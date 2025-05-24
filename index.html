@@ -3,9 +3,684 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>BUP Maintenance HUB</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1>BUP Maintenance HUB</h1>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="https://bup.edu.bd/public/upload/logo/202306071686132726.svg" alt="BUP Logo" class="logo">
+                <span class="nav-title">Maintenance HUB</span>
+            </div>
+            <div class="nav-links">
+                <a href="#home" class="nav-link active">Home</a>
+                <a href="#map" class="nav-link">Campus Map</a>
+                <a href="#dashboard" class="nav-link">Dashboard</a>
+                <a href="#reports" class="nav-link">Reports</a>
+                <div class="nav-controls">
+                    <button id="darkModeToggle" class="dark-mode-toggle" title="Switch to Dark Mode" aria-label="Switch to Dark Mode">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="user-menu">
+                        <button class="login-btn" onclick="showLoginModal()">
+                            <i class="fas fa-user"></i> Login
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeLoginModal()">&times;</span>
+            <h2>Login to BUP Maintenance HUB</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Select Role:</label>
+                    <select id="userRole" required>
+                        <option value="">Select Role</option>
+                        <option value="student">Student</option>
+                        <option value="faculty">Faculty</option>
+                        <option value="staff">Staff</option>
+                        <option value="admin">Admin</option>
+                        <option value="authority">Higher Authority</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="email" required placeholder="your.email@bup.edu.bd">
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn-primary">Login</button>
+                <p class="register-link">Don't have an account? <a href="#" onclick="showRegisterModal()">Register here</a></p>
+            </form>
+        </div>
+    </div>
+
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRegisterModal()">&times;</span>
+            <h2>Register for BUP Maintenance HUB</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <input type="hidden" id="fullName" required>
+                </div>
+                <div class="form-group">
+                    <label>Role:</label>
+                    <select id="regRole" required>
+                        <option value="">Select Role</option>
+                        <option value="student">Student</option>
+                        <option value="faculty">Faculty</option>
+                        <option value="staff">Staff</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>BUP Email:</label>
+                    <input type="email" id="regEmail" required placeholder="your.email@bup.edu.bd">
+                    <small>Only @bup.edu.bd emails are allowed</small>
+                </div>
+                <div class="form-group">
+                    <input type="hidden" id="userId" required>
+                </div>
+                <div class="form-group">
+                    <label>Department:</label>
+                    <select id="department" required>
+                        <option value="">Select Department</option>
+                        <option value="economics">Department of Economics</option>
+                        <option value="international-relations">Department of International Relations</option>
+                        <option value="ict">Department of Information and Communication Technology</option>
+                        <option value="business-general">Department of Business Administration - General</option>
+                        <option value="environmental-science">Department of Environmental Science</option>
+                        <option value="english">Department of English</option>
+                        <option value="business-ais">Department of Business Administration in Accounting & Information Systems</option>
+                        <option value="cse">Department of Computer Science and Engineering</option>
+                        <option value="public-administration">Department of Public Administration</option>
+                        <option value="business-management">Department of Business Administration in Management Studies</option>
+                        <option value="development-studies">Department of Development Studies</option>
+                        <option value="sociology">Department of Sociology</option>
+                        <option value="mass-communication">Department of Mass Communication and Journalism</option>
+                        <option value="business-finance">Department of Business Administration in Finance & Banking</option>
+                        <option value="business-marketing">Department of Business Administration in Marketing</option>
+                        <option value="law">Department of Law</option>
+                        <option value="disaster-management">Department of Disaster Management & Resilience</option>
+                        <option value="peace-conflict">Department of Peace, Conflict and Human Rights</option>
+                        <option value="ba-bss">Department of BA/BSS</option>
+                        <option value="public-health">Department of Public Health & Informatics</option>
+                        <option value="chsr">Centre for Higher Studies & Research (CHSR)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="regPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password:</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <button type="submit" class="btn-primary">Register</button>
+                <p class="register-link">Already have an account? <a href="#" onclick="showLoginModal()">Login here</a></p>
+            </form>
+        </div>
+    </div>
+
+    <main>
+        <section id="home" class="section active">
+            <div class="hero">
+                <div class="hero-content">
+                    <h1>Welcome to BUP Maintenance HUB</h1>
+                    <p>Report campus maintenance issues quickly and efficiently. Help us maintain a better learning environment for everyone.</p>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-number">245</span>
+                            <span class="stat-label">Issues Resolved</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">12</span>
+                            <span class="stat-label">Pending Issues</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">4.8</span>
+                            <span class="stat-label">Avg Rating</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-report">
+                <h2>Report an Issue</h2>
+                <form id="issueForm" class="issue-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Category:</label>
+                            <select id="category" required>
+                                <option value="">Select Category</option>
+                                <option value="furniture">Furniture</option>
+                                <option value="electricity">Electricity</option>
+                                <option value="sanitary">Sanitary</option>
+                                <option value="lab">Laboratory</option>
+                                <option value="cafeteria">Cafeteria</option>
+                                <option value="transportation">Transportation</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Priority Level:</label>
+                            <select id="priority" required>
+                                <option value="">Select Priority</option>
+                                <option value="low" class="priority-low">Low</option>
+                                <option value="medium" class="priority-medium">Medium</option>
+                                <option value="high" class="priority-high">High</option>
+                                <option value="urgent" class="priority-urgent">Urgent</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Location:</label>
+                            <select id="location" required>
+                                <option value="">Select Location</option>
+                                <option value="academic-block-1">Academic Block 1</option>
+                                <option value="academic-block-2">Academic Block 2</option>
+                                <option value="admin-building">Admin Building</option>
+                                <option value="library">Library</option>
+                                <option value="cafeteria">Cafeteria</option>
+                                <option value="auditorium">Auditorium</option>
+                                <option value="playground">Playground</option>
+                                <option value="parking">Parking Area</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Room/Specific Location:</label>
+                            <input type="text" id="specificLocation" placeholder="e.g., Room 205, Washroom 2nd Floor">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Issue Description:</label>
+                        <textarea id="description" rows="4" required placeholder="Describe the issue in detail..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Upload Image (Optional):</label>
+                        <div class="file-upload">
+                            <input type="file" id="imageUpload" accept="image/*" multiple>
+                            <label for="imageUpload" class="file-upload-label">
+                                <i class="fas fa-camera"></i>
+                                Choose Images
+                            </label>
+                        </div>
+                        <div id="imagePreview" class="image-preview"></div>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        Submit Issue Report
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <section id="map" class="section">
+            <div class="section-header">
+                <h2>Campus Map - Issue Locations</h2>
+                <div class="map-filters">
+                    <select id="mapFilter">
+                        <option value="all">All Issues</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="high">High Priority</option>
+                        <option value="pending">Pending</option>
+                        <option value="resolved">Resolved</option>
+                    </select>
+                </div>
+            </div>
+            <div class="map-container">
+                <div class="campus-map">
+                    <div class="building" data-building="academic-1" style="top: 20%; left: 30%;">
+                        <div class="building-icon">
+                            <i class="fas fa-building"></i>
+                            <span class="issue-count urgent">3</span>
+                        </div>
+                        <span class="building-label">Academic Block 1</span>
+                    </div>
+                    <div class="building" data-building="academic-2" style="top: 20%; left: 60%;">
+                        <div class="building-icon">
+                            <i class="fas fa-building"></i>
+                            <span class="issue-count medium">2</span>
+                        </div>
+                        <span class="building-label">Academic Block 2</span>
+                    </div>
+                    <div class="building" data-building="library" style="top: 50%; left: 20%;">
+                        <div class="building-icon">
+                            <i class="fas fa-book"></i>
+                            <span class="issue-count low">1</span>
+                        </div>
+                        <span class="building-label">Library</span>
+                    </div>
+                    <div class="building" data-building="cafeteria" style="top: 70%; left: 45%;">
+                        <div class="building-icon">
+                            <i class="fas fa-utensils"></i>
+                            <span class="issue-count high">4</span>
+                        </div>
+                        <span class="building-label">Cafeteria</span>
+                    </div>
+                    <div class="building" data-building="admin" style="top: 40%; left: 70%;">
+                        <div class="building-icon">
+                            <i class="fas fa-university"></i>
+                        </div>
+                        <span class="building-label">Admin Building</span>
+                    </div>
+                </div>
+                <div class="map-legend">
+                    <h4>Issue Priority Legend</h4>
+                    <div class="legend-item">
+                        <span class="legend-color urgent"></span>
+                        <span>Urgent (1-24 hours)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color high"></span>
+                        <span>High (1-3 days)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color medium"></span>
+                        <span>Medium (3-7 days)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color low"></span>
+                        <span>Low (1-2 weeks)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="dashboard" class="section">
+            <div class="dashboard-header">
+                <h2>Dashboard</h2>
+                <div class="dashboard-tabs">
+                    <button class="tab-btn active" onclick="showTab('user-dashboard')">My Issues</button>
+                    <button class="tab-btn" onclick="showTab('admin-panel')" id="adminTab" style="display: none;">Admin Panel</button>
+                    <button class="tab-btn" onclick="showTab('authority-panel')" id="authorityTab" style="display: none;">Authority Panel</button>
+                </div>
+            </div>
+
+            <div id="user-dashboard" class="tab-content active">
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <div>
+                            <span class="stat-number">8</span>
+                            <span class="stat-label">Total Submitted</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <span class="stat-number">3</span>
+                            <span class="stat-label">Pending</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-check-circle"></i>
+                        <div>
+                            <span class="stat-number">5</span>
+                            <span class="stat-label">Resolved</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-star"></i>
+                        <div>
+                            <span class="stat-number">4.6</span>
+                            <span class="stat-label">Avg Rating</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-filters">
+                    <div class="filter-group">
+                        <select id="statusFilter">
+                            <option value="all">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="resolved">Resolved</option>
+                        </select>
+                        <select id="categoryFilter">
+                            <option value="all">All Categories</option>
+                            <option value="furniture">Furniture</option>
+                            <option value="electricity">Electricity</option>
+                            <option value="sanitary">Sanitary</option>
+                            <option value="lab">Laboratory</option>
+                        </select>
+                        <input type="date" id="dateFilter">
+                    </div>
+                </div>
+
+                <div class="issues-list">
+                    <div class="issue-card">
+                        <div class="issue-header">
+                            <span class="issue-id">#BUP001</span>
+                            <span class="issue-status pending">Pending</span>
+                            <span class="issue-priority urgent">Urgent</span>
+                        </div>
+                        <h4>Broken Projector in Room 205</h4>
+                        <div class="issue-details">
+                            <span><i class="fas fa-map-marker-alt"></i> Academic Block 1, Room 205</span>
+                            <span><i class="fas fa-calendar"></i> Submitted: 2024-01-15</span>
+                            <span><i class="fas fa-tag"></i> Electricity</span>
+                        </div>
+                        <p>The projector in room 205 is not working. The screen remains black even after multiple attempts to restart.</p>
+                        <div class="issue-actions">
+                            <button class="btn-secondary" onclick="viewIssueDetails('BUP001')">View Details</button>
+                            <button class="btn-primary" onclick="provideFeedback('BUP001')">Provide Feedback</button>
+                        </div>
+                    </div>
+
+                    <div class="issue-card">
+                        <div class="issue-header">
+                            <span class="issue-id">#BUP002</span>
+                            <span class="issue-status resolved">Resolved</span>
+                            <span class="issue-priority medium">Medium</span>
+                        </div>
+                        <h4>Dirty Washroom - 2nd Floor</h4>
+                        <div class="issue-details">
+                            <span><i class="fas fa-map-marker-alt"></i> Academic Block 2, 2nd Floor</span>
+                            <span><i class="fas fa-calendar"></i> Submitted: 2024-01-10</span>
+                            <span><i class="fas fa-tag"></i> Sanitary</span>
+                        </div>
+                        <p>The washroom on the 2nd floor needs thorough cleaning. Multiple stalls are in poor condition.</p>
+                        <div class="issue-actions">
+                            <button class="btn-secondary" onclick="viewIssueDetails('BUP002')">View Details</button>
+                            <div class="rating">
+                                <span>Rate Resolution:</span>
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="admin-panel" class="tab-content">
+                <div class="admin-header">
+                    <h3>Admin Panel - Issue Management</h3>
+                    <button class="btn-primary" onclick="showAnalytics()">
+                        <i class="fas fa-chart-bar"></i> Analytics Dashboard
+                    </button>
+                </div>
+
+                <div class="admin-filters">
+                    <select id="adminStatusFilter">
+                        <option value="all">All Status</option>
+                        <option value="pending-review">Pending Review</option>
+                        <option value="approved">Approved</option>
+                        <option value="assigned">Assigned</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="resolved">Resolved</option>
+                    </select>
+                    <select id="adminPriorityFilter">
+                        <option value="all">All Priorities</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                    <input type="text" placeholder="Search issues..." id="adminSearch">
+                </div>
+
+                <div class="admin-issues-list">
+                    <div class="admin-issue-card">
+                        <div class="admin-issue-header">
+                            <span class="issue-id">#BUP003</span>
+                            <span class="issue-status pending-review">Pending Review</span>
+                            <span class="issue-priority urgent">Urgent</span>
+                            <span class="issue-date">Jan 16, 2024</span>
+                        </div>
+                        <div class="admin-issue-content">
+                            <h4>AC Not Working in Auditorium</h4>
+                            <p><strong>Location:</strong> Auditorium, Main Hall</p>
+                            <p><strong>Reported by:</strong> John Doe (Student)</p>
+                            <p><strong>Description:</strong> The main AC unit in the auditorium has stopped working. Temperature is extremely high.</p>
+                            <div class="admin-actions">
+                                <button class="btn-success" onclick="approveIssue('BUP003')">Approve</button>
+                                <button class="btn-warning" onclick="assignTechnician('BUP003')">Assign Technician</button>
+                                <button class="btn-danger" onclick="rejectIssue('BUP003')">Reject</button>
+                                <button class="btn-secondary" onclick="addNote('BUP003')">Add Note</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-issue-card">
+                        <div class="admin-issue-header">
+                            <span class="issue-id">#BUP004</span>
+                            <span class="issue-status assigned">Assigned</span>
+                            <span class="issue-priority high">High</span>
+                            <span class="issue-date">Jan 15, 2024</span>
+                        </div>
+                        <div class="admin-issue-content">
+                            <h4>Broken Chairs in Room 301</h4>
+                            <p><strong>Location:</strong> Academic Block 1, Room 301</p>
+                            <p><strong>Assigned to:</strong> Maintenance Team A</p>
+                            <p><strong>Scheduled:</strong> Jan 17, 2024 (9:00 AM - 11:00 AM)</p>
+                            <div class="admin-actions">
+                                <button class="btn-primary" onclick="updateSchedule('BUP004')">Update Schedule</button>
+                                <button class="btn-warning" onclick="changeStatus('BUP004')">Change Status</button>
+                                <button class="btn-secondary" onclick="viewHistory('BUP004')">View History</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="authority-panel" class="tab-content">
+                <div class="authority-header">
+                    <h3>Higher Authority Panel</h3>
+                    <div class="authority-actions">
+                        <button class="btn-primary" onclick="generateReport()">
+                            <i class="fas fa-file-pdf"></i> Generate Report
+                        </button>
+                        <button class="btn-warning" onclick="showOverdueIssues()">
+                            <i class="fas fa-exclamation-triangle"></i> Overdue Issues
+                        </button>
+                    </div>
+                </div>
+
+                <div class="authority-overview">
+                    <div class="overview-stats">
+                        <div class="overview-card">
+                            <h4>Total Issues</h4>
+                            <span class="overview-number">156</span>
+                            <span class="overview-change positive">+12 this week</span>
+                        </div>
+                        <div class="overview-card">
+                            <h4>Overdue Issues</h4>
+                            <span class="overview-number warning">8</span>
+                            <span class="overview-change negative">+3 this week</span>
+                        </div>
+                        <div class="overview-card">
+                            <h4>Resolution Rate</h4>
+                            <span class="overview-number">87%</span>
+                            <span class="overview-change positive">+5% this month</span>
+                        </div>
+                        <div class="overview-card">
+                            <h4>Avg Resolution Time</h4>
+                            <span class="overview-number">3.2 days</span>
+                            <span class="overview-change positive">-0.5 days</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overdue-alerts">
+                    <h4>Issues Requiring Attention (>7 days)</h4>
+                    <div class="alert-list">
+                        <div class="alert-item urgent">
+                            <div class="alert-content">
+                                <h5>#BUP005 - Library WiFi Issues</h5>
+                                <p>Submitted: Jan 8, 2024 (8 days ago)</p>
+                                <p>Status: In Progress - No updates since Jan 12</p>
+                            </div>
+                            <button class="btn-danger" onclick="escalateIssue('BUP005')">Escalate</button>
+                        </div>
+                        <div class="alert-item high">
+                            <div class="alert-content">
+                                <h5>#BUP006 - Cafeteria Ventilation</h5>
+                                <p>Submitted: Jan 7, 2024 (9 days ago)</p>
+                                <p>Status: Approved - Awaiting technician assignment</p>
+                            </div>
+                            <button class="btn-warning" onclick="assignUrgent('BUP006')">Assign Urgently</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="reports" class="section">
+            <div class="reports-header">
+                <h2>Reports & Analytics</h2>
+                <div class="report-actions">
+                    <button class="btn-primary" onclick="exportReport('pdf')">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </button>
+                    <button class="btn-success" onclick="exportReport('excel')">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </button>
+                </div>
+            </div>
+
+            <div class="reports-filters">
+                <div class="filter-row">
+                    <select id="reportType">
+                        <option value="summary">Summary Report</option>
+                        <option value="detailed">Detailed Report</option>
+                        <option value="performance">Performance Report</option>
+                        <option value="trends">Trend Analysis</option>
+                    </select>
+                    <input type="date" id="reportStartDate">
+                    <input type="date" id="reportEndDate">
+                    <button class="btn-primary" onclick="generateCustomReport()">Generate Report</button>
+                </div>
+            </div>
+
+            <div class="reports-content">
+                <div class="chart-container">
+                    <h3>Issue Resolution Trends</h3>
+                    <div class="chart-placeholder">
+                        <canvas id="trendsChart" width="800" height="400"></canvas>
+                    </div>
+                </div>
+
+                <div class="report-tables">
+                    <div class="table-container">
+                        <h4>Category-wise Issue Distribution</h4>
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Total Issues</th>
+                                    <th>Resolved</th>
+                                    <th>Pending</th>
+                                    <th>Avg Resolution Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Electricity</td>
+                                    <td>45</td>
+                                    <td>38</td>
+                                    <td>7</td>
+                                    <td>2.3 days</td>
+                                </tr>
+                                <tr>
+                                    <td>Furniture</td>
+                                    <td>32</td>
+                                    <td>28</td>
+                                    <td>4</td>
+                                    <td>4.1 days</td>
+                                </tr>
+                                <tr>
+                                    <td>Sanitary</td>
+                                    <td>28</td>
+                                    <td>25</td>
+                                    <td>3</td>
+                                    <td>1.8 days</td>
+                                </tr>
+                                <tr>
+                                    <td>Laboratory</td>
+                                    <td>21</td>
+                                    <td>18</td>
+                                    <td>3</td>
+                                    <td>3.2 days</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="notification" class="notification">
+        <div class="notification-content">
+            <i class="notification-icon"></i>
+            <span class="notification-message"></span>
+        </div>
+        <button class="notification-close">&times;</button>
+    </div>
+
+    <div id="scheduleModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeScheduleModal()">&times;</span>
+            <h2>Schedule Maintenance</h2>
+            <form id="scheduleForm">
+                <div class="form-group">
+                    <label>Maintenance Team:</label>
+                    <select id="maintenanceTeam" required>
+                        <option value="">Select Team</option>
+                        <option value="team-a">Maintenance Team A</option>
+                        <option value="team-b">Maintenance Team B</option>
+                        <option value="electrical">Electrical Team</option>
+                        <option value="plumbing">Plumbing Team</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Scheduled Date:</label>
+                    <input type="date" id="scheduleDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Time Range:</label>
+                    <div class="time-range">
+                        <input type="time" id="startTime" required>
+                        <span>to</span>
+                        <input type="time" id="endTime" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Estimated Duration:</label>
+                    <select id="duration">
+                        <option value="30min">30 minutes</option>
+                        <option value="1hour">1 hour</option>
+                        <option value="2hours">2 hours</option>
+                        <option value="halfday">Half day</option>
+                        <option value="fullday">Full day</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Notes:</label>
+                    <textarea id="scheduleNotes" rows="3" placeholder="Additional notes for the maintenance team..."></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Schedule Maintenance</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
