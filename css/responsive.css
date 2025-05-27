@@ -1,0 +1,152 @@
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+    }
+    
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    .nav-controls {
+        gap: 10px;
+    }
+    
+    .dark-mode-toggle, .theme-toggle {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+    }
+    
+    .hero h1 {
+        font-size: 2rem;
+    }
+    
+    .hero-stats {
+        gap: 30px;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .map-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-group,
+    .filter-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .issue-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .issue-details {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .issue-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .modal-content {
+        margin: 10% auto;
+        padding: 20px;
+        width: 95%;
+    }
+
+    .auth-wrapper {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .auth-hero {
+        text-align: center;
+    }
+    
+    .auth-hero h1 {
+        font-size: 2rem;
+    }
+    
+    .auth-form {
+        padding: 30px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    main {
+        padding: 10px;
+    }
+    
+    .quick-report,
+    .issue-form {
+        padding: 20px;
+    }
+    
+    .hero {
+        padding: 40px 20px;
+    }
+    
+    .nav-container {
+        padding: 0 15px;
+    }
+    
+    .input-icon {
+        left: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .password-toggle {
+        right: 8px;
+        padding: 6px;
+        font-size: 0.9rem;
+    }
+    
+    .form-group input[type="password"],
+    .form-group input[type="text"][id*="Password"] {
+        padding-left: 35px;
+        padding-right: 35px;
+    }
+    
+    .form-group input[type="email"]:not([id*="Password"]),
+    .form-group input[type="text"]:not([id*="Password"]) {
+        padding-right: 35px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dark-mode-toggle,
+    .theme-toggle,
+    body,
+    .navbar,
+    .section,
+    .modal-content,
+    .notification,
+    .issue-card,
+    .stat-card,
+    .campus-map,
+    input,
+    select,
+    textarea,
+    button {
+        transition: none;
+    }
+}
+
+@media (prefers-contrast: high) {
+    .dark-mode {
+        --primary-color: #4a90e2;
+        --gray-300: #666;
+        --gray-600: #ccc;
+    }
+}

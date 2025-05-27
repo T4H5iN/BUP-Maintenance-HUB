@@ -4,14 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BUP Maintenance HUB</title>
-    <link rel="stylesheet" href="styles.css">
+    <!-- Import CSS files in proper order -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/forms.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/remaining-styles.css">
+    <link rel="stylesheet" href="css/theme-dark.css">
+    <link rel="stylesheet" href="css/responsive.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <img src="https://bup.edu.bd/public/upload/logo/202306071686132726.svg" alt="BUP Logo" class="logo">
+                <img src="image/bup.svg" alt="BUP Logo" class="logo">
                 <span class="nav-title">BUP Maintenance HUB</span>
             </div>
             <div class="nav-links">
@@ -48,6 +57,7 @@
                         <option value="student">Student</option>
                         <option value="faculty">Faculty</option>
                         <option value="staff">Staff</option>
+                        <option value="technician">Technician</option>
                         <option value="admin">Admin</option>
                         <option value="authority">Higher Authority</option>
                     </select>
@@ -188,14 +198,19 @@
                             <label>Location:</label>
                             <select id="location" required>
                                 <option value="">Select Location</option>
-                                <option value="academic-block-1">Academic Block 1</option>
-                                <option value="academic-block-2">Academic Block 2</option>
+                                <option value="academic-building">Academic Building</option>
+                                <option value="fbs-building">FBS Building</option>
                                 <option value="admin-building">Admin Building</option>
                                 <option value="library">Library</option>
-                                <option value="cafeteria">Cafeteria</option>
-                                <option value="auditorium">Auditorium</option>
-                                <option value="playground">Playground</option>
-                                <option value="parking">Parking Area</option>
+                                <option value="annex">Annex</option>
+                                <option value="vista-cafeteria">Vista Cafeteria</option>
+                                <option value="amitte-cafeteria">Amitte Cafeteria</option>
+                                <option value="third-place-cafeteria">Third Place Cafeteria</option>
+                                <option value="staff-canteen">Staff Canteen</option>
+                                <option value="day-care-center">Day Care Center</option>
+                                <option value="male-common-room">Male Common Room</option>
+                                <option value="female-common-room">Female Common Room</option>
+                                <option value="other">Other</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -224,6 +239,49 @@
                     </button>
                 </form>
             </div>
+
+            <!-- New All Issues Section -->
+            <div class="all-issues-home">
+                <h2>All Campus Issues</h2>
+                <div class="dashboard-filters">
+                    <div class="filter-group">
+                        <select id="homeStatusFilter">
+                            <option value="all">All Status</option>
+                            <option value="assigned">Assigned</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="resolved">Resolved</option>
+                        </select>
+                        <select id="homeCategoryFilter">
+                            <option value="all">All Categories</option>
+                            <option value="furniture">Furniture</option>
+                            <option value="electricity">Electricity</option>
+                            <option value="sanitary">Sanitary</option>
+                            <option value="lab">Laboratory</option>
+                            <option value="cafeteria">Cafeteria</option>
+                            <option value="transportation">Transportation</option>
+                        </select>
+                        <select id="homeLocationFilter">
+                            <option value="all">All Locations</option>
+                            <option value="academic">Academic Building</option>
+                            <option value="fbs">FBS Building</option>
+                            <option value="admin">Admin Building</option>
+                            <option value="library">Library</option>
+                            <option value="annex">Annex</option>
+                            <option value="vista">Vista Cafeteria</option>
+                            <option value="amitte">Amitte Cafeteria</option>
+                            <option value="third-place">Third Place Cafeteria</option>
+                            <option value="daycare">Day Care Center</option>
+                            <option value="staff-canteen">Staff Canteen</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="home-issues-list" class="issues-list">
+                    <!-- Issues will be populated dynamically -->
+                    <div class="loading-indicator">
+                        <i class="fas fa-spinner fa-spin"></i> Loading issues...
+                    </div>
+                </div>
+            </div>
         </section>
 
         <section id="map" class="section">
@@ -241,39 +299,75 @@
             </div>
             <div class="map-container">
                 <div class="campus-map">
-                    <div class="building" data-building="academic-1" style="top: 20%; left: 30%;">
+                    <div class="building" data-building="academic" style="top: 20%; left: 50%;">
+                        <div class="building-icon">
+                            <i class="fas fa-university"></i>
+                            <span class="issue-count urgent">5</span>
+                        </div>
+                        <span class="building-label">Academic Building</span>
+                    </div>
+                    <div class="building" data-building="fbs" style="top: 60%; left: 50%;">
                         <div class="building-icon">
                             <i class="fas fa-building"></i>
-                            <span class="issue-count urgent">3</span>
+                            <span class="issue-count medium">3</span>
                         </div>
-                        <span class="building-label">Academic Block 1</span>
+                        <span class="building-label">FBS Building</span>
                     </div>
-                    <div class="building" data-building="academic-2" style="top: 20%; left: 60%;">
+                    <div class="building" data-building="admin" style="top: 40%; left: 50%;">
+                        <div class="building-icon">
+                            <i class="fas fa-landmark"></i>
+                            <span class="issue-count high">4</span>
+                        </div>
+                        <span class="building-label">Admin Building</span>
+                    </div>
+                    <div class="building" data-building="annex" style="top: 80%; left: 88%;">
                         <div class="building-icon">
                             <i class="fas fa-building"></i>
-                            <span class="issue-count medium">2</span>
+                            <span class="issue-count low">2</span>
                         </div>
-                        <span class="building-label">Academic Block 2</span>
+                        <span class="building-label">Annex</span>
                     </div>
-                    <div class="building" data-building="library" style="top: 50%; left: 20%;">
+                    <div class="building" data-building="library" style="top: 37%; left: 37%;">
                         <div class="building-icon">
                             <i class="fas fa-book"></i>
-                            <span class="issue-count low">1</span>
+                            <span class="issue-count low">2</span>
                         </div>
                         <span class="building-label">Library</span>
                     </div>
-                    <div class="building" data-building="cafeteria" style="top: 70%; left: 45%;">
+                    <div class="building" data-building="vista" style="top: 66%; left: 38%;">
                         <div class="building-icon">
                             <i class="fas fa-utensils"></i>
-                            <span class="issue-count high">4</span>
+                            <span class="issue-count medium">2</span>
                         </div>
-                        <span class="building-label">Cafeteria</span>
+                        <span class="building-label">Vista Cafeteria</span>
                     </div>
-                    <div class="building" data-building="admin" style="top: 40%; left: 70%;">
+                    <div class="building" data-building="amitte" style="top: 14%; left: 37%;">
                         <div class="building-icon">
-                            <i class="fas fa-university"></i>
+                            <i class="fas fa-coffee"></i>
+                            <span class="issue-count low">1</span>
                         </div>
-                        <span class="building-label">Admin Building</span>
+                        <span class="building-label">Amitte Cafeteria</span>
+                    </div>
+                    <div class="building" data-building="third-place" style="top: 5%; left: 6%;">
+                        <div class="building-icon">
+                            <i class="fas fa-utensils"></i>
+                            <span class="issue-count medium">3</span>
+                        </div>
+                        <span class="building-label">Third Place Cafeteria</span>
+                    </div>
+                    <div class="building" data-building="daycare" style="top: 60%; left: 88%;">
+                        <div class="building-icon">
+                            <i class="fas fa-child"></i>
+                            <span class="issue-count low">1</span>
+                        </div>
+                        <span class="building-label">Day Care Center</span>
+                    </div>
+                    <div class="building" data-building="staff-canteen" style="top: 80%; left: 5%;">
+                        <div class="building-icon">
+                            <i class="fas fa-utensils"></i>
+                            <span class="issue-count low">1</span>
+                        </div>
+                        <span class="building-label">Staff Canteen</span>
                     </div>
                 </div>
                 <div class="map-legend">
@@ -305,6 +399,7 @@
                     <button class="tab-btn active" onclick="showTab('user-dashboard')">My Issues</button>
                     <button class="tab-btn" onclick="showTab('admin-panel')" id="adminTab" style="display: none;">Admin Panel</button>
                     <button class="tab-btn" onclick="showTab('authority-panel')" id="authorityTab" style="display: none;">Authority Panel</button>
+                    <button class="tab-btn" onclick="showTab('technician-panel')" id="technicianTab" style="display: none;">Technician Panel</button>
                 </div>
             </div>
 
@@ -411,7 +506,7 @@
 
             <div id="admin-panel" class="tab-content">
                 <div class="admin-header">
-                    <h3>Admin Panel - Issue Management</h3>
+                    <h3>Moderator Panel - Issue Management</h3>
                     <button class="btn-primary" onclick="showAnalytics()">
                         <i class="fas fa-chart-bar"></i> Analytics Dashboard
                     </button>
@@ -482,7 +577,7 @@
 
             <div id="authority-panel" class="tab-content">
                 <div class="authority-header">
-                    <h3>Higher Authority Panel</h3>
+                    <h3>Administrator Panel</h3>
                     <div class="authority-actions">
                         <button class="btn-primary" onclick="generateReport()">
                             <i class="fas fa-file-pdf"></i> Generate Report
@@ -536,6 +631,163 @@
                                 <p>Status: Approved - Awaiting technician assignment</p>
                             </div>
                             <button class="btn-warning" onclick="assignUrgent('BUP006')">Assign Urgently</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="technician-panel" class="tab-content">
+                <div class="technician-header">
+                    <h3>Technician Dashboard - My Assignments</h3>
+                    <div class="technician-actions">
+                        <button class="btn-primary" onclick="showScheduleView()">
+                            <i class="fas fa-calendar-alt"></i> View Schedule
+                        </button>
+                        <button class="btn-success" onclick="markAvailability()">
+                            <i class="fas fa-check-circle"></i> Update Availability
+                        </button>
+                    </div>
+                </div>
+
+                <div class="technician-stats">
+                    <div class="stat-card">
+                        <i class="fas fa-tasks"></i>
+                        <div>
+                            <span class="stat-number">5</span>
+                            <span class="stat-label">Assigned Tasks</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-hourglass-half"></i>
+                        <div>
+                            <span class="stat-number">3</span>
+                            <span class="stat-label">In Progress</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-check-double"></i>
+                        <div>
+                            <span class="stat-number">12</span>
+                            <span class="stat-label">Completed This Week</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-star"></i>
+                        <div>
+                            <span class="stat-number">4.8</span>
+                            <span class="stat-label">Avg Rating</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="technician-filter">
+                    <select id="techStatusFilter" class="filter-element">
+                        <option value="all">All Assignments</option>
+                        <option value="pending">Pending</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                    <select id="techPriorityFilter" class="filter-element">
+                        <option value="all">All Priorities</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                    <input type="date" id="techDateFilter" class="filter-element">
+                </div>
+
+                <div class="technician-tasks">
+                    <div class="tech-task-card">
+                        <div class="task-header">
+                            <div class="task-id-container">
+                                <span class="issue-id">#BUP008</span>
+                                <span class="issue-priority urgent">Urgent</span>
+                            </div>
+                            <div class="task-status">
+                                <select class="task-status-select" onchange="updateTaskStatus('BUP008', this.value)">
+                                    <option value="pending">Pending</option>
+                                    <option value="in-progress" selected>In Progress</option>
+                                    <option value="parts-needed">Parts Needed</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="task-content">
+                            <h4>Fix AC in Auditorium</h4>
+                            <p class="task-location"><i class="fas fa-map-marker-alt"></i> Auditorium, Main Hall</p>
+                            <p class="task-schedule"><i class="fas fa-calendar-day"></i> Scheduled: Today, 10:00 AM - 12:00 PM</p>
+                            <p class="task-description">The main AC unit in the auditorium has stopped working. Temperature is extremely high. Initial diagnosis shows compressor issues.</p>
+                            
+                            <div class="task-progress">
+                                <div class="progress-label">
+                                    <span>Progress: 60%</span>
+                                    <span class="time-spent">Time spent: 1.5 hours</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 60%;"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="task-actions">
+                                <button class="btn-primary" onclick="updateTaskProgress('BUP008')">
+                                    <i class="fas fa-edit"></i> Update Progress
+                                </button>
+                                <button class="btn-secondary" onclick="addWorkNotes('BUP008')">
+                                    <i class="fas fa-clipboard"></i> Add Notes
+                                </button>
+                                <button class="btn-warning" onclick="requestParts('BUP008')">
+                                    <i class="fas fa-tools"></i> Request Parts
+                                </button>
+                                <button class="btn-success" onclick="completeTask('BUP008')">
+                                    <i class="fas fa-check-circle"></i> Mark Complete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tech-task-card">
+                        <div class="task-header">
+                            <div class="task-id-container">
+                                <span class="issue-id">#BUP012</span>
+                                <span class="issue-priority high">High</span>
+                            </div>
+                            <div class="task-status">
+                                <select class="task-status-select" onchange="updateTaskStatus('BUP012', this.value)">
+                                    <option value="pending" selected>Pending</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="parts-needed">Parts Needed</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="task-content">
+                            <h4>Replace Broken Chairs in Room 301</h4>
+                            <p class="task-location"><i class="fas fa-map-marker-alt"></i> Academic Block 1, Room 301</p>
+                            <p class="task-schedule"><i class="fas fa-calendar-day"></i> Scheduled: Tomorrow, 9:00 AM - 11:00 AM</p>
+                            <p class="task-description">Five chairs in Room 301 have broken backrests and need replacement. New chairs are available in storage.</p>
+                            
+                            <div class="task-progress">
+                                <div class="progress-label">
+                                    <span>Progress: 0%</span>
+                                    <span class="time-spent">Time spent: 0 hours</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="task-actions">
+                                <button class="btn-primary" onclick="startTask('BUP012')">
+                                    <i class="fas fa-play"></i> Start Task
+                                </button>
+                                <button class="btn-secondary" onclick="viewTaskDetails('BUP012')">
+                                    <i class="fas fa-eye"></i> View Details
+                                </button>
+                                <button class="btn-warning" onclick="rescheduleTask('BUP012')">
+                                    <i class="fas fa-calendar-alt"></i> Reschedule
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -681,6 +933,143 @@
         </div>
     </div>
 
+    <!-- Add Chart.js library before your scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="analytics.js"></script>
     <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Apply theme first, before checking authentication
+            if (typeof initializeDarkMode === 'function') {
+                initializeDarkMode();
+            }
+            
+            // Then check authentication
+            checkAuthentication();
+            initializeApp();
+            
+            // Make sure theme toggle has a direct click handler
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            if (darkModeToggle) {
+                // Remove any existing event listeners and add a fresh one
+                darkModeToggle.removeEventListener('click', toggleDarkMode);
+                darkModeToggle.addEventListener('click', toggleDarkMode);
+            }
+
+            // Initialize analytics and charts
+            if (typeof analyticsManager !== 'undefined') {
+                analyticsManager.initializeAnalytics();
+                analyticsManager.initializeCharts();
+            }
+        });
+
+        function checkAuthentication() {
+            const savedUser = localStorage.getItem('bup-current-user');
+            
+            if (!savedUser) {
+                // No user logged in, redirect to auth page
+                window.location.href = 'auth.html';
+                return;
+            }
+            
+            try {
+                currentUser = JSON.parse(savedUser);
+                updateUIForLoggedInUser();
+            } catch (e) {
+                // Invalid user data, clear and redirect
+                localStorage.removeItem('bup-current-user');
+                window.location.href = 'auth.html';
+            }
+        }
+
+        function logout() {
+            // Clear user data
+            currentUser = null;
+            localStorage.removeItem('bup-current-user');
+            
+            // Show notification and redirect
+            showNotification('Logged out successfully', 'success');
+            setTimeout(() => {
+                window.location.href = 'auth.html';
+            }, 1000);
+        }
+    </script>
+
+<!-- Add this right before the closing </body> tag, replacing the existing inline script -->
+<script>
+  // Define a standalone notification function that doesn't rely on other code
+  function showNotification(message, type = 'info') {
+    // Try to use existing notification element if available
+    const notification = document.getElementById('notification');
+    if (notification) {
+      const messageElement = notification.querySelector('.notification-message');
+      const iconElement = notification.querySelector('.notification-icon');
+      
+      // Set the message
+      if (messageElement) {
+        messageElement.textContent = message;
+      }
+      
+      // Set appropriate icon if element exists
+      if (iconElement) {
+        iconElement.className = 'notification-icon';
+        switch(type) {
+          case 'success':
+            iconElement.classList.add('fas', 'fa-check-circle');
+            break;
+          case 'error':
+            iconElement.classList.add('fas', 'fa-times-circle');
+            break;
+          case 'warning':
+            iconElement.classList.add('fas', 'fa-exclamation-circle');
+            break;
+          default:
+            iconElement.classList.add('fas', 'fa-info-circle');
+            break;
+        }
+      }
+      
+      // Apply the notification type
+      notification.className = `notification ${type}`;
+      
+      // Show the notification
+      notification.style.display = 'flex';
+      
+      // Hide after 3 seconds
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 3000);
+    } else {
+      // Fallback to console if notification element doesn't exist
+      console.log(`${type.toUpperCase()}: ${message}`);
+    }
+  }
+
+  // Updated handleLogout function that includes showNotification
+  function handleLogout() {
+    try {
+      // Clear user data
+      window.currentUser = null;
+      localStorage.removeItem('bup-current-user');
+      
+      // Show notification using our defined function
+      showNotification('Logged out successfully', 'success');
+      
+      // Redirect to login page after a short delay
+      setTimeout(() => {
+        window.location.href = 'auth.html';
+      }, 1000);
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Fallback redirect if there's an error
+      window.location.href = 'auth.html';
+    }
+  }
+
+  // Make sure logout and handleLogout both work
+  window.logout = handleLogout;
+  window.handleLogout = handleLogout;
+</script>
+</script>
 </body>
 </html>

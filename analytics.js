@@ -111,101 +111,218 @@ class AnalyticsManager {
         });
     }
 
-    generateCategoryChart() {
-        const ctx = document.getElementById('categoryChart');
-        if (!ctx) return;
-
-        const categories = Object.keys(this.data.categories);
-        const values = Object.values(this.data.categories);
+    initializeCharts() {
+        document.querySelector('[href="#reports"]').addEventListener('click', () => {
+            setTimeout(() => {
+                this.generateTrendsChart();
+                this.generateCategoryChart();
+            }, 300);
+        });
         
-        this.drawBarChart(ctx, categories, values, 'Category Distribution');
+        if (currentSection === 'reports') {
+            setTimeout(() => {
+                this.generateTrendsChart();
+                this.generateCategoryChart();
+            }, 300);
+        }
     }
 
     generateTrendsChart() {
         const ctx = document.getElementById('trendsChart');
         if (!ctx) return;
-
-        const months = this.data.trends.map(t => t.month);
+        
+        if (this.trendsChartInstance) {
+            this.trendsChartInstance.destroy();
+        }
+        
+        const months = this.data.trends.map(t => {
+            const [year, month] = t.month.split('-');
+            const date = new Date(year, month - 1);
+            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        });
+        
         const submitted = this.data.trends.map(t => t.submitted);
         const resolved = this.data.trends.map(t => t.resolved);
         
-        this.drawLineChart(ctx, months, [submitted, resolved], ['Submitted', 'Resolved']);
-    }
-
-    drawBarChart(canvas, labels, data, title) {
-        const ctx = canvas.getContext('2d');
-        const width = canvas.width;
-        const height = canvas.height;
-        
-        ctx.clearRect(0, 0, width, height);
-        
-        ctx.fillStyle = '#1e3a8a';
-        ctx.font = '14px Inter';
-        
-        const maxValue = Math.max(...data);
-        const barWidth = width / (labels.length * 1.5);
-        const barMaxHeight = height - 100;
-        
-        labels.forEach((label, index) => {
-            const barHeight = (data[index] / maxValue) * barMaxHeight;
-            const x = index * barWidth * 1.5 + 50;
-            const y = height - barHeight - 50;
-            
-            ctx.fillRect(x, y, barWidth, barHeight);
-            
-            ctx.fillStyle = '#64748b';
-            ctx.fillText(label, x, height - 20);
-            ctx.fillText(data[index].toString(), x, y - 10);
-            ctx.fillStyle = '#1e3a8a';
-        });
-        
-        ctx.fillStyle = '#1e293b';
-        ctx.font = '16px Inter';
-        ctx.fillText(title, 20, 30);
-    }
-
-    drawLineChart(canvas, labels, datasets, legends) {
-        const ctx = canvas.getContext('2d');
-        const width = canvas.width;
-        const height = canvas.height;
-        
-        ctx.clearRect(0, 0, width, height);
-        
-        const colors = ['#1e3a8a', '#10b981'];
-        const maxValue = Math.max(...datasets.flat());
-        const stepX = (width - 100) / (labels.length - 1);
-        const chartHeight = height - 100;
-        
-        datasets.forEach((dataset, datasetIndex) => {
-            ctx.strokeStyle = colors[datasetIndex];
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            
-            dataset.forEach((value, index) => {
-                const x = 50 + index * stepX;
-                const y = height - 50 - (value / maxValue) * chartHeight;
-                
-                if (index === 0) {
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
+        this.trendsChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [
+                    {
+                        label: 'Issues Submitted',
+                        data: submitted,
+                        borderColor: '#1e3a8a',
+                        backgroundColor: 'rgba(30, 58, 138, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Issues Resolved',
+                        data: resolved,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Issue Resolution Trends',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Issues'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Month'
+                        }
+                    }
                 }
-            });
-            
-            ctx.stroke();
-            
-            ctx.fillStyle = colors[datasetIndex];
-            ctx.fillRect(20, 50 + datasetIndex * 25, 15, 15);
-            ctx.fillStyle = '#1e293b';
-            ctx.font = '12px Inter';
-            ctx.fillText(legends[datasetIndex], 45, 62 + datasetIndex * 25);
+            }
         });
+
+        if (typeof isDarkMode !== 'undefined' && isDarkMode) {
+            this.applyDarkModeToChart(this.trendsChartInstance);
+        }
         
-        ctx.fillStyle = '#64748b';
-        labels.forEach((label, index) => {
-            const x = 50 + index * stepX;
-            ctx.fillText(label, x - 20, height - 20);
+        window.addEventListener('themeChanged', (event) => {
+            if (event.detail.isDark) {
+                this.applyDarkModeToChart(this.trendsChartInstance);
+            } else {
+                this.applyLightModeToChart(this.trendsChartInstance);
+            }
         });
+    }
+
+    generateCategoryChart() {
+        const canvas = document.createElement('canvas');
+        canvas.id = 'categoryChart';
+        canvas.width = 400;
+        canvas.height = 300;
+        
+        const chartContainer = document.querySelector('.chart-container');
+        if (chartContainer && !document.getElementById('categoryChart')) {
+            const categoryChartDiv = document.createElement('div');
+            categoryChartDiv.className = 'chart-placeholder';
+            categoryChartDiv.appendChild(canvas);
+            chartContainer.appendChild(categoryChartDiv);
+        }
+        
+        const ctx = document.getElementById('categoryChart');
+        if (!ctx) return;
+        
+        if (this.categoryChartInstance) {
+            this.categoryChartInstance.destroy();
+        }
+        
+        const categories = Object.keys(this.data.categories);
+        const values = Object.values(this.data.categories);
+        const backgroundColors = [
+            'rgba(30, 58, 138, 0.8)',
+            'rgba(59, 130, 246, 0.8)',
+            'rgba(16, 185, 129, 0.8)',
+            'rgba(245, 158, 11, 0.8)',
+            'rgba(239, 68, 68, 0.8)',
+            'rgba(139, 92, 246, 0.8)'
+        ];
+        
+        this.categoryChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: categories.map(cat => cat.charAt(0).toUpperCase() + cat.slice(1)),
+                datasets: [{
+                    label: 'Number of Issues',
+                    data: values,
+                    backgroundColor: backgroundColors,
+                    borderColor: backgroundColors.map(color => color.replace('0.8', '1')),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Issues by Category',
+                        font: {
+                            size: 16
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Issues'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Category'
+                        }
+                    }
+                }
+            }
+        });
+
+        if (typeof isDarkMode !== 'undefined' && isDarkMode) {
+            this.applyDarkModeToChart(this.categoryChartInstance);
+        }
+    }
+
+    applyDarkModeToChart(chart) {
+        if (!chart) return;
+        
+        chart.options.scales.x.ticks.color = '#cbd5e1';
+        chart.options.scales.y.ticks.color = '#cbd5e1';
+        chart.options.scales.x.title.color = '#cbd5e1';
+        chart.options.scales.y.title.color = '#cbd5e1';
+        chart.options.plugins.title.color = '#e2e8f0';
+        chart.options.plugins.legend.labels = { color: '#cbd5e1' };
+        
+        chart.update();
+    }
+
+    applyLightModeToChart(chart) {
+        if (!chart) return;
+        
+        chart.options.scales.x.ticks.color = '#475569';
+        chart.options.scales.y.ticks.color = '#475569';
+        chart.options.scales.x.title.color = '#475569';
+        chart.options.scales.y.title.color = '#475569';
+        chart.options.plugins.title.color = '#1e293b';
+        chart.options.plugins.legend.labels = { color: '#475569' };
+        
+        chart.update();
     }
 
     exportReportData(type, startDate, endDate) {
@@ -279,10 +396,6 @@ const analyticsManager = new AnalyticsManager();
 document.addEventListener('DOMContentLoaded', function() {
     analyticsManager.initializeAnalytics();
     
-    setTimeout(() => {
-        analyticsManager.generateTrendsChart();
-        analyticsManager.generateCategoryChart();
-    }, 1000);
 });
 
 if (typeof module !== 'undefined' && module.exports) {

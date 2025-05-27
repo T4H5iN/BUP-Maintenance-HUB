@@ -1,3 +1,5 @@
+let isDarkMode = false;
+
 class ThemeManager {
     constructor() {
         this.currentTheme = 'system';
@@ -72,10 +74,12 @@ class ThemeManager {
     }
 
     updateToggleButton() {
-        const toggle = document.getElementById('darkModeToggle');
+        const toggle = document.getElementById('darkModeToggle') || 
+                       document.getElementById('themeToggle');
         if (!toggle) return;
 
         const icon = toggle.querySelector('i');
+        if (!icon) return;
         
         if (isDarkMode) {
             icon.className = 'fas fa-sun';

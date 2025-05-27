@@ -1,0 +1,238 @@
+.hero {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: var(--white);
+    padding: 60px 40px;
+    border-radius: var(--border-radius);
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+    opacity: 0.9;
+}
+
+.hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    flex-wrap: wrap;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.quick-report,
+.issue-form {
+    background: var(--white);
+    padding: 40px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 40px;
+}
+
+.quick-report h2 {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.dashboard-tabs {
+    display: flex;
+    gap: 10px;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    border: 2px solid var(--gray-200);
+    background: var(--white);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.tab-btn.active,
+.tab-btn:hover {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.issues-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.issue-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+}
+
+.issue-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.issue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.issue-id {
+    font-weight: 700;
+    color: var(--gray-600);
+}
+
+.issue-status,
+.issue-priority {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.issue-status.pending { background: var(--warning-color); color: var(--white); }
+.issue-status.resolved { background: var(--success-color); color: var(--white); }
+.issue-status.in-progress { background: var(--secondary-color); color: var(--white); }
+
+.issue-priority.urgent { background: var(--danger-color); color: var(--white); }
+.issue-priority.high { background: var(--warning-color); color: var(--white); }
+.issue-priority.medium { background: var(--secondary-color); color: var(--white); }
+.issue-priority.low { background: var(--success-color); color: var(--white); }
+
+.issue-details {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+    color: var(--gray-600);
+}
+
+.issue-details span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.issue-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stars {
+    display: flex;
+    gap: 2px;
+}
+
+.stars i {
+    color: var(--warning-color);
+    cursor: pointer;
+}
+
+/* Styles for All Issues on Home page - more specific and with !important to override any conflicts */
+.all-issues-home {
+    background-color: #ffffff !important;
+    padding: 40px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 40px;
+    border: 1px solid #e5e7eb; /* Adding border for better visibility */
+}
+
+.all-issues-home h2 {
+    font-size: 2rem;
+    color: #1f2937 !important; /* Dark gray for better contrast on white */
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* Dark mode styles with higher specificity */
+body.dark-mode .all-issues-home {
+    background-color: #1f2937 !important; /* Dark background */
+    border-color: #374151;
+}
+
+body.dark-mode .all-issues-home h2 {
+    color: #f3f4f6 !important; /* Light text for dark background */
+}
+
+/* All issues list empty states */
+#home-issues-list .no-issues {
+    text-align: center;
+    padding: 40px;
+    background-color: #f9fafb;
+    border-radius: var(--border-radius);
+    color: #6b7280;
+    font-size: 1.1rem;
+    font-style: italic;
+}
+
+body.dark-mode #home-issues-list .no-issues {
+    background-color: #374151;
+    color: #d1d5db;
+}

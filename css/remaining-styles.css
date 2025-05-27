@@ -1,0 +1,280 @@
+/* Map Styles */
+.map-container {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: var(--shadow-md);
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 30px;
+}
+
+.campus-map {
+    position: relative;
+    background: var(--gray-100);
+    border-radius: var(--border-radius);
+    min-height: 500px;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23e2e8f0" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+}
+
+.building {
+    position: absolute;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.building:hover {
+    transform: scale(1.1);
+}
+
+.building-icon {
+    position: relative;
+    background: var(--white);
+    border: 3px solid var(--primary-color);
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+}
+
+.issue-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: var(--danger-color);
+    color: var(--white);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.issue-count.urgent { background: var(--danger-color); }
+.issue-count.high { background: var(--warning-color); }
+.issue-count.medium { background: var(--secondary-color); }
+.issue-count.low { background: var(--success-color); }
+
+.building-label {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--white);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: var(--shadow-sm);
+}
+
+.map-legend {
+    background: var(--gray-50);
+    padding: 20px;
+    border-radius: var(--border-radius);
+}
+
+.map-legend h4 {
+    margin-bottom: 15px;
+    color: var(--gray-700);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+}
+
+.legend-color.urgent { background: var(--danger-color); }
+.legend-color.high { background: var(--warning-color); }
+.legend-color.medium { background: var(--secondary-color); }
+.legend-color.low { background: var(--success-color); }
+
+/* Filters */
+.dashboard-filters {
+    background: var(--white);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 30px;
+}
+
+.filter-group {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.filter-group select,
+.filter-group input {
+    padding: 10px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+}
+
+.reports-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.report-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.reports-filters {
+    background: var(--white);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 30px;
+}
+
+.filter-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.chart-container {
+    background: var(--white);
+    padding: 30px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 30px;
+}
+
+.chart-placeholder {
+    width: 100%;
+    height: 400px;
+    background: var(--gray-100);
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-500);
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+.report-table th,
+.report-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.report-table th {
+    background: var(--gray-100);
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+.report-table tr:hover {
+    background: var(--gray-50);
+}
+
+/* Admin Styles */
+.admin-issue-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 20px;
+    border-left: 4px solid var(--gray-300);
+}
+
+.admin-issue-card.urgent { border-left-color: var(--danger-color); }
+.admin-issue-card.high { border-left-color: var(--warning-color); }
+
+.admin-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.overview-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.overview-card {
+    background: var(--white);
+    padding: 25px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+}
+
+.overview-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.overview-number.warning { color: var(--warning-color); }
+
+.overview-change {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.overview-change.positive { color: var(--success-color); }
+.overview-change.negative { color: var(--danger-color); }
+
+.alert-item {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow-md);
+}
+
+.alert-item.urgent { border-left: 4px solid var(--danger-color); }
+.alert-item.high { border-left: 4px solid var(--warning-color); }
+
+.time-range {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.time-range input {
+    flex: 1;
+}

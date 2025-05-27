@@ -1,0 +1,64 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: var(--font-primary);
+}
+
+html {
+    box-sizing: border-box;
+    overflow-x: hidden;
+    /* Prevent any horizontal scrolling */
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    color: var(--gray-800);
+    background-color: var(--light-bg);
+    overflow-x: hidden;
+    /* Ensure consistent viewport */
+    min-height: 100vh;
+    width: 100%;
+    /* Prevent any size changes during theme transitions */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, .chart-title {
+    font-family: var(--font-primary);
+    font-weight: 600;
+}
+
+/* Transitions for theme switching */
+body,
+.navbar,
+.section,
+.modal-content,
+.notification,
+.issue-card,
+.stat-card,
+.campus-map,
+input,
+select,
+textarea,
+button {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}

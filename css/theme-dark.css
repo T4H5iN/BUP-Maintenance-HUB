@@ -1,0 +1,173 @@
+.dark-mode .dark-mode-toggle, .dark-mode .theme-toggle {
+    border-color: var(--gray-500);
+    color: var(--gray-400);
+}
+
+.dark-mode .dark-mode-toggle:hover, .dark-mode .theme-toggle:hover {
+    background: var(--gray-200);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.dark-mode .hero {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+}
+
+.dark-mode .campus-map {
+    background: var(--gray-300);
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid-dark" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23334155" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid-dark)"/></svg>');
+}
+
+.dark-mode .building-icon {
+    background: var(--white);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.dark-mode .building-label {
+    background: var(--gray-100);
+    color: var(--gray-800);
+}
+
+.dark-mode .map-legend {
+    background: var(--gray-100);
+}
+
+.dark-mode .chart-placeholder {
+    background: var(--gray-200);
+    color: var(--gray-500);
+}
+
+.dark-mode .report-table th {
+    background: var(--gray-200);
+    color: var(--gray-800);
+}
+
+.dark-mode .report-table tr:hover {
+    background: var(--gray-200);
+}
+
+.dark-mode .file-upload-label {
+    background: var(--gray-200);
+    border-color: var(--gray-400);
+}
+
+.dark-mode .file-upload-label:hover {
+    background: var(--gray-300);
+    border-color: var(--primary-color);
+}
+
+.dark-mode .modal-content {
+    background: var(--white);
+}
+
+.dark-mode .modal {
+    background-color: rgba(15, 23, 42, 0.8);
+}
+
+.dark-mode .notification {
+    background: var(--white);
+    color: var(--gray-800);
+}
+
+.dark-mode .notification.success {
+    border-left-color: var(--success-color);
+}
+
+.dark-mode .notification.error {
+    border-left-color: var(--danger-color);
+}
+
+.dark-mode .notification.warning {
+    border-left-color: var(--warning-color);
+}
+
+.dark-mode .notification.info {
+    border-left-color: var(--secondary-color);
+}
+
+/* Global dark mode fixes to prevent scrollbar issues */
+.dark-mode {
+    /* Ensure no layout shifts */
+    overflow-x: hidden;
+}
+
+.dark-mode body {
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Remove any conflicting borders/shadows that could cause size changes */
+.dark-mode .issue-card {
+    background: var(--white);
+    /* Remove border that could cause layout shift */
+    border: none;
+    box-sizing: border-box;
+}
+
+.dark-mode .admin-issue-card {
+    background: var(--white);
+    border-left: 4px solid var(--gray-400);
+    box-sizing: border-box;
+}
+
+.dark-mode .overview-card {
+    background: var(--white);
+    /* Remove border that could cause layout shift */
+    border: none;
+    box-sizing: border-box;
+}
+
+.dark-mode .alert-item {
+    background: var(--white);
+    /* Remove border that could cause layout shift */
+    border: none;
+    box-sizing: border-box;
+}
+
+.dark-mode .navbar {
+    background: var(--white);
+    /* Remove border that could cause layout shift */
+    border-bottom: none;
+    box-sizing: border-box;
+}
+
+/* Ensure form elements don't change size */
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea {
+    background: var(--gray-100);
+    border-color: var(--gray-300);
+    color: var(--gray-800);
+    box-sizing: border-box;
+}
+
+.dark-mode input:focus,
+.dark-mode select:focus,
+.dark-mode textarea:focus {
+    background: var(--white);
+    border-color: var(--primary-color);
+    box-sizing: border-box;
+}
+
+/* Ensure buttons maintain consistent sizing */
+.dark-mode .tab-btn {
+    background: var(--gray-100);
+    border-color: var(--gray-300);
+    color: var(--gray-700);
+    box-sizing: border-box;
+}
+
+.dark-mode .tab-btn.active,
+.dark-mode .tab-btn:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--white);
+    box-sizing: border-box;
+}
+
+.dark-mode .all-notifications-panel {
+  background-color: var(--gray-800);
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+}
