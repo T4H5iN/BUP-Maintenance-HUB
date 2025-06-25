@@ -1472,3 +1472,193 @@
 .notification-item {
   animation: fadeIn 0.3s ease-out;
 }
+
+/* Issue Details Modal */
+.issue-details-modal {
+    max-width: 800px;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.issue-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--gray-200);
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.issue-badges {
+    display: flex;
+    gap: 10px;
+}
+
+.issue-details-content {
+    margin-bottom: 25px;
+}
+
+.detail-row {
+    display: flex;
+    margin-bottom: 12px;
+    align-items: flex-start;
+}
+
+.detail-label {
+    min-width: 140px;
+    font-weight: 600;
+    color: var(--gray-700);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.detail-value {
+    flex: 1;
+}
+
+.priority-urgent, .priority-high, .priority-medium, .priority-low {
+    font-weight: 600;
+}
+
+.priority-urgent {
+    color: var(--danger-color);
+}
+
+.priority-high {
+    color: var(--warning-color);
+}
+
+.priority-medium {
+    color: var(--secondary-color);
+}
+
+.priority-low {
+    color: var(--success-color);
+}
+
+.status-pending-review, .status-assigned, .status-in-progress, .status-resolved, .status-rejected {
+    font-weight: 600;
+}
+
+.status-pending-review {
+    color: var(--gray-600);
+}
+
+.status-assigned {
+    color: var(--primary-color);
+}
+
+.status-in-progress {
+    color: var(--warning-color);
+}
+
+.status-resolved {
+    color: var(--success-color);
+}
+
+.status-rejected {
+    color: var(--danger-color);
+}
+
+.issue-description {
+    margin: 20px 0;
+}
+
+.issue-description h4 {
+    margin-bottom: 10px;
+    color: var(--gray-800);
+}
+
+.issue-description p {
+    white-space: pre-line;
+    line-height: 1.5;
+}
+
+.issue-images {
+    margin: 20px 0;
+}
+
+.issue-images h4 {
+    margin-bottom: 10px;
+    color: var(--gray-800);
+}
+
+.image-gallery {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.issue-detail-image {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    border: 2px solid var(--gray-200);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.issue-detail-image:hover {
+    transform: scale(1.05);
+}
+
+.issue-progress {
+    margin: 20px 0;
+}
+
+.issue-progress h4 {
+    margin-bottom: 10px;
+    color: var(--gray-800);
+}
+
+.progress-history {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.progress-update {
+    background-color: var(--gray-50);
+    padding: 15px;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--primary-color);
+}
+
+.update-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: var(--gray-600);
+}
+
+.update-by {
+    font-weight: 600;
+}
+
+.issue-details-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid var(--gray-200);
+}
+
+/* Dark mode styles */
+.dark-mode .detail-label {
+    color: var(--gray-300);
+}
+
+.dark-mode .progress-update {
+    background-color: var(--gray-750);
+}
+
+.dark-mode .issue-details-header,
+.dark-mode .issue-details-actions {
+    border-color: var(--gray-700);
+}

@@ -4,6 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BUP Maintenance HUB</title>
+    
+    <!-- Add loading screen styles -->
+    <style>
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+        
+        #loading-screen.fade-out {
+            opacity: 0;
+        }
+        
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        .dark-mode #loading-screen {
+            background-color: #1a1a2e;
+            color: #ffffff;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    
     <!-- Import CSS files in proper order -->
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/base.css">
@@ -17,6 +60,13 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
+    <!-- Add loading screen -->
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <h2>Loading BUP Maintenance HUB...</h2>
+        <p>Please wait while we set things up for you.</p>
+    </div>
+
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
@@ -247,6 +297,7 @@
                     <div class="filter-group">
                         <select id="homeStatusFilter">
                             <option value="all">All Status</option>
+                            <option value="pending-review">Pending Review</option>
                             <option value="assigned">Assigned</option>
                             <option value="in-progress">In Progress</option>
                             <option value="resolved">Resolved</option>
@@ -273,6 +324,9 @@
                             <option value="daycare">Day Care Center</option>
                             <option value="staff-canteen">Staff Canteen</option>
                         </select>
+                        <div class="search-container">
+                            <input type="text" id="homeSearchInput" placeholder="Search issues..." class="search-input">
+                        </div>
                     </div>
                 </div>
                 <div id="home-issues-list" class="issues-list">
@@ -933,10 +987,42 @@
         </div>
     </div>
 
-    <!-- Add Chart.js library before your scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="analytics.js"></script>
-    <script src="script.js"></script>
+    <!-- Load the script loader first -->
+    <script src="js/loader.js"></script>
+    
+    <!-- Load the utility functions -->
+    <script src="js/utils.js" onload="registerModuleLoaded('utils')" onerror="handleScriptError('utils', event)"></script>
+    
+    <!-- Load core functionality -->
+    <script src="js/core.js" onload="registerModuleLoaded('core')" onerror="handleScriptError('core', event)"></script>
+    
+    <!-- Load UI management -->
+    <script src="js/ui.js" onload="registerModuleLoaded('ui')" onerror="handleScriptError('ui', event)"></script>
+    
+    <!-- Load dark mode functionality -->
+    <script src="js/darkMode.js" onload="registerModuleLoaded('darkMode')" onerror="handleScriptError('darkMode', event)"></script>
+    
+    <!-- Load issue management -->
+    <script src="js/issues.js" onload="registerModuleLoaded('issues')" onerror="handleScriptError('issues', event)"></script>
+    
+    <!-- Load map functionality -->
+    <script src="js/map.js" onload="registerModuleLoaded('map')" onerror="handleScriptError('map', event)"></script>
+    
+    <!-- Load authentication functionality -->
+    <script src="js/auth.js" onload="registerModuleLoaded('auth')" onerror="handleScriptError('auth', event)"></script>
+    
+    <!-- Load notification system -->
+    <script src="js/notifications.js" onload="registerModuleLoaded('notifications')" onerror="handleScriptError('notifications', event)"></script>
+    
+    <!-- Load technician dashboard functionality -->
+    <script src="js/technician.js" onload="registerModuleLoaded('technician')" onerror="handleScriptError('technician', event)"></script>
+    
+    <!-- Load analytics functionality -->
+    <script src="js/analytics.js" onload="registerModuleLoaded('analytics')" onerror="handleScriptError('analytics', event)"></script>
+    
+    <!-- Load the main entry point last -->
+    <script src="js/index.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Apply theme first, before checking authentication
@@ -995,7 +1081,6 @@
         }
     </script>
 
-<!-- Add this right before the closing </body> tag, replacing the existing inline script -->
 <script>
   // Define a standalone notification function that doesn't rely on other code
   function showNotification(message, type = 'info') {
@@ -1069,7 +1154,6 @@
   // Make sure logout and handleLogout both work
   window.logout = handleLogout;
   window.handleLogout = handleLogout;
-</script>
 </script>
 </body>
 </html>
