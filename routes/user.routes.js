@@ -23,15 +23,6 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// Verify the connection configuration
-transporter.verify(function(error, success) {
-    if (error) {
-        console.error('SMTP connection error:', error);
-    } else {
-        console.log('SMTP server is ready to take our messages');
-    }
-});
-
 // Generate a random 6-digit OTP
 function generateOTP() {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -189,15 +180,10 @@ router.post('/', async (req, res) => {
 router.post('/verify-otp', async (req, res) => {
     const { email, otp } = req.body;
     
-    // Add logging to debug the issue
-    console.log('Received verification request:', { email, otp });
-    
     try {
         // Find the OTP document
         const otpDoc = await OTP.findOne({ email, otp });
-        
-        console.log('OTP document found:', otpDoc ? 'Yes' : 'No');
-        
+                
         if (!otpDoc) {
             // Log all OTPs for this email to help debugging
             const allOtps = await OTP.find({ email });
