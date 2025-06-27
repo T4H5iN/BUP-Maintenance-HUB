@@ -57,7 +57,7 @@ async function handleLogin(e) {
         localStorage.setItem('bup-token', data.token);
         localStorage.setItem('bup-current-user', JSON.stringify(data.user));
         currentUser = data.user;
-        showNotification(`Welcome back, ${currentUser.user}!`, 'success');
+        showNotification(`Welcome back, ${currentUser.email}!`, 'success');
         setTimeout(() => {
             window.location.href = 'index.html';
         }, 1000);
@@ -78,6 +78,12 @@ async function handleRegistration(e) {
     // Validate BUP email domains
     if (!validateBUPEmail(email)) {
         showNotification('Only @bup.edu.bd or @student.bup.edu.bd email addresses are allowed', 'error');
+        return;
+    }
+
+    // Validate password strength
+    if (!validatePassword(password)) {
+        showNotification('Password does not meet the strength requirements', 'error');
         return;
     }
 
@@ -358,8 +364,9 @@ async function handlePasswordReset(e) {
         return;
     }
     
-    if (newPassword.length < 6) {
-        showNotification('Password must be at least 6 characters long', 'error');
+    // Validate password strength
+    if (!validatePassword(newPassword)) {
+        showNotification('Password does not meet the strength requirements', 'error');
         return;
     }
     
@@ -393,6 +400,138 @@ async function handlePasswordReset(e) {
         showNotification('Error resetting password', 'error');
         console.error('Password reset error:', err);
     }
+}
+
+/**
+ * Check password strength and update UI
+ */
+function checkPasswordStrength() {
+    const password = document.getElementById('regPassword').value;
+    const strengthBar = document.getElementById('strengthBar');
+    
+    // Password requirement checks
+    const lengthReq = document.getElementById('length-req');
+    const uppercaseReq = document.getElementById('uppercase-req');
+    const lowercaseReq = document.getElementById('lowercase-req');
+    const numberReq = document.getElementById('number-req');
+    const specialReq = document.getElementById('special-req');
+    
+    // Define password requirement patterns
+    const hasLength = password.length >= 8;
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    
+    // Update requirement indicators
+    updateRequirement(lengthReq, hasLength);
+    updateRequirement(uppercaseReq, hasUppercase);
+    updateRequirement(lowercaseReq, hasLowercase);
+    updateRequirement(numberReq, hasNumber);
+    updateRequirement(specialReq, hasSpecial);
+    
+    // Calculate strength percentage
+    const criteria = [hasLength, hasUppercase, hasLowercase, hasNumber, hasSpecial];
+    const fulfilledCriteria = criteria.filter(Boolean).length;
+    const strengthPercentage = (fulfilledCriteria / criteria.length) * 100;
+    
+    // Update strength bar
+    strengthBar.style.width = `${strengthPercentage}%`;
+    
+    // Update strength bar color
+    if (strengthPercentage <= 20) {
+        strengthBar.className = 'strength-bar-fill very-weak';
+    } else if (strengthPercentage <= 40) {
+        strengthBar.className = 'strength-bar-fill weak';
+    } else if (strengthPercentage <= 60) {
+        strengthBar.className = 'strength-bar-fill medium';
+    } else if (strengthPercentage <= 80) {
+        strengthBar.className = 'strength-bar-fill strong';
+    } else {
+        strengthBar.className = 'strength-bar-fill very-strong';
+    }
+    
+    return fulfilledCriteria === criteria.length; // Return true if all criteria are met
+}
+
+/**
+ * Check password strength for reset password form
+ */
+function checkResetPasswordStrength() {
+    const password = document.getElementById('newPassword').value;
+    const strengthBar = document.getElementById('resetStrengthBar');
+    
+    // Password requirement checks
+    const lengthReq = document.getElementById('reset-length-req');
+    const uppercaseReq = document.getElementById('reset-uppercase-req');
+    const lowercaseReq = document.getElementById('reset-lowercase-req');
+    const numberReq = document.getElementById('reset-number-req');
+    const specialReq = document.getElementById('reset-special-req');
+    
+    // Define password requirement patterns
+    const hasLength = password.length >= 8;
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    
+    // Update requirement indicators
+    updateRequirement(lengthReq, hasLength);
+    updateRequirement(uppercaseReq, hasUppercase);
+    updateRequirement(lowercaseReq, hasLowercase);
+    updateRequirement(numberReq, hasNumber);
+    updateRequirement(specialReq, hasSpecial);
+    
+    // Calculate strength percentage
+    const criteria = [hasLength, hasUppercase, hasLowercase, hasNumber, hasSpecial];
+    const fulfilledCriteria = criteria.filter(Boolean).length;
+    const strengthPercentage = (fulfilledCriteria / criteria.length) * 100;
+    
+    // Update strength bar
+    strengthBar.style.width = `${strengthPercentage}%`;
+    
+    // Update strength bar color
+    if (strengthPercentage <= 20) {
+        strengthBar.className = 'strength-bar-fill very-weak';
+    } else if (strengthPercentage <= 40) {
+        strengthBar.className = 'strength-bar-fill weak';
+    } else if (strengthPercentage <= 60) {
+        strengthBar.className = 'strength-bar-fill medium';
+    } else if (strengthPercentage <= 80) {
+        strengthBar.className = 'strength-bar-fill strong';
+    } else {
+        strengthBar.className = 'strength-bar-fill very-strong';
+    }
+    
+    return fulfilledCriteria === criteria.length; // Return true if all criteria are met
+}
+
+/**
+ * Update a single requirement indicator
+ * @param {HTMLElement} element - The requirement element
+ * @param {boolean} isFulfilled - Whether the requirement is fulfilled
+ */
+function updateRequirement(element, isFulfilled) {
+    if (isFulfilled) {
+        element.querySelector('i').className = 'fas fa-check-circle';
+        element.classList.add('fulfilled');
+    } else {
+        element.querySelector('i').className = 'fas fa-times-circle';
+        element.classList.remove('fulfilled');
+    }
+}
+
+/**
+ * Validate that the password meets all requirements
+ * @param {string} password - The password to validate
+ * @returns {boolean} - Whether the password is valid
+ */
+function validatePassword(password) {
+    return password.length >= 8 && 
+           /[A-Z]/.test(password) && 
+           /[a-z]/.test(password) && 
+           /[0-9]/.test(password) && 
+           /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
 }
 
 /**

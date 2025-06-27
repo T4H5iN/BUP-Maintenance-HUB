@@ -21,7 +21,7 @@ async function handleLogin(e) {
         localStorage.setItem('bup-token', data.token);
         localStorage.setItem('bup-current-user', JSON.stringify(data.user));
         currentUser = data.user;
-        showNotification(`Welcome back, ${currentUser.user}!`, 'success');
+        showNotification(`Welcome back, ${currentUser.email}!`, 'success');
         closeLoginModal();
         updateUIForLoggedInUser();
     } catch (err) {

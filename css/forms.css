@@ -386,7 +386,97 @@ input[type="file"] {
     background-size: 18px 18px;
 }
 
-/* Make the search container responsive */
+/* Password Strength Meter */
+.password-strength-meter {
+    margin-top: 10px;
+}
+
+.password-strength-bar {
+    height: 5px;
+    background-color: var(--gray-200);
+    border-radius: 3px;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.strength-bar-fill {
+    height: 100%;
+    width: 0;
+    border-radius: 3px;
+    transition: width 0.3s, background-color 0.3s;
+}
+
+.strength-bar-fill.very-weak {
+    background-color: #ff4d4d;
+}
+
+.strength-bar-fill.weak {
+    background-color: #ffa64d;
+}
+
+.strength-bar-fill.medium {
+    background-color: #ffeb3b;
+}
+
+.strength-bar-fill.strong {
+    background-color: #4caf50;
+}
+
+.strength-bar-fill.very-strong {
+    background-color: #2e7d32;
+}
+
+.password-requirements {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 0.85rem;
+    color: var(--gray-600);
+}
+
+.requirement {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.requirement i {
+    font-size: 0.85rem;
+}
+
+.requirement i.fa-times-circle {
+    color: #ff4d4d;
+}
+
+.requirement i.fa-check-circle {
+    color: #4caf50;
+}
+
+.requirement.fulfilled {
+    color: #4caf50;
+}
+
+/* Dark mode styles for password strength meter */
+.dark-mode .password-strength-bar {
+    background-color: var(--gray-600);
+}
+
+.dark-mode .password-requirements {
+    color: var(--gray-400);
+}
+
+.dark-mode .requirement i.fa-times-circle {
+    color: #ff6b6b;
+}
+
+.dark-mode .requirement i.fa-check-circle {
+    color: #69f0ae;
+}
+
+.dark-mode .requirement.fulfilled {
+    color: #69f0ae;
+}
+
 @media (max-width: 768px) {
     .search-container {
         width: 100%;
