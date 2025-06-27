@@ -21,7 +21,7 @@ async function handleLogin(e) {
         localStorage.setItem('bup-token', data.token);
         localStorage.setItem('bup-current-user', JSON.stringify(data.user));
         currentUser = data.user;
-        showNotification(`Welcome back, ${currentUser.email}!`, 'success');
+        showNotification(`Welcome back, ${currentUser.user}!`, 'success');
         closeLoginModal();
         updateUIForLoggedInUser();
     } catch (err) {
@@ -62,24 +62,35 @@ async function handleRegistration(e) {
     }
 }
 
+/**
+ * Update UI elements based on logged in user
+ */
 function updateUIForLoggedInUser() {
+    if (!currentUser) return;
+    
+    // Update login button to show user info
     const loginBtn = document.querySelector('.login-btn');
+    if (loginBtn) {
+        loginBtn.innerHTML = `
+            <i class="fas fa-user-circle"></i>
+            ${currentUser.name || currentUser.email}
+        `;
+        loginBtn.onclick = showUserMenu;
+    }
     
-    // Get the name from user object, fallback to email if no name
-    const displayName = currentUser.name || currentUser.email.split('@')[0];
-    
-    loginBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${displayName}`;
-    loginBtn.onclick = showUserMenu;
-
+    // Show role-specific tabs
     if (currentUser.role === 'admin') {
         document.getElementById('adminTab').style.display = 'block';
-    }
-    if (currentUser.role === 'authority') {
+    } else if (currentUser.role === 'authority') {
         document.getElementById('authorityTab').style.display = 'block';
-    }
-    if (currentUser.role === 'technician' || currentUser.role === 'staff') {
+    } else if (currentUser.role === 'technician') {
         document.getElementById('technicianTab').style.display = 'block';
     }
+    
+    // Dispatch auth state changed event
+    window.dispatchEvent(new CustomEvent('authStateChanged', { 
+        detail: { user: currentUser } 
+    }));
 }
 
 function showUserMenu() {
@@ -388,6 +399,28 @@ function logout() {
         // Fallback redirect if there's an error
         window.location.href = 'auth.html';
     }
+}
+
+/**
+ * Handle logout
+ */
+function handleLogout() {
+    currentUser = null;
+    localStorage.removeItem('bup-current-user');
+    localStorage.removeItem('bup-token');
+    
+    // Show notification
+    showNotification('You have been logged out successfully', 'success');
+    
+    // Dispatch auth state changed event
+    window.dispatchEvent(new CustomEvent('authStateChanged', { 
+        detail: { user: null } 
+    }));
+    
+    // Redirect to login page after a short delay
+    setTimeout(() => {
+        window.location.href = 'auth.html';
+    }, 1000);
 }
 
 // Helper function to reset UI elements after logout

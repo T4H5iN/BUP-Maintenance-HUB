@@ -77,19 +77,6 @@
                             </div>
                         </div>
                         
-                        <div class="form-group">
-                            <label for="loginRole">Role</label>
-                            <select id="loginRole" required>
-                                <option value="">Select your role</option>
-                                <option value="student">Student</option>
-                                <option value="faculty">Faculty</option>
-                                <option value="staff">Staff</option>
-                                <option value="technician">Technician</option>
-                                <option value="admin">Moderator</option>
-                                <option value="authority">Administrator</option>
-                            </select>
-                        </div>
-                        
                         <button type="submit" class="btn-primary auth-btn">
                             <i class="fas fa-sign-in-alt"></i>
                             Login
@@ -124,10 +111,12 @@
                         <div class="form-group">
                             <label for="regEmail">BUP Email</label>
                             <div class="input-wrapper">
-                                <input type="email" id="regEmail" required placeholder="your.email@bup.edu.bd">
+                                <input type="email" id="regEmail" required 
+                                       pattern=".*@(student\.)?bup\.edu\.bd$"
+                                       placeholder="your.email@bup.edu.bd">
                                 <i class="fas fa-envelope input-icon"></i>
                             </div>
-                            <small class="email-hint">Use your official BUP email address</small>
+                            <small class="email-hint">Only @bup.edu.bd or @student.bup.edu.bd emails are allowed</small>
                         </div>
                         
                         <div class="form-group">
@@ -194,6 +183,119 @@
                         </div>
                     </form>
                 </div>
+
+                <div id="verificationForm" class="auth-form">
+                    <div class="form-header">
+                        <h2>Verify Your Email</h2>
+                        <p>Please enter the verification code sent to your email</p>
+                        <!-- Add email checking guidance -->
+                        <div class="email-guidance" style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                            <p>An email with verification code has been sent to your inbox. 
+                               If you don't see it, please check your spam/junk folder.</p>
+                        </div>
+                    </div>
+                    
+                    <form id="otpFormElement">
+                        <div class="form-group">
+                            <label for="userEmail">Email Address</label>
+                            <div class="input-wrapper">
+                                <input type="email" id="userEmail" readonly>
+                                <i class="fas fa-envelope input-icon"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="otpCode">Verification Code</label>
+                            <div class="input-wrapper otp-wrapper">
+                                <input type="text" id="otpCode" required placeholder="Enter 6-digit code" maxlength="6" pattern="\d{6}" style="padding-left: 45px;">
+                                <i class="fas fa-key input-icon"></i>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary auth-btn">
+                            <i class="fas fa-check-circle"></i>
+                            Verify Email
+                        </button>
+                        
+                        <div class="form-footer">
+                            <p>Didn't receive the code? 
+                                <a href="#" id="resendOtp">Resend code</a>
+                            </p>
+                            <a href="#" onclick="showLoginForm(); return false;">Back to Login</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Forgot Password Form -->
+                <div id="forgotPasswordForm" class="auth-form">
+                    <div class="form-header">
+                        <h2>Forgot Your Password?</h2>
+                        <p>Enter your email to receive a verification code</p>
+                    </div>
+                    
+                    <form id="forgotPasswordFormElement">
+                        <div class="form-group">
+                            <label for="forgotEmail">Email Address</label>
+                            <div class="input-wrapper">
+                                <input type="email" id="forgotEmail" required placeholder="name@bup.edu.bd">
+                                <i class="fas fa-envelope input-icon"></i>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary auth-btn">
+                            <i class="fas fa-paper-plane"></i>
+                            Send Verification Code
+                        </button>
+                        
+                        <div class="form-footer">
+                            <a href="#" onclick="showLoginForm(); return false;">Back to Login</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Reset Password Form -->
+                <div id="resetPasswordForm" class="auth-form">
+                    <div class="form-header">
+                        <h2>Reset Your Password</h2>
+                        <p>Enter a new password for your account</p>
+                    </div>
+                    
+                    <form id="resetPasswordFormElement">
+                        <input type="hidden" id="resetEmail">
+                        <input type="hidden" id="resetToken">
+                        
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <div class="input-wrapper">
+                                <input type="password" id="newPassword" required placeholder="Enter new password">
+                                <i class="fas fa-lock input-icon"></i>
+                                <button type="button" class="password-toggle" onclick="togglePassword('newPassword')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirmNewPassword">Confirm New Password</label>
+                            <div class="input-wrapper">
+                                <input type="password" id="confirmNewPassword" required placeholder="Confirm new password">
+                                <i class="fas fa-lock input-icon"></i>
+                                <button type="button" class="password-toggle" onclick="togglePassword('confirmNewPassword')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary auth-btn">
+                            <i class="fas fa-key"></i>
+                            Reset Password
+                        </button>
+                        
+                        <div class="form-footer">
+                            <a href="#" onclick="showLoginForm(); return false;">Back to Login</a>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </main>
@@ -213,6 +315,7 @@
     </div>
 
     <script src="js/authorize.js"></script>
+    <script src="js/otpVerification.js"></script>
     <script src="js/theme-preferences.js"></script>
 </body>
 </html>

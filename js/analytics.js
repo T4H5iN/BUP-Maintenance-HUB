@@ -11,7 +11,12 @@ class AnalyticsManager {
     }
 
     initializeAnalytics() {
-        this.generateMockData();
+        // Use real data if available, otherwise generate mock data
+        if (window.issues && Array.isArray(window.issues) && window.issues.length > 0) {
+            this.data.issues = window.issues;
+        } else {
+            this.generateMockData();
+        }
         this.calculateMetrics();
     }
 
@@ -131,18 +136,35 @@ class AnalyticsManager {
         const ctx = document.getElementById('trendsChart');
         if (!ctx) return;
         
+        // Check if Chart is defined
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js library is not loaded. Unable to generate trend chart.');
+            this.renderFallbackChart(ctx, 'trends');
+            return;
+        }
+        
         if (this.trendsChartInstance) {
             this.trendsChartInstance.destroy();
         }
         
-        const months = this.data.trends.map(t => {
+        // Use actual data if available
+        let chartData;
+        if (window.reportData && Array.isArray(window.reportData.filteredIssues) && window.reportData.filteredIssues.length > 0) {
+            // Use report data for chart
+            chartData = this.calculateTrendsFromData(window.reportData.filteredIssues);
+        } else {
+            // Fall back to stored trends
+            chartData = this.data.trends;
+        }
+        
+        const months = chartData.map(t => {
             const [year, month] = t.month.split('-');
             const date = new Date(year, month - 1);
             return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
         });
         
-        const submitted = this.data.trends.map(t => t.submitted);
-        const resolved = this.data.trends.map(t => t.resolved);
+        const submitted = chartData.map(t => t.submitted);
+        const resolved = chartData.map(t => t.resolved);
         
         this.trendsChartInstance = new Chart(ctx, {
             type: 'line',
@@ -217,6 +239,32 @@ class AnalyticsManager {
         });
     }
 
+    calculateTrendsFromData(issues) {
+        const monthlyData = {};
+        
+        issues.forEach(issue => {
+            if (!issue.submittedDate) return;
+            
+            const month = issue.submittedDate.substring(0, 7); 
+            if (!monthlyData[month]) {
+                monthlyData[month] = { submitted: 0, resolved: 0 };
+            }
+            monthlyData[month].submitted++;
+            if (issue.status === 'resolved') {
+                monthlyData[month].resolved++;
+            }
+        });
+
+        return Object.keys(monthlyData)
+            .sort()
+            .map(month => ({
+                month,
+                submitted: monthlyData[month].submitted,
+                resolved: monthlyData[month].resolved,
+                resolutionRate: (monthlyData[month].resolved / monthlyData[month].submitted * 100).toFixed(1)
+            }));
+    }
+
     generateCategoryChart() {
         const canvas = document.createElement('canvas');
         canvas.id = 'categoryChart';
@@ -234,12 +282,30 @@ class AnalyticsManager {
         const ctx = document.getElementById('categoryChart');
         if (!ctx) return;
         
+        // Check if Chart is defined
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js library is not loaded. Unable to generate category chart.');
+            this.renderFallbackChart(ctx, 'categories');
+            return;
+        }
+        
         if (this.categoryChartInstance) {
             this.categoryChartInstance.destroy();
         }
         
-        const categories = Object.keys(this.data.categories);
-        const values = Object.values(this.data.categories);
+        // Use actual data if available
+        let categories, values;
+        if (window.reportData && Array.isArray(window.reportData.filteredIssues) && window.reportData.filteredIssues.length > 0) {
+            // Calculate categories from filtered issues
+            const categoryCount = this.calculateCategoriesFromData(window.reportData.filteredIssues);
+            categories = Object.keys(categoryCount);
+            values = Object.values(categoryCount);
+        } else {
+            // Fall back to stored categories
+            categories = Object.keys(this.data.categories);
+            values = Object.values(this.data.categories);
+        }
+        
         const backgroundColors = [
             'rgba(30, 58, 138, 0.8)',
             'rgba(59, 130, 246, 0.8)',
@@ -297,6 +363,14 @@ class AnalyticsManager {
         if (typeof isDarkMode !== 'undefined' && isDarkMode) {
             this.applyDarkModeToChart(this.categoryChartInstance);
         }
+    }
+
+    calculateCategoriesFromData(issues) {
+        return issues.reduce((acc, issue) => {
+            const category = issue.category || 'other';
+            acc[category] = (acc[category] || 0) + 1;
+            return acc;
+        }, {});
     }
 
     applyDarkModeToChart(chart) {
@@ -388,6 +462,73 @@ class AnalyticsManager {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    }
+
+    /**
+     * Render a fallback visualization when Chart.js is not available
+     */
+    renderFallbackChart(container, type) {
+        if (!container) return;
+        
+        // Clear any existing content
+        container.innerHTML = '';
+        container.style.height = 'auto';
+        
+        // Create fallback message
+        const fallbackMessage = document.createElement('div');
+        fallbackMessage.className = 'chart-fallback';
+        fallbackMessage.innerHTML = `
+            <div class="fallback-message">
+                <i class="fas fa-chart-bar"></i>
+                <p>Chart visualization could not be loaded</p>
+                <button class="btn-secondary" onclick="location.reload()">
+                    Reload Page
+                </button>
+            </div>
+        `;
+        
+        // Create a simple text-based visualization
+        const dataDisplay = document.createElement('div');
+        dataDisplay.className = 'fallback-data';
+        
+        if (type === 'trends') {
+            const trends = this.data.trends.slice(-5); // Show last 5 months
+            let trendsHtml = '<h4>Recent Trends (Last 5 Months)</h4><table class="fallback-table">';
+            trendsHtml += '<tr><th>Month</th><th>Submitted</th><th>Resolved</th><th>Rate</th></tr>';
+            
+            trends.forEach(t => {
+                const [year, month] = t.month.split('-');
+                const date = new Date(year, month - 1);
+                const monthName = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                
+                trendsHtml += `<tr>
+                    <td>${monthName}</td>
+                    <td>${t.submitted}</td>
+                    <td>${t.resolved}</td>
+                    <td>${t.resolutionRate}%</td>
+                </tr>`;
+            });
+            
+            trendsHtml += '</table>';
+            dataDisplay.innerHTML = trendsHtml;
+        } else if (type === 'categories') {
+            let categoriesHtml = '<h4>Issues by Category</h4><table class="fallback-table">';
+            categoriesHtml += '<tr><th>Category</th><th>Issues</th></tr>';
+            
+            Object.entries(this.data.categories).forEach(([category, count]) => {
+                categoriesHtml += `<tr>
+                    <td>${category.charAt(0).toUpperCase() + category.slice(1)}</td>
+                    <td>${count}</td>
+                </tr>`;
+            });
+            
+            categoriesHtml += '</table>';
+            dataDisplay.innerHTML = categoriesHtml;
+        }
+        
+        // Append elements
+        container.appendChild(fallbackMessage);
+        container.appendChild(dataDisplay);
     }
 }
 

@@ -5,16 +5,37 @@
  */
 async function loadAllIssuesFromBackend() {
     try {
-        const res = await fetch('http://localhost:3000/api/issues');
+        // Clear any existing issues first
+        window.issues = [];
+        
+        // Show loading indicators
+        showLoadingIndicators();
+        
+        // Get token from localStorage for authentication
+        const token = localStorage.getItem('bup-token');
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const res = await fetch('http://localhost:3000/api/issues', {
+            headers: headers
+        });
+        
         if (!res.ok) {
+            hideLoadingIndicators();
             showNotification(`Failed to load issues: ${res.status} ${res.statusText}`, 'error');
             return;
         }
+        
         const data = await res.json();
         if (!Array.isArray(data)) {
+            hideLoadingIndicators();
             showNotification('Failed to load issues from server - invalid data format', 'error');
             return;
         }
+        
+        console.log(`Loaded ${data.length} issues from database`);
         window.issues = data;
         
         // Update UI with fetched issues
@@ -27,19 +48,47 @@ async function loadAllIssuesFromBackend() {
             updateCampusMap(window.issues);
         }
         
+        // Hide loading indicators
+        hideLoadingIndicators();
+        
         // Dispatch event to notify other components that issues were loaded
-        window.dispatchEvent(new CustomEvent('issuesLoaded'));
+        window.dispatchEvent(new CustomEvent('issuesLoaded', { detail: { count: data.length } }));
     } catch (err) {
+        hideLoadingIndicators();
         showNotification('Failed to load issues from server - network error', 'error');
         console.error('Error loading issues:', err);
     }
 }
 
+/**
+ * Show loading indicators across the app
+ */
+function showLoadingIndicators() {
+    const loadingIndicators = document.querySelectorAll('.loading-indicator');
+    loadingIndicators.forEach(indicator => {
+        indicator.style.display = 'flex';
+    });
+}
+
+/**
+ * Hide loading indicators across the app
+ */
+function hideLoadingIndicators() {
+    const loadingIndicators = document.querySelectorAll('.loading-indicator');
+    loadingIndicators.forEach(indicator => {
+        indicator.style.display = 'none';
+    });
+}
+
 // Initialize issue fetching when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Load issues from backend
     loadAllIssuesFromBackend();
     
-    // Set up event listeners for issue filtering
+    // Set up auto-refresh every 5 minutes (300000 ms)
+    setInterval(loadAllIssuesFromBackend, 300000);
+    
+    // Set up filter event listeners
     setupFilterEventListeners();
 });
 

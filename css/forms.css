@@ -266,15 +266,11 @@ input[type="file"] {
     align-items: center;
     gap: 5px;
     padding: 10px 15px;
-    background-color: var(--primary-color);
+    background-color: white;
     color: white;
     border-radius: var(--border-radius);
     cursor: pointer;
     transition: var(--transition);
-}
-
-.file-upload-label:hover {
-    background-color: var(--secondary-color);
 }
 
 /* Filter elements - Admin panel, map, and dashboard filters */

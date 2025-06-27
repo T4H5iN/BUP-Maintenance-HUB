@@ -58,6 +58,8 @@
     <link rel="stylesheet" href="css/votes.css">
     <!-- Add the new CSS file specifically for building cards -->
     <link rel="stylesheet" href="css/building-cards.css">
+    <!-- Add the missing reports CSS file -->
+    <link rel="stylesheet" href="css/reports.css">
     <link rel="stylesheet" href="css/theme-dark.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -467,28 +469,28 @@
                     <div class="stat-card">
                         <i class="fas fa-exclamation-circle"></i>
                         <div>
-                            <span class="stat-number">8</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Total Submitted</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <i class="fas fa-clock"></i>
                         <div>
-                            <span class="stat-number">3</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Pending</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <i class="fas fa-check-circle"></i>
                         <div>
-                            <span class="stat-number">5</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Resolved</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <i class="fas fa-star"></i>
                         <div>
-                            <span class="stat-number">4.6</span>
+                            <span class="stat-number">N/A</span>
                             <span class="stat-label">Avg Rating</span>
                         </div>
                     </div>
@@ -508,57 +510,18 @@
                             <option value="electricity">Electricity</option>
                             <option value="sanitary">Sanitary</option>
                             <option value="lab">Laboratory</option>
+                            <option value="cafeteria">Cafeteria</option>
+                            <option value="transportation">Transportation</option>
+                            <option value="other">Other</option>
                         </select>
                         <input type="date" id="dateFilter">
                     </div>
                 </div>
 
                 <div class="issues-list">
-                    <div class="issue-card">
-                        <div class="issue-header">
-                            <span class="issue-id">#BUP001</span>
-                            <span class="issue-status pending">Pending</span>
-                            <span class="issue-priority urgent">Urgent</span>
-                        </div>
-                        <h4>Broken Projector in Room 205</h4>
-                        <div class="issue-details">
-                            <span><i class="fas fa-map-marker-alt"></i> Academic Block 1, Room 205</span>
-                            <span><i class="fas fa-calendar"></i> Submitted: 2024-01-15</span>
-                            <span><i class="fas fa-tag"></i> Electricity</span>
-                        </div>
-                        <p>The projector in room 205 is not working. The screen remains black even after multiple attempts to restart.</p>
-                        <div class="issue-actions">
-                            <button class="btn-secondary" onclick="viewIssueDetails('BUP001')">View Details</button>
-                            <button class="btn-primary" onclick="provideFeedback('BUP001')">Provide Feedback</button>
-                        </div>
-                    </div>
-
-                    <div class="issue-card">
-                        <div class="issue-header">
-                            <span class="issue-id">#BUP002</span>
-                            <span class="issue-status resolved">Resolved</span>
-                            <span class="issue-priority medium">Medium</span>
-                        </div>
-                        <h4>Dirty Washroom - 2nd Floor</h4>
-                        <div class="issue-details">
-                            <span><i class="fas fa-map-marker-alt"></i> Academic Block 2, 2nd Floor</span>
-                            <span><i class="fas fa-calendar"></i> Submitted: 2024-01-10</span>
-                            <span><i class="fas fa-tag"></i> Sanitary</span>
-                        </div>
-                        <p>The washroom on the 2nd floor needs thorough cleaning. Multiple stalls are in poor condition.</p>
-                        <div class="issue-actions">
-                            <button class="btn-secondary" onclick="viewIssueDetails('BUP002')">View Details</button>
-                            <div class="rating">
-                                <span>Rate Resolution:</span>
-                                <div class="stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="far fa-star"></i>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- Remove hardcoded issue cards - will be populated dynamically -->
+                    <div class="loading-indicator">
+                        <i class="fas fa-spinner fa-spin"></i> Loading your issues...
                     </div>
                 </div>
             </div>
@@ -866,6 +829,7 @@
                 </div>
             </div>
 
+            <!-- Reports section filters row -->
             <div class="reports-filters">
                 <div class="filter-row">
                     <select id="reportType">
@@ -876,7 +840,9 @@
                     </select>
                     <input type="date" id="reportStartDate">
                     <input type="date" id="reportEndDate">
-                    <button class="btn-primary" onclick="generateCustomReport()">Generate Report</button>
+                    <button class="btn-primary" onclick="generateCustomReport(true)">
+                        <i class="fas fa-sync-alt"></i> Generate Report
+                    </button>
                 </div>
             </div>
 
@@ -902,34 +868,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>Electricity</td>
-                                    <td>45</td>
-                                    <td>38</td>
-                                    <td>7</td>
-                                    <td>2.3 days</td>
-                                </tr>
-                                <tr>
-                                    <td>Furniture</td>
-                                    <td>32</td>
-                                    <td>28</td>
-                                    <td>4</td>
-                                    <td>4.1 days</td>
-                                </tr>
-                                <tr>
-                                    <td>Sanitary</td>
-                                    <td>28</td>
-                                    <td>25</td>
-                                    <td>3</td>
-                                    <td>1.8 days</td>
-                                </tr>
-                                <tr>
-                                    <td>Laboratory</td>
-                                    <td>21</td>
-                                    <td>18</td>
-                                    <td>3</td>
-                                    <td>3.2 days</td>
-                                </tr>
+                                <!-- Dynamic data will be populated here -->
                             </tbody>
                         </table>
                     </div>
@@ -992,6 +931,9 @@
         </div>
     </div>
 
+    <!-- Load external libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
     <!-- Load the script loader first -->
     <script src="js/loader.js"></script>
     
@@ -1019,6 +961,9 @@
     <!-- Load map functionality -->
     <script src="js/map.js" onload="registerModuleLoaded('map')" onerror="handleScriptError('map', event)"></script>
     
+    <!-- Load dashboard functionality -->
+    <script src="js/dashboard.js" onload="registerModuleLoaded('dashboard')" onerror="handleScriptError('dashboard', event)"></script>
+    
     <!-- Load authentication functionality -->
     <script src="js/auth.js" onload="registerModuleLoaded('auth')" onerror="handleScriptError('auth', event)"></script>
     
@@ -1030,6 +975,12 @@
     
     <!-- Load analytics functionality -->
     <script src="js/analytics.js" onload="registerModuleLoaded('analytics')" onerror="handleScriptError('analytics', event)"></script>
+    
+    <!-- Load enhanced charts functionality -->
+    <script src="js/enhanced-charts.js" onload="registerModuleLoaded('enhancedCharts')" onerror="handleScriptError('enhancedCharts', event)"></script>
+    
+    <!-- Load reports functionality -->
+    <script src="js/reports.js" onload="registerModuleLoaded('reports')" onerror="handleScriptError('reports', event)"></script>
     
     <!-- Load the main entry point last -->
     <script src="js/index.js"></script>

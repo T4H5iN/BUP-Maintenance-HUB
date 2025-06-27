@@ -6,20 +6,21 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-const userRoutes = require('./routes/user.routes');
-const issueRoutes = require('./routes/issue.routes'); // Add this line
-// If you want to use auth.routes.js, uncomment the next line:
-// const authRoutes = require('./routes/auth.routes');
-
+// Load environment variables
 dotenv.config();
+
+// Fix Mongoose deprecation warning
+mongoose.set('strictQuery', true);
+
+const userRoutes = require('./routes/user.routes');
+const issueRoutes = require('./routes/issue.routes');
+
 const app = express();
 app.use(express.json()); 
-app.use(cors()); // Allow cross-origin requests
+app.use(cors());
 
 app.use('/api/users', userRoutes);
-app.use('/api/issues', issueRoutes); // Add this line
-// If you want to use /api/auth/register and /api/auth/login, uncomment the next line:
-// app.use('/api/auth', authRoutes); 
+app.use('/api/issues', issueRoutes);
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -67,9 +68,14 @@ app.post('/api/upload', upload.array('images', 5), (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
+// Add error handling for MongoDB connection
 mongoose.connect(process.env.MONGODB_URI)
-.then (() => {
+.then(() => {
     console.log('Connected to MongoDB');
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 })
-.catch (err => console.error('DB connection error:', err));
+.catch(err => {
+    console.error('MongoDB connection error:', err);
+    // Exit process on failed connection to make error more visible
+    process.exit(1);
+});

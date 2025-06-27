@@ -19,7 +19,11 @@ function initializeApp() {
             input.value = lastMonth.toISOString().split('T')[0];
         } else if (input.id === 'reportEndDate') {
             input.value = today;
+        } else if (input.id === 'dateFilter') {
+            // Don't set min date for dashboard filter - allows filtering by past dates
+            console.log("Initializing dashboard date filter without date restrictions");
         } else {
+            // Only set min date for other inputs (like scheduling future maintenance)
             input.min = today;
         }
     });
@@ -157,6 +161,60 @@ function filterMapIssues() {
     
     // Show notification about the filter
     showNotification(`Showing ${filter} issues on the campus map`, 'info');
+}
+
+// Check authentication from localStorage and update UI
+function checkAuthentication() {
+    const token = localStorage.getItem('bup-token');
+    const savedUser = localStorage.getItem('bup-current-user');
+    
+    if (token && savedUser) {
+        try {
+            // Parse the user data
+            currentUser = JSON.parse(savedUser);
+            
+            // Update UI based on user's role (which is now determined by the backend)
+            updateUIForLoggedInUser();
+            return true;
+        } catch (e) {
+            console.error('Error parsing user data:', e);
+            // Clear invalid data
+            localStorage.removeItem('bup-token');
+            localStorage.removeItem('bup-current-user');
+        }
+    }
+    
+    // Not authenticated
+    return false;
+}
+
+// Update UI elements based on logged in user
+function updateUIForLoggedInUser() {
+    if (!currentUser) return;
+    
+    // Update login button to show user info
+    const loginBtn = document.querySelector('.login-btn');
+    if (loginBtn) {
+        loginBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.name || currentUser.email.split('@')[0]}`;
+        loginBtn.onclick = showUserMenu;
+    }
+    
+    // Show role-specific tabs based on the role determined by the backend
+    if (currentUser.role === 'admin') {
+        document.getElementById('adminTab').style.display = 'block';
+    } else if (currentUser.role === 'authority') {
+        document.getElementById('authorityTab').style.display = 'block';
+    } else if (currentUser.role === 'technician') {
+        document.getElementById('technicianTab').style.display = 'block';
+    }
+    
+    // Update navigation options based on role
+    updateNavigation();
+    
+    // Dispatch auth state changed event
+    window.dispatchEvent(new CustomEvent('authStateChanged', { 
+        detail: { user: currentUser } 
+    }));
 }
 
 // Additional DOM listener for when all scripts are loaded
