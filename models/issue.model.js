@@ -8,12 +8,24 @@ const issueSchema = new mongoose.Schema({
     location: { type: String, required: true },
     specificLocation: String,
     description: { type: String, required: true },
-    submittedBy: String, // (legacy, can be removed later)
-    submitterName: String, // Add this field
-    submitterEmail: String, // Add this field
+    submittedBy: String, // Store submitter's name
+    submitterEmail: String, // Store email separately
     submittedDate: { type: Date, default: Date.now },
     status: { type: String, default: 'pending-review' },
-    images: [String]
+    images: [String], // Store paths to uploaded images
+    progressUpdates: [{
+        date: { type: Date, default: Date.now },
+        by: String,
+        note: String
+    }],
+    assignedTo: String,
+    scheduledDate: Date,
+    scheduledTime: String,
+    // Add vote tracking
+    upvotes: { type: Number, default: 0 },
+    downvotes: { type: Number, default: 0 },
+    upvoters: [String], // Store email addresses of users who upvoted
+    downvoters: [String] // Store email addresses of users who downvoted
 }, {
     timestamps: true
 });

@@ -73,6 +73,44 @@ function setupEventListeners() {
     document.getElementById('homeStatusFilter').addEventListener('change', filterHomeIssues);
     document.getElementById('homeCategoryFilter').addEventListener('change', filterHomeIssues);
     document.getElementById('homeLocationFilter').addEventListener('change', filterHomeIssues);
+
+    // Fix filter event listeners by ensuring they're properly attached
+    const homeStatusFilter = document.getElementById('homeStatusFilter');
+    const homeCategoryFilter = document.getElementById('homeCategoryFilter');
+    const homeLocationFilter = document.getElementById('homeLocationFilter');
+    const homeSearchInput = document.getElementById('homeSearchInput');
+    
+    if (homeStatusFilter) {
+        homeStatusFilter.addEventListener('change', function() {
+            if (typeof filterHomeIssues === 'function') {
+                filterHomeIssues();
+            }
+        });
+    }
+    
+    if (homeCategoryFilter) {
+        homeCategoryFilter.addEventListener('change', function() {
+            if (typeof filterHomeIssues === 'function') {
+                filterHomeIssues();
+            }
+        });
+    }
+    
+    if (homeLocationFilter) {
+        homeLocationFilter.addEventListener('change', function() {
+            if (typeof filterHomeIssues === 'function') {
+                filterHomeIssues();
+            }
+        });
+    }
+    
+    if (homeSearchInput) {
+        homeSearchInput.addEventListener('input', function() {
+            if (typeof filterHomeIssues === 'function') {
+                filterHomeIssues();
+            }
+        });
+    }
 }
 
 function updateNavigation() {
@@ -136,5 +174,30 @@ document.addEventListener('DOMContentLoaded', function() {
     if (mapFilter) {
         mapFilter.removeEventListener('change', filterMapIssues);
         mapFilter.addEventListener('change', filterMapIssues);
+    }
+    
+    // Explicitly setup the home issues filter event listeners again to ensure they work
+    const filters = ['homeStatusFilter', 'homeCategoryFilter', 'homeLocationFilter'];
+    filters.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('change', function() {
+                console.log('Filter changed:', id);
+                if (window.filterHomeIssues) {
+                    window.filterHomeIssues();
+                }
+            });
+        }
+    });
+    
+    // Also setup search input
+    const searchInput = document.getElementById('homeSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            console.log('Search input changed');
+            if (window.filterHomeIssues) {
+                window.filterHomeIssues();
+            }
+        });
     }
 });

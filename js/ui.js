@@ -136,6 +136,13 @@ function closeRescheduleModal() {
     }
 }
 
+function closeIssueDetailsModal() {
+    const modal = document.getElementById('issueDetailsModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
 function closeAllNotificationsPanel() {
     const panel = document.getElementById('allNotificationsPanel');
     if (panel) {
@@ -161,4 +168,5 @@ window.closeProgressModal = closeProgressModal;
 window.closePartsRequestModal = closePartsRequestModal;
 window.closeCompletionModal = closeCompletionModal;
 window.closeRescheduleModal = closeRescheduleModal;
+window.closeIssueDetailsModal = closeIssueDetailsModal;
 window.closeAllNotificationsPanel = closeAllNotificationsPanel;

@@ -55,6 +55,9 @@
     <link rel="stylesheet" href="css/forms.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/remaining-styles.css">
+    <link rel="stylesheet" href="css/votes.css">
+    <!-- Add the new CSS file specifically for building cards -->
+    <link rel="stylesheet" href="css/building-cards.css">
     <link rel="stylesheet" href="css/theme-dark.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -275,13 +278,15 @@
                     <div class="form-group">
                         <label>Upload Image (Optional):</label>
                         <div class="file-upload">
-                            <input type="file" id="imageUpload" accept="image/*" multiple>
+                            <input type="file" id="imageUpload" accept="image/*" multiple onchange="handleImageUpload(event)">
                             <label for="imageUpload" class="file-upload-label">
                                 <i class="fas fa-camera"></i>
-                                Choose Images
+                                Choose a maximum of 5 Images
                             </label>
                         </div>
-                        <div id="imagePreview" class="image-preview"></div>
+                        <div id="imagePreview" class="image-preview">
+                            <!-- Images will be displayed here -->
+                        </div>
                     </div>
                     <button type="submit" class="btn-primary">
                         <i class="fas fa-paper-plane"></i>
@@ -1003,7 +1008,13 @@
     <script src="js/darkMode.js" onload="registerModuleLoaded('darkMode')" onerror="handleScriptError('darkMode', event)"></script>
     
     <!-- Load issue management -->
-    <script src="js/issues.js" onload="registerModuleLoaded('issues')" onerror="handleScriptError('issues', event)"></script>
+    <script src="js/imageHandler.js" onload="registerModuleLoaded('issues')" onerror="handleScriptError('issues', event)"></script>
+    <script src="js/issueSubmission.js" onerror="handleScriptError('issues', event)"></script>
+    <script src="js/issueFetching.js" onerror="handleScriptError('issues', event)"></script>
+    <script src="js/issueDisplay.js" onerror="handleScriptError('issues', event)"></script>
+    <script src="js/issueDetails.js" onerror="handleScriptError('issues', event)"></script>
+    <script src="js/issueManager.js" onerror="handleScriptError('issues', event)"></script>
+    <script src="js/voteSystem.js" onload="registerModuleLoaded('votes')" onerror="handleScriptError('votes', event)"></script>
     
     <!-- Load map functionality -->
     <script src="js/map.js" onload="registerModuleLoaded('map')" onerror="handleScriptError('map', event)"></script>
@@ -1155,5 +1166,39 @@
   window.logout = handleLogout;
   window.handleLogout = handleLogout;
 </script>
+
+  <!-- Add right before closing body tag -->
+  <script>
+    // Ensure filters work after page is fully loaded
+    window.addEventListener('load', function() {
+      // Setup filter event listeners one final time
+      ['homeStatusFilter', 'homeCategoryFilter', 'homeLocationFilter'].forEach(id => {
+        const filter = document.getElementById(id);
+        if (filter) {
+          filter.addEventListener('change', function() {
+            console.log('Filter changed:', id);
+            if (typeof window.filterHomeIssues === 'function') {
+              window.filterHomeIssues();
+            }
+          });
+        }
+      });
+      
+      // Also make sure search input works
+      const searchInput = document.getElementById('homeSearchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', function() {
+          if (typeof window.filterHomeIssues === 'function') {
+            window.filterHomeIssues();
+          }
+        });
+        searchInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter' && typeof window.filterHomeIssues === 'function') {
+            window.filterHomeIssues();
+          }
+        });
+      }
+    });
+  </script>
 </body>
 </html>

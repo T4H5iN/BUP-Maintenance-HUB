@@ -139,16 +139,70 @@
 
 .issue-status,
 .issue-priority {
-    padding: 4px 12px;
+    padding: 6px 12px;
     border-radius: 20px;
     font-size: 0.8rem;
     font-weight: 600;
     text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
-.issue-status.pending { background: var(--warning-color); color: var(--white); }
-.issue-status.resolved { background: var(--success-color); color: var(--white); }
-.issue-status.in-progress { background: var(--secondary-color); color: var(--white); }
+.issue-status i {
+    font-size: 1rem;
+}
+
+.issue-status.pending-review { 
+    background: #fef3c7; 
+    color: #92400e; 
+}
+
+.issue-status.assigned { 
+    background: #e0e7ff; 
+    color: #3730a3; 
+}
+
+.issue-status.in-progress { 
+    background: #dbeafe; 
+    color: #1e40af; 
+}
+
+.issue-status.resolved { 
+    background: #d1fae5; 
+    color: #065f46; 
+}
+
+.issue-status.rejected { 
+    background: #fee2e2; 
+    color: #991b1b; 
+}
+
+/* Dark mode status styles */
+.dark-mode .issue-status.pending-review {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+}
+
+.dark-mode .issue-status.assigned {
+    background: rgba(79, 70, 229, 0.2);
+    color: #818cf8;
+}
+
+.dark-mode .issue-status.in-progress {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+}
+
+.dark-mode .issue-status.resolved {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+}
+
+.dark-mode .issue-status.rejected {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+}
 
 .issue-priority.urgent { background: var(--danger-color); color: var(--white); }
 .issue-priority.high { background: var(--warning-color); color: var(--white); }

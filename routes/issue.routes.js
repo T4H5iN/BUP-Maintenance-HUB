@@ -1,56 +1,30 @@
 const express = require('express');
 const router = express.Router();
 const Issue = require('../models/issue.model');
+const auth = require('../middleware/auth'); // Ensure you have the auth middleware
 
 // Create a new issue
 router.post('/', async (req, res) => {
     try {
         const data = req.body;
-        // Extract submitter info from email
-        let submitterName = '';
-        let submitterEmail = '';
-        if (data.submittedBy && typeof data.submittedBy === 'string' && data.submittedBy.includes('@')) {
-            submitterEmail = data.submittedBy;
-            // Faculty/staff: name@bup.edu.bd
-            if (submitterEmail.endsWith('@bup.edu.bd')) {
-                submitterName = submitterEmail.split('@')[0].replace(/\./g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-            }
-        } else if (data.submittedBy && typeof data.submittedBy === 'string' && data.submittedBy.includes('@student.bup.edu.bd')) {
-            // Student: mdtahsinul2254901057@student.bup.edu.bd
-            submitterEmail = data.submittedBy;
-            const username = submitterEmail.split('@')[0];
-            // Try to extract name and id
-            const match = username.match(/^([a-zA-Z]+)([a-zA-Z]+)(\d+)$/);
-            if (match) {
-                // e.g. mdtahsinul2254901057
-                const firstName = match[1];
-                const lastName = match[2];
-                const studentId = match[3];
-                submitterName = `${capitalize(firstName)} ${capitalize(lastName)} (${studentId})`;
-            } else {
-                submitterName = username;
-            }
-        } else if (data.submittedBy) {
-            submitterName = data.submittedBy;
-        }
-
-        // Helper to capitalize
-        function capitalize(str) {
-            if (!str) return '';
-            return str.charAt(0).toUpperCase() + str.slice(1);
-        }
-
+        
+        // Ensure submittedBy contains the name string, not an ObjectId
         // Always set id = issueId for frontend compatibility
         const issue = new Issue({
             ...data,
             id: data.issueId,
-            submitterName,
-            submitterEmail
+            // Make sure submittedBy is a string name, not an ObjectId
+            submittedBy: typeof data.submittedBy === 'string' ? data.submittedBy : 'Anonymous',
+            // Store email if available
+            submitterEmail: data.submitterEmail || data.email || null,
+            // Ensure images are stored as an array of paths
+            images: Array.isArray(data.images) ? data.images : []
         });
 
         await issue.save();
         res.status(201).json(issue);
     } catch (err) {
+        console.error('Issue creation error:', err);
         res.status(500).json({ error: 'Failed to create issue' });
     }
 });
@@ -62,6 +36,135 @@ router.get('/', async (req, res) => {
         res.json(issues);
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+});
+
+// Add a vote to an issue
+router.post('/:id/vote', auth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { voteType } = req.body;
+        const userEmail = req.user.email;
+
+        // Validate vote type
+        if (voteType !== 'up' && voteType !== 'down') {
+            return res.status(400).json({ message: 'Invalid vote type' });
+        }
+
+        const issue = await Issue.findOne({ $or: [{ issueId: id }, { id: id }] });
+        if (!issue) {
+            return res.status(404).json({ message: 'Issue not found' });
+        }
+
+        // Initialize arrays if they don't exist
+        if (!Array.isArray(issue.upvoters)) issue.upvoters = [];
+        if (!Array.isArray(issue.downvoters)) issue.downvoters = [];
+        if (typeof issue.upvotes !== 'number') issue.upvotes = 0;
+        if (typeof issue.downvotes !== 'number') issue.downvotes = 0;
+
+        // Check if user has already voted
+        const hasUpvoted = issue.upvoters.includes(userEmail);
+        const hasDownvoted = issue.downvoters.includes(userEmail);
+
+        // Handle upvote
+        if (voteType === 'up') {
+            // If already upvoted, do nothing (handled by frontend as toggle)
+            if (!hasUpvoted) {
+                // If previously downvoted, remove downvote
+                if (hasDownvoted) {
+                    issue.downvoters = issue.downvoters.filter(email => email !== userEmail);
+                    issue.downvotes = Math.max(0, issue.downvotes - 1);
+                }
+                
+                // Add upvote
+                issue.upvoters.push(userEmail);
+                issue.upvotes = issue.upvotes + 1;
+            }
+        } 
+        // Handle downvote
+        else if (voteType === 'down') {
+            // If already downvoted, do nothing (handled by frontend as toggle)
+            if (!hasDownvoted) {
+                // If previously upvoted, remove upvote
+                if (hasUpvoted) {
+                    issue.upvoters = issue.upvoters.filter(email => email !== userEmail);
+                    issue.upvotes = Math.max(0, issue.upvotes - 1);
+                }
+                
+                // Add downvote
+                issue.downvoters.push(userEmail);
+                issue.downvotes = issue.downvotes + 1;
+            }
+        }
+
+        await issue.save();
+        
+        // Return more detailed response with issue data
+        res.json({ 
+            message: 'Vote recorded successfully',
+            issue: {
+                id: issue.id,
+                upvotes: issue.upvotes,
+                downvotes: issue.downvotes,
+                upvoters: issue.upvoters,
+                downvoters: issue.downvoters
+            }
+        });
+    } catch (error) {
+        console.error('Error adding vote:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Remove a vote from an issue
+router.delete('/:id/vote', auth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userEmail = req.user.email;
+
+        const issue = await Issue.findOne({ $or: [{ issueId: id }, { id: id }] });
+        if (!issue) {
+            return res.status(404).json({ message: 'Issue not found' });
+        }
+
+        // Initialize arrays if they don't exist
+        if (!Array.isArray(issue.upvoters)) issue.upvoters = [];
+        if (!Array.isArray(issue.downvoters)) issue.downvoters = [];
+        if (typeof issue.upvotes !== 'number') issue.upvotes = 0;
+        if (typeof issue.downvotes !== 'number') issue.downvotes = 0;
+
+        // Check if user has already voted
+        const hasUpvoted = issue.upvoters.includes(userEmail);
+        const hasDownvoted = issue.downvoters.includes(userEmail);
+
+        // Remove upvote if exists
+        if (hasUpvoted) {
+            issue.upvoters = issue.upvoters.filter(email => email !== userEmail);
+            issue.upvotes = Math.max(0, issue.upvotes - 1);
+        }
+        
+        // Remove downvote if exists
+        if (hasDownvoted) {
+            issue.downvoters = issue.downvoters.filter(email => email !== userEmail);
+            issue.downvotes = Math.max(0, issue.downvotes - 1);
+        }
+
+        await issue.save();
+        
+        // Return more detailed response with issue data
+        res.json({ 
+            message: 'Vote removed successfully',
+            issue: {
+                id: issue.id,
+                upvotes: issue.upvotes,
+                downvotes: issue.downvotes,
+                upvoters: issue.upvoters,
+                downvoters: issue.downvoters
+            }
+        });
+    } catch (error) {
+        console.error('Error removing vote:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 

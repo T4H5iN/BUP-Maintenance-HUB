@@ -1,38 +1,78 @@
 // Campus map and building-related functionality
 
+/**
+ * Initialize the campus map with actual issue data
+ * This should be called when the app starts and whenever issues are updated
+ */
+function initializeCampusMap() {
+    // Ensure issues data is available
+    if (!window.issues || !Array.isArray(window.issues)) {
+        console.error("Issues data not available for map initialization");
+        return;
+    }
+    
+    console.log(`Initializing campus map with ${window.issues.length} issues`);
+    
+    // Update the map with all issues
+    updateCampusMap(window.issues);
+    
+    // Add click event listeners to all buildings
+    document.querySelectorAll('.building').forEach(building => {
+        // Remove any existing click listeners to avoid duplicates
+        building.removeEventListener('click', handleBuildingClick);
+        // Add fresh click listener
+        building.addEventListener('click', handleBuildingClick);
+    });
+    
+    // Set up map filter
+    const mapFilter = document.getElementById('mapFilter');
+    if (mapFilter) {
+        mapFilter.removeEventListener('change', filterMapIssues);
+        mapFilter.addEventListener('change', filterMapIssues);
+    }
+}
+
+/**
+ * Handle building click event
+ * @param {Event} e - The click event
+ */
 function handleBuildingClick(e) {
     e.preventDefault();  // Prevent default action
     const building = e.currentTarget;
+    const buildingId = building.dataset.building;
     const buildingName = building.querySelector('.building-label').textContent;
     const issueCount = building.querySelector('.issue-count')?.textContent || '0';
     
-    console.log(`Building clicked: ${buildingName} with ${issueCount} issues`);  // Debug
+    console.log(`Building clicked: ${buildingName} (${buildingId}) with ${issueCount} issues`);
     
-    showBuildingDetails(buildingName, issueCount);
+    showBuildingDetails(buildingName, issueCount, buildingId);
 }
 
+/**
+ * Filter issues on the map based on selected filter
+ */
 function filterMapIssues() {
     const filter = document.getElementById('mapFilter').value;
-    console.log("Filter applied:", filter);  // Debug
+    console.log("Filter applied:", filter);
     
     // Filter issues based on the selected criteria
     let filteredIssues = [];
     
     if (filter === 'all') {
-        filteredIssues = issues;
+        filteredIssues = window.issues || [];
     } else if (filter === 'urgent') {
-        filteredIssues = issues.filter(issue => issue.priority === 'urgent');
+        filteredIssues = (window.issues || []).filter(issue => issue.priority === 'urgent');
     } else if (filter === 'high') {
-        filteredIssues = issues.filter(issue => issue.priority === 'high');
+        filteredIssues = (window.issues || []).filter(issue => issue.priority === 'high');
     } else if (filter === 'pending') {
-        filteredIssues = issues.filter(issue => 
+        filteredIssues = (window.issues || []).filter(issue => 
             issue.status === 'pending-review' || issue.status === 'assigned'
         );
     } else if (filter === 'resolved') {
-        filteredIssues = issues.filter(issue => issue.status === 'resolved');
+        filteredIssues = (window.issues || []).filter(issue => issue.status === 'resolved');
     }
     
-    console.log("Filtered issues:", filteredIssues.length);  // Debug
+    console.log("Filtered issues:", filteredIssues.length);
     
     // Update the campus map with filtered issues
     updateCampusMap(filteredIssues);
@@ -41,28 +81,56 @@ function filterMapIssues() {
     showNotification(`Showing ${filter} issues on the campus map`, 'info');
 }
 
+/**
+ * Update the campus map with the filtered issues
+ * @param {Array} filteredIssues - Array of issues to display on the map
+ */
 function updateCampusMap(filteredIssues) {
-    // Group issues by location - make sure locations match building data-attributes
+    // The comprehensive mapping between HTML data-building attributes and database location values
+    const locationMapping = {
+        'academic': ['academic-building', 'academic'],
+        'fbs': ['fbs-building', 'fbs'],
+        'admin': ['admin-building', 'admin'],
+        'library': ['library'],
+        'annex': ['annex'],
+        'vista': ['vista-cafeteria', 'vista'],
+        'amitte': ['amitte-cafeteria', 'amitte'],
+        'third-place': ['third-place-cafeteria', 'third-place'],
+        'daycare': ['day-care-center', 'daycare'],
+        'staff-canteen': ['staff-canteen']
+    };
+    
+    // Create the reverse mapping from database values to HTML data-building attributes
+    const reverseMapping = {};
+    Object.entries(locationMapping).forEach(([buildingId, locationValues]) => {
+        locationValues.forEach(location => {
+            reverseMapping[location] = buildingId;
+        });
+    });
+    
+    // Group issues by location using the reverse mapping
     const issuesByLocation = {};
     
     filteredIssues.forEach(issue => {
         const location = issue.location;
-        if (!issuesByLocation[location]) {
-            issuesByLocation[location] = [];
+        const buildingId = reverseMapping[location] || location;
+        
+        if (!issuesByLocation[buildingId]) {
+            issuesByLocation[buildingId] = [];
         }
-        issuesByLocation[location].push(issue);
+        issuesByLocation[buildingId].push(issue);
     });
     
-    console.log("Issues by location:", issuesByLocation);  // Debug
+    console.log("Issues by location:", issuesByLocation);
     
     // Update each building on the map
     document.querySelectorAll('.building').forEach(building => {
         const buildingId = building.dataset.building;
-        console.log("Processing building:", buildingId);  // Debug
+        console.log("Processing building:", buildingId);
         
         const issueCountElement = building.querySelector('.issue-count');
         if (!issueCountElement) {
-            console.log("No issue count element for:", buildingId);  // Debug
+            console.log("No issue count element for:", buildingId);
             return;
         }
         
@@ -71,7 +139,7 @@ function updateCampusMap(filteredIssues) {
             const buildingIssues = issuesByLocation[buildingId];
             const issueCount = buildingIssues.length;
             
-            console.log(`${buildingId} has ${issueCount} issues`);  // Debug
+            console.log(`${buildingId} has ${issueCount} issues`);
             
             // Find highest priority
             let highestPriority = 'low';
@@ -116,22 +184,48 @@ function updateCampusMap(filteredIssues) {
     });
 }
 
-function showBuildingDetails(buildingName, issueCount) {
-    // Find building ID from name - important for mapping to issues
-    const buildingElement = Array.from(document.querySelectorAll('.building'))
-        .find(b => b.querySelector('.building-label').textContent === buildingName);
+/**
+ * Show building details and related issues in a modal
+ * @param {string} buildingName - Display name of the building
+ * @param {string} issueCount - Number of issues for this building
+ * @param {string} buildingId - Data attribute ID of the building
+ */
+function showBuildingDetails(buildingName, issueCount, buildingId) {
+    // Create a mapping between HTML data-building attributes and database location values
+    const locationMapping = {
+        'academic': ['academic-building', 'academic'],
+        'fbs': ['fbs-building', 'fbs'],
+        'admin': ['admin-building', 'admin'],
+        'library': ['library'],
+        'annex': ['annex'],
+        'vista': ['vista-cafeteria', 'vista'],
+        'amitte': ['amitte-cafeteria', 'amitte'],
+        'third-place': ['third-place-cafeteria', 'third-place'],
+        'daycare': ['day-care-center', 'daycare'],
+        'staff-canteen': ['staff-canteen']
+    };
     
-    if (!buildingElement) {
-        console.log("Building element not found");  // Debug
-        return;
-    }
-    
-    const buildingId = buildingElement.dataset.building;
-    console.log("Building ID:", buildingId);  // Debug
+    // Get all possible location values for this building
+    const locationValues = locationMapping[buildingId] || [buildingId];
     
     // Get issues for this building
-    const buildingIssues = issues.filter(issue => issue.location === buildingId);
-    console.log("Found issues:", buildingIssues.length);  // Debug
+    const buildingIssues = (window.issues || []).filter(issue => 
+        locationValues.includes(issue.location)
+    );
+    
+    console.log(`Found ${buildingIssues.length} issues for ${buildingName} (${buildingId})`);
+    
+    // Sort issues by priority (highest first) and then by submission date (newest first)
+    buildingIssues.sort((a, b) => {
+        // Priority ranking: urgent > high > medium > low
+        const priorityRank = { 'urgent': 4, 'high': 3, 'medium': 2, 'low': 1 };
+        const priorityDiff = (priorityRank[b.priority] || 0) - (priorityRank[a.priority] || 0);
+        
+        if (priorityDiff !== 0) return priorityDiff;
+        
+        // Then sort by date (newest first)
+        return new Date(b.submittedDate || 0) - new Date(a.submittedDate || 0);
+    });
     
     // Create modal for displaying building details
     const modal = document.createElement('div');
@@ -144,6 +238,15 @@ function showBuildingDetails(buildingName, issueCount) {
         high: buildingIssues.filter(i => i.priority === 'high').length,
         medium: buildingIssues.filter(i => i.priority === 'medium').length,
         low: buildingIssues.filter(i => i.priority === 'low').length
+    };
+    
+    // Count issues by status
+    const statusCounts = {
+        'pending-review': buildingIssues.filter(i => i.status === 'pending-review').length,
+        'assigned': buildingIssues.filter(i => i.status === 'assigned').length,
+        'in-progress': buildingIssues.filter(i => i.status === 'in-progress').length,
+        'resolved': buildingIssues.filter(i => i.status === 'resolved').length,
+        'rejected': buildingIssues.filter(i => i.status === 'rejected').length
     };
     
     // Create issue breakdown
@@ -161,28 +264,75 @@ function showBuildingDetails(buildingName, issueCount) {
         issueBreakdown += `<div class="priority-count low">${priorityCounts.low} Low</div>`;
     }
     
+    // Create status breakdown
+    let statusBreakdown = '';
+    if (statusCounts['pending-review'] > 0) {
+        statusBreakdown += `<div class="status-count pending-review">${statusCounts['pending-review']} Pending Review</div>`;
+    }
+    if (statusCounts['assigned'] > 0) {
+        statusBreakdown += `<div class="status-count assigned">${statusCounts['assigned']} Assigned</div>`;
+    }
+    if (statusCounts['in-progress'] > 0) {
+        statusBreakdown += `<div class="status-count in-progress">${statusCounts['in-progress']} In Progress</div>`;
+    }
+    if (statusCounts['resolved'] > 0) {
+        statusBreakdown += `<div class="status-count resolved">${statusCounts['resolved']} Resolved</div>`;
+    }
+    if (statusCounts['rejected'] > 0) {
+        statusBreakdown += `<div class="status-count rejected">${statusCounts['rejected']} Rejected</div>`;
+    }
+    
     // Generate issue cards for this building
     let issueCards = '';
-    buildingIssues.forEach(issue => {
-        issueCards += `
-            <div class="mini-issue-card">
-                <div class="mini-issue-header">
-                    <span class="issue-id">${issue.id}</span>
-                    <span class="issue-priority ${issue.priority}">${issue.priority}</span>
-                    <span class="issue-status ${issue.status}">${issue.status.replace('-', ' ')}</span>
-                </div>
-                <h5>${issue.category.charAt(0).toUpperCase() + issue.category.slice(1)} Issue - ${issue.specificLocation}</h5>
-                <p>${issue.description}</p>
-                <div class="mini-issue-footer">
-                    <span><i class="fas fa-user"></i> ${issue.submittedBy}</span>
-                    <span><i class="fas fa-calendar"></i> ${issue.submittedDate}</span>
-                </div>
-            </div>
-        `;
-    });
     
     if (buildingIssues.length === 0) {
-        issueCards = '<p class="no-issues">No issues reported for this building.</p>';
+        issueCards = '<div class="no-issues-container"><p class="no-issues">No issues reported for this building.</p></div>';
+    } else {
+        issueCards = '<div class="building-issues-grid">';
+        
+        buildingIssues.forEach(issue => {
+            // Format date for display
+            const submittedDate = issue.submittedDate ? 
+                new Date(issue.submittedDate).toLocaleDateString() : 'Unknown';
+            
+            // Get status icon
+            const statusIcon = typeof getStatusIcon === 'function' ? 
+                getStatusIcon(issue.status) : 'fas fa-info-circle';
+            
+            issueCards += `
+                <div class="building-issue-card ${issue.priority}">
+                    <div class="building-issue-header">
+                        <div class="issue-id-container">
+                            <span class="issue-id">#${issue.issueId || issue.id}</span>
+                            <span class="issue-date">${submittedDate}</span>
+                        </div>
+                        <div class="issue-badges">
+                            <span class="issue-priority ${issue.priority}">${issue.priority}</span>
+                            <span class="issue-status ${issue.status}">
+                                <i class="${statusIcon}"></i>
+                                ${formatStatus(issue.status)}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="building-issue-content">
+                        <h4 class="issue-title">${formatCategoryName(issue.category)} Issue - ${issue.specificLocation}</h4>
+                        <p class="issue-description">${issue.description}</p>
+                    </div>
+                    
+                    <div class="building-issue-footer">
+                        <div class="issue-meta">
+                            <span class="issue-submitter"><i class="fas fa-user"></i> ${issue.submittedBy || issue.submitterName || 'Anonymous'}</span>
+                        </div>
+                        <button class="btn-primary btn-sm" onclick="viewIssueDetails('${issue.issueId || issue.id}')">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        issueCards += '</div>';
     }
     
     modal.innerHTML = `
@@ -198,10 +348,23 @@ function showBuildingDetails(buildingName, issueCount) {
                 </div>
             </div>
             
-            <div class="priority-breakdown">
-                ${issueBreakdown || '<p>No active issues</p>'}
+            <div class="building-summary">
+                <div class="summary-section">
+                    <h4>Issues by Priority</h4>
+                    <div class="priority-breakdown">
+                        ${issueBreakdown || '<p>No active issues</p>'}
+                    </div>
+                </div>
+                
+                <div class="summary-section">
+                    <h4>Issues by Status</h4>
+                    <div class="status-breakdown">
+                        ${statusBreakdown || '<p>No active issues</p>'}
+                    </div>
+                </div>
             </div>
             
+            <h3 class="building-issues-title">All Issues</h3>
             <div class="building-issues-list">
                 ${issueCards}
             </div>
@@ -221,6 +384,10 @@ function showBuildingDetails(buildingName, issueCount) {
     modal.style.display = 'block';
 }
 
+/**
+ * Navigate to report issue form and pre-select the building
+ * @param {string} buildingId - Building ID to pre-select
+ */
 function reportIssueForBuilding(buildingId) {
     closeBuildingDetailsModal();
     
@@ -244,9 +411,27 @@ function reportIssueForBuilding(buildingId) {
     currentSection = 'home';
 }
 
+/**
+ * Initialize the map when the DOM is loaded
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    // When issues are loaded, initialize the map
+    window.addEventListener('issuesLoaded', function() {
+        console.log('Issues loaded, initializing campus map');
+        initializeCampusMap();
+    });
+    
+    // If issues are already loaded, initialize the map now
+    if (window.issues && Array.isArray(window.issues) && window.issues.length > 0) {
+        console.log('Issues already available, initializing campus map');
+        initializeCampusMap();
+    }
+});
+
 // Make functions available globally
 window.handleBuildingClick = handleBuildingClick;
 window.filterMapIssues = filterMapIssues;
 window.updateCampusMap = updateCampusMap;
 window.showBuildingDetails = showBuildingDetails;
 window.reportIssueForBuilding = reportIssueForBuilding;
+window.initializeCampusMap = initializeCampusMap;
