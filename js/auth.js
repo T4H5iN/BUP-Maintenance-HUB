@@ -79,10 +79,10 @@ function updateUIForLoggedInUser() {
     }
     
     // Show role-specific tabs
-    if (currentUser.role === 'admin') {
-        document.getElementById('adminTab').style.display = 'block';
-    } else if (currentUser.role === 'authority') {
-        document.getElementById('authorityTab').style.display = 'block';
+    if (currentUser.role === 'moderator') {
+        document.getElementById('moderatorTab').style.display = 'block';
+    } else if (currentUser.role === 'administrator') {
+        document.getElementById('administratorTab').style.display = 'block';
     } else if (currentUser.role === 'technician') {
         document.getElementById('technicianTab').style.display = 'block';
     }
@@ -115,7 +115,7 @@ function showUserMenu() {
             </div>
             <div class="user-info">
                 <span class="user-name">${displayName}</span>
-                <span class="user-role">${currentUser.role}</span>
+                <span class="user-role">${currentUser.role === 'moderator' ? 'Moderator' : currentUser.role === 'administrator' ? 'Administrator' : currentUser.role}</span>
                 <span class="user-email">${currentUser.email}</span>
             </div>
         </div>
@@ -433,7 +433,7 @@ function resetUIAfterLogout() {
     }
     
     // Hide role-specific tabs
-    const roleTabs = ['adminTab', 'authorityTab', 'technicianTab'];
+    const roleTabs = ['moderatorTab', 'administratorTab', 'technicianTab'];
     roleTabs.forEach(tabId => {
         const tab = document.getElementById(tabId);
         if (tab) {

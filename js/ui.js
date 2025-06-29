@@ -20,7 +20,7 @@ function showSection(sectionName) {
     } else if (sectionName === 'reports') {
         // Check if user has permission to view reports
         if (currentUser) {
-            const hasFullAccess = currentUser.role === 'admin' || currentUser.role === 'authority';
+            const hasFullAccess = currentUser.role === 'administrator' || currentUser.role === 'moderator';
             const hasTechnicianAccess = currentUser.role === 'technician';
             
             // Adapt reports section based on role
@@ -188,10 +188,10 @@ function updateNavigation() {
         // Show appropriate tabs based on user role
         const reportsLink = document.querySelector('[href="#reports"]');
         if (reportsLink) {
-            // Show reports for admin and authority roles by default
+            // Show reports for moderator and administrator roles by default
             // For other roles, either hide completely or show limited version
-            if (currentUser.role === 'admin' || currentUser.role === 'authority') {
-                reportsLink.style.display = 'block';  // Full access for admins
+            if (currentUser.role === 'moderator' || currentUser.role === 'administrator') {
+                reportsLink.style.display = 'block';  // Full access for moderators/administrators
             } else if (currentUser.role === 'technician') {
                 reportsLink.style.display = 'block';  // Show for technicians (limited view)
             } else {
@@ -250,6 +250,14 @@ function customizeReportsForRole(hasFullAccess, hasTechnicianAccess) {
                     </div>
                 `;
                 reportsContent.insertBefore(limitedAccessNotice, reportsContent.firstChild);
+            } else {
+                // Update notice for regular users
+                limitedAccessNotice.innerHTML = `
+                    <div class="notice-content">
+                        <i class="fas fa-info-circle"></i>
+                        <p>You are viewing a simplified reports dashboard. For detailed analytics and export options, please contact an administrator.</p>
+                    </div>
+                `;
             }
         }
     }

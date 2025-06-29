@@ -200,10 +200,10 @@ function updateUIForLoggedInUser() {
     }
     
     // Show role-specific tabs based on the role determined by the backend
-    if (currentUser.role === 'admin') {
-        document.getElementById('adminTab').style.display = 'block';
-    } else if (currentUser.role === 'authority') {
-        document.getElementById('authorityTab').style.display = 'block';
+    if (currentUser.role === 'moderator') {
+        document.getElementById('moderatorTab').style.display = 'block';
+    } else if (currentUser.role === 'administrator') {
+        document.getElementById('administratorTab').style.display = 'block';
     } else if (currentUser.role === 'technician') {
         document.getElementById('technicianTab').style.display = 'block';
     }
