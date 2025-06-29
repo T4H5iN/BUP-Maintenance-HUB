@@ -92,32 +92,36 @@ function displayHomeIssues(issuesToDisplay) {
         // Get status icon based on status
         const statusIcon = getStatusIcon(issue.status);
 
+        // Show only a portion of the description (first 120 chars)
+        const shortDescription = issue.description && issue.description.length > 120
+            ? issue.description.slice(0, 120) + '...'
+            : issue.description || '';
+
         issueCard.innerHTML = `
             <div class="issue-header">
-                <span class="issue-id">#${issue.issueId || issue.id}</span>
-                <span class="issue-status ${issue.status}">
-                    <i class="${statusIcon}"></i>
-                    ${formatStatus(issue.status)}
-                </span>
-                <span class="issue-priority ${issue.priority}">${issue.priority}</span>
+            <span class="issue-id">#${issue.issueId || issue.id}</span>
+            <span class="issue-status ${issue.status}">
+                <i class="${statusIcon}"></i>
+                ${formatStatus(issue.status)}
+            </span>
+            <span class="issue-priority ${issue.priority}">${issue.priority}</span>
             </div>
             <h4>${formatCategoryName(issue.category)} Issue - ${issue.specificLocation}</h4>
             <div class="issue-details">
-                <span><i class="fas fa-map-marker-alt"></i> ${locationName}, ${issue.specificLocation}</span>
-                <span><i class="fas fa-calendar"></i> Submitted: ${issue.submittedDate ? (issue.submittedDate.split ? issue.submittedDate.split('T')[0] : issue.submittedDate) : ''}</span>
-                <span><i class="fas fa-user"></i> ${submitter}</span>
+            <span><i class="fas fa-map-marker-alt"></i> ${locationName}, ${issue.specificLocation}</span>
+            <span><i class="fas fa-calendar"></i> Submitted: ${issue.submittedDate ? (issue.submittedDate.split ? issue.submittedDate.split('T')[0] : issue.submittedDate) : ''}</span>
+            <span><i class="fas fa-user"></i> ${submitter}</span>
             </div>
-            <p>${issue.description}</p>
+            <p>${shortDescription}</p>
             <div class="issue-actions">
-                <button class="btn-secondary" onclick="viewIssueDetails('${issue.issueId || issue.id}')">View Details</button>
-                ${issue.status === 'resolved' ?
-                    `<div class="rating">
-                        <span>Avg Rating:</span>
-                        <div class="stars">
-                            ${generateStarRating(getRandomRating())}
-                        </div>
-                    </div>` : ''}
-                <!-- Voting UI will be injected here by voteSystem.js -->
+            <button class="btn-secondary" onclick="viewIssueDetails('${issue.issueId || issue.id}')">View Details</button>
+            ${issue.status === 'resolved' ?
+                `<div class="rating">
+                <span>Avg Rating:</span>
+                <div class="stars">
+                    ${generateStarRating(getRandomRating())}
+                </div>
+                </div>` : ''}
             </div>
         `;
 

@@ -270,12 +270,12 @@
                         </div>
                         <div class="form-group">
                             <label>Room/Specific Location:</label>
-                            <input type="text" id="specificLocation" placeholder="e.g., Room 205, Washroom 2nd Floor">
+                            <input type="text" id="specificLocation" placeholder="e.g., Room 205, Washroom 2nd Floor" maxlength="50">
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Issue Description:</label>
-                        <textarea id="description" rows="4" required placeholder="Describe the issue in detail..."></textarea>
+                        <textarea id="description" rows="8" required placeholder="Describe the issue in detail..." maxlength="1000" style="text-align: justify;"></textarea>
                     </div>
                     <div class="form-group">
                         <label>Upload Image (Optional):</label>
@@ -332,7 +332,7 @@
                             <option value="staff-canteen">Staff Canteen</option>
                         </select>
                         <div class="search-container">
-                            <input type="text" id="homeSearchInput" placeholder="Search issues..." class="search-input">
+                            <input type="text" id="homeSearchInput" placeholder="Search issues..." class="search-input" maxlength="50">
                         </div>
                     </div>
                 </div>

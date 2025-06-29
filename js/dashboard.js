@@ -295,6 +295,13 @@ function createIssueCard(issue) {
     }
     
     // Build the card HTML
+    // Limit description to 120 characters, add ellipsis if longer
+    const maxDescLength = 120;
+    let shortDescription = issue.description || '';
+    if (shortDescription.length > maxDescLength) {
+        shortDescription = shortDescription.slice(0, maxDescLength).trim() + '...';
+    }
+
     card.innerHTML = `
         <div class="issue-header">
             <span class="issue-id">#${issue.issueId || issue.id}</span>
@@ -312,7 +319,7 @@ function createIssueCard(issue) {
             <span><i class="fas fa-calendar"></i> Submitted: ${submittedDate}</span>
             <span><i class="fas fa-tag"></i> ${formatCategoryName(issue.category)}</span>
         </div>
-        <p>${issue.description}</p>
+        <p>${shortDescription}</p>
         <div class="issue-actions">
             ${actionButtons}
             ${ratingDisplay}
