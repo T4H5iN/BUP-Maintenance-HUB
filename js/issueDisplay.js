@@ -8,8 +8,13 @@ function updateHomeIssuesList() {
     // Reset the display limit
     currentDisplayLimit = 10;
     
-    // Show ALL issues instead of filtering out pending-review
-    displayHomeIssues(window.issues || []);
+    // Only show issues that are NOT pending-review or rejected for students/faculty
+    let issuesToShow = window.issues || [];
+    if (currentUser && (currentUser.role === 'student' || currentUser.role === 'faculty')) {
+        // Only hide pending-review and rejected, show approved/assigned/in-progress/resolved
+        issuesToShow = issuesToShow.filter(issue => issue.status !== 'pending-review' && issue.status !== 'rejected');
+    }
+    displayHomeIssues(issuesToShow);
 }
 
 // Function to filter home issues based on selected filters
@@ -34,6 +39,10 @@ function filterHomeIssues() {
     };
 
     let filteredIssues = (window.issues || []).filter(issue => {
+        // Hide pending-review and rejected issues for student/faculty
+        if (currentUser && (currentUser.role === 'student' || currentUser.role === 'faculty')) {
+            if (issue.status === 'pending-review' || issue.status === 'rejected') return false;
+        }
         // Filter by status if not "all"
         if (statusFilter !== 'all' && issue.status !== statusFilter) return false;
         

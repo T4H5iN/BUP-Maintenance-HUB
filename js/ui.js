@@ -263,6 +263,246 @@ function customizeReportsForRole(hasFullAccess, hasTechnicianAccess) {
     }
 }
 
+// --- Moderator Panel Functionality ---
+
+/**
+ * Approve an issue (Moderator)
+ */
+async function approveIssue(issueId) {
+    const issue = window.issues.find(i => (i.issueId || i.id) === issueId);
+    if (!issue) return;
+
+    try {
+        const token = localStorage.getItem('bup-token');
+        const res = await fetch(`http://localhost:3000/api/issues/${issueId}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({ status: 'approved' })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            showNotification(data.message || 'Failed to approve issue', 'error');
+            return;
+        }
+        // Update local issue status
+        issue.status = 'approved';
+        showNotification(`Issue #${issueId} approved.`, 'success');
+        updateModeratorPanel();
+        // Optionally, reload all issues from backend for consistency
+        if (typeof loadAllIssuesFromBackend === 'function') loadAllIssuesFromBackend();
+    } catch (err) {
+        showNotification('Failed to approve issue', 'error');
+    }
+}
+
+/**
+ * Assign a technician to an issue (Moderator)
+ */
+async function assignTechnician(issueId) {
+    const issue = window.issues.find(i => (i.issueId || i.id) === issueId);
+    if (!issue) return;
+
+    try {
+        const token = localStorage.getItem('bup-token');
+        const res = await fetch(`http://localhost:3000/api/issues/${issueId}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({ status: 'assigned' })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            showNotification(data.message || 'Failed to assign technician', 'error');
+            return;
+        }
+        issue.status = 'assigned';
+        showNotification(`Technician assigned to issue #${issueId}.`, 'success');
+        updateModeratorPanel();
+        if (typeof loadAllIssuesFromBackend === 'function') loadAllIssuesFromBackend();
+    } catch (err) {
+        showNotification('Failed to assign technician', 'error');
+    }
+}
+
+/**
+ * Reject an issue (Moderator)
+ */
+async function rejectIssue(issueId) {
+    const issue = window.issues.find(i => (i.issueId || i.id) === issueId);
+    if (!issue) return;
+
+    try {
+        const token = localStorage.getItem('bup-token');
+        const res = await fetch(`http://localhost:3000/api/issues/${issueId}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({ status: 'rejected' })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            showNotification(data.message || 'Failed to reject issue', 'error');
+            return;
+        }
+        issue.status = 'rejected';
+        showNotification(`Issue #${issueId} rejected.`, 'warning');
+        updateModeratorPanel();
+        if (typeof loadAllIssuesFromBackend === 'function') loadAllIssuesFromBackend();
+    } catch (err) {
+        showNotification('Failed to reject issue', 'error');
+    }
+}
+
+/**
+ * Add a note to an issue (Moderator)
+ */
+function addNote(issueId) {
+    // For demo: prompt for note and show notification
+    const note = prompt('Enter note for this issue:');
+    if (note) {
+        // You would save the note to the backend here
+        showNotification(`Note added to issue #${issueId}.`, 'info');
+    }
+}
+
+/**
+ * Filter moderator issues by status/priority/search
+ */
+function filterModeratorIssues() {
+    const status = document.getElementById('adminStatusFilter').value;
+    const priority = document.getElementById('adminPriorityFilter').value;
+    const search = document.getElementById('adminSearch').value.trim().toLowerCase();
+
+    let filtered = window.issues || [];
+    // Always show pending-review issues by default if no filter is applied
+    if ((!status || status === 'all') && (!priority || priority === 'all') && !search) {
+        filtered = filtered.filter(i => i.status === 'pending-review');
+    } else {
+        if (status && status !== 'all') {
+            filtered = filtered.filter(i => i.status === status);
+        }
+        if (priority && priority !== 'all') {
+            filtered = filtered.filter(i => i.priority === priority);
+        }
+        if (search) {
+            filtered = filtered.filter(i =>
+                (i.description && i.description.toLowerCase().includes(search)) ||
+                (i.specificLocation && i.specificLocation.toLowerCase().includes(search)) ||
+                (i.issueId && i.issueId.toLowerCase().includes(search)) ||
+                (i.id && i.id.toLowerCase().includes(search))
+            );
+        }
+    }
+    renderModeratorIssues(filtered);
+}
+
+/**
+ * Render moderator issues list using the same UI as All Campus Issues
+ */
+function renderModeratorIssues(issues) {
+    const list = document.querySelector('.admin-issues-list');
+    if (!list) return;
+    list.innerHTML = '';
+    if (!issues || !issues.length) {
+        list.innerHTML = '<p class="no-issues">No issues found.</p>';
+        return;
+    }
+    issues.sort((a, b) => new Date(b.submittedDate) - new Date(a.submittedDate));
+    issues.forEach(issue => {
+        const issueCard = document.createElement('div');
+        issueCard.className = 'issue-card';
+        issueCard.style.marginBottom = '20px';
+        let submitter = issue.submitterName || issue.submittedBy || issue.submitterEmail || '';
+        const statusIcon = typeof getStatusIcon === 'function'
+            ? getStatusIcon(issue.status)
+            : 'fas fa-info-circle';
+        const shortDescription = issue.description && issue.description.length > 120
+            ? issue.description.slice(0, 120) + '...'
+            : issue.description || '';
+        const submittedDate = issue.submittedDate
+            ? (issue.submittedDate.split ? issue.submittedDate.split('T')[0] : issue.submittedDate)
+            : '';
+
+        // Moderator actions: show Approve/Reject for pending-review, Assign Technician for approved
+        let moderatorActions = '';
+        if (issue.status === 'pending-review') {
+            moderatorActions = `
+                <button class="btn-success" onclick="approveIssue('${issue.issueId || issue.id}')">Approve</button>
+                <button class="btn-danger" onclick="rejectIssue('${issue.issueId || issue.id}')">Reject</button>
+            `;
+        } else if (issue.status === 'approved') {
+            moderatorActions = `
+                <button class="btn-warning" onclick="assignTechnician('${issue.issueId || issue.id}')">Assign Technician</button>
+            `;
+        }
+
+        issueCard.innerHTML = `
+            <div class="issue-header">
+                <span class="issue-id">#${issue.issueId || issue.id}</span>
+                <span class="issue-status ${issue.status}">
+                    <i class="${statusIcon}"></i>
+                    ${formatStatus(issue.status)}
+                </span>
+                <span class="issue-priority ${issue.priority}">${issue.priority}</span>
+            </div>
+            <h4>${formatCategoryName(issue.category)} Issue - ${issue.specificLocation}</h4>
+            <div class="issue-details">
+                <span><i class="fas fa-map-marker-alt"></i> ${getLocationName(issue.location)}, ${issue.specificLocation}</span>
+                <span><i class="fas fa-calendar"></i> Submitted: ${submittedDate}</span>
+                <span><i class="fas fa-user"></i> ${submitter}</span>
+            </div>
+            <p>${shortDescription}</p>
+            <div class="issue-actions">
+                <button class="btn-secondary" onclick="viewIssueDetails('${issue.issueId || issue.id}')">View Details</button>
+                ${moderatorActions}
+                <!-- <button class="btn-secondary" onclick="addNote('${issue.issueId || issue.id}')">Add Note</button> -->
+            </div>
+        `;
+
+        list.appendChild(issueCard);
+    });
+
+    if (typeof initializeVoteSystem === 'function') {
+        initializeVoteSystem(list);
+    }
+}
+
+/**
+ * Update moderator panel UI after actions
+ */
+function updateModeratorPanel() {
+    filterModeratorIssues();
+}
+
+// Attach event listeners for moderator panel filters/search and auto-update on issues load
+document.addEventListener('DOMContentLoaded', function() {
+    const statusFilter = document.getElementById('adminStatusFilter');
+    const priorityFilter = document.getElementById('adminPriorityFilter');
+    const searchInput = document.getElementById('adminSearch');
+    if (statusFilter) statusFilter.addEventListener('change', filterModeratorIssues);
+    if (priorityFilter) priorityFilter.addEventListener('change', filterModeratorIssues);
+    if (searchInput) searchInput.addEventListener('input', filterModeratorIssues);
+
+    // Initial render if moderator panel is visible
+    if (document.getElementById('moderator-panel')) {
+        filterModeratorIssues();
+    }
+});
+
+// Update moderator panel when issues are loaded/refreshed
+window.addEventListener('issuesLoaded', function() {
+    if (document.getElementById('moderator-panel')) {
+        filterModeratorIssues();
+    }
+});
+
 // Make these functions accessible globally
 window.showSection = showSection;
 window.updateReports = updateReports;
@@ -285,3 +525,10 @@ window.closeIssueDetailsModal = closeIssueDetailsModal;
 window.closeAllNotificationsPanel = closeAllNotificationsPanel;
 window.updateNavigation = updateNavigation;
 window.customizeReportsForRole = customizeReportsForRole;
+window.approveIssue = approveIssue;
+window.assignTechnician = assignTechnician;
+window.rejectIssue = rejectIssue;
+window.addNote = addNote;
+window.filterModeratorIssues = filterModeratorIssues;
+window.updateModeratorPanel = updateModeratorPanel;
+window.renderModeratorIssues = renderModeratorIssues;

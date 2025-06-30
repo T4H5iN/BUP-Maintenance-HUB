@@ -168,4 +168,26 @@ router.delete('/:id/vote', auth, async (req, res) => {
     }
 });
 
+// Update issue status (approve, assign, reject, etc.)
+router.patch('/:id/status', auth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+        const validStatuses = ['pending-review', 'approved', 'assigned', 'in-progress', 'resolved', 'rejected'];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ message: 'Invalid status value' });
+        }
+        const issue = await Issue.findOne({ $or: [{ issueId: id }, { id: id }] });
+        if (!issue) {
+            return res.status(404).json({ message: 'Issue not found' });
+        }
+        issue.status = status;
+        await issue.save();
+        res.json({ message: `Issue status updated to ${status}`, issue });
+    } catch (error) {
+        console.error('Error updating issue status:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
 module.exports = router;
