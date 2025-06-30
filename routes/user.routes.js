@@ -74,11 +74,15 @@ async function sendOTPEmail(email, otp, subject = 'Email Verification') {
     }
 }
 
-// Get all users
+// Get all users, or filter by role if ?role=technician is provided
 router.get('/', async (req, res) => {
     try {
-        const users = await User.find().select('-password');
-        res.json(users);
+        const filter = {};
+        if (req.query.role) {
+            filter.role = req.query.role;
+        }
+        const users = await User.find(filter).select('-password');
+        res.json({ users });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

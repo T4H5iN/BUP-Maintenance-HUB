@@ -25,7 +25,8 @@ const issueSchema = new mongoose.Schema({
     upvotes: { type: Number, default: 0 },
     downvotes: { type: Number, default: 0 },
     upvoters: [String], // Store email addresses of users who upvoted
-    downvoters: [String] // Store email addresses of users who downvoted
+    downvoters: [String], // Store email addresses of users who downvoted
+    rejectReason: { type: String } // Add this line
 }, {
     timestamps: true
 });

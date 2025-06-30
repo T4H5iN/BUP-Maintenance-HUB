@@ -168,25 +168,65 @@ router.delete('/:id/vote', auth, async (req, res) => {
     }
 });
 
-// Update issue status (approve, assign, reject, etc.)
-router.patch('/:id/status', auth, async (req, res) => {
+// Update issue status (including rejection reason)
+router.patch('/:id/status', async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body;
-        const validStatuses = ['pending-review', 'approved', 'assigned', 'in-progress', 'resolved', 'rejected'];
-        if (!validStatuses.includes(status)) {
-            return res.status(400).json({ message: 'Invalid status value' });
-        }
+        const { status, rejectReason } = req.body;
+
         const issue = await Issue.findOne({ $or: [{ issueId: id }, { id: id }] });
         if (!issue) {
             return res.status(404).json({ message: 'Issue not found' });
         }
+
         issue.status = status;
+        if (status === 'rejected' && rejectReason) {
+            issue.rejectReason = rejectReason;
+        } else if (status !== 'rejected') {
+            issue.rejectReason = undefined;
+        }
         await issue.save();
-        res.json({ message: `Issue status updated to ${status}`, issue });
-    } catch (error) {
-        console.error('Error updating issue status:', error);
-        res.status(500).json({ message: 'Server error', error: error.message });
+
+        res.json({ message: 'Issue status updated', issue });
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to update issue status', error: err.message });
+    }
+});
+
+// Assign a technician to an issue
+router.patch('/:id/assign', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { technicianId } = req.body;
+        if (!technicianId) {
+            return res.status(400).json({ message: 'Technician ID is required' });
+        }
+
+        // Find the technician user
+        const User = require('../models/user.model');
+        const technician = await User.findById(technicianId);
+        if (!technician || technician.role !== 'technician') {
+            return res.status(404).json({ message: 'Technician not found' });
+        }
+
+        // Find the issue by issueId or id
+        const issue = await Issue.findOne({ $or: [{ issueId: id }, { id: id }] });
+        if (!issue) {
+            return res.status(404).json({ message: 'Issue not found' });
+        }
+
+        // Assign the technician and update status
+        issue.assignedTo = technician.name || technician.email;
+        issue.status = 'assigned';
+        await issue.save();
+
+        res.json({
+            message: 'Technician assigned successfully',
+            assignedTo: issue.assignedTo,
+            issueId: issue.issueId || issue.id
+        });
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to assign technician', error: err.message });
     }
 });
 

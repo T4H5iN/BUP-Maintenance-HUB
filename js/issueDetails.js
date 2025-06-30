@@ -125,6 +125,17 @@ function viewIssueDetails(issueId) {
         `;
     }
     
+    // Add rejection reason if status is rejected
+    let rejectionNotice = '';
+    if (issue.status === 'rejected' && issue.rejectReason) {
+        rejectionNotice = `
+            <div class="rejection-notice">
+                <i class="fas fa-exclamation-circle"></i>
+                <strong>Rejected:</strong> ${issue.rejectReason}
+            </div>
+        `;
+    }
+
     // HTML for the modal
     modal.innerHTML = `
         <div class="modal-content issue-details-modal">
@@ -136,7 +147,7 @@ function viewIssueDetails(issueId) {
                     <span class="issue-priority ${issue.priority}">${issue.priority}</span>
                 </div>
             </div>
-            
+            ${rejectionNotice}
             <div class="issue-details-content">
                 <div class="issue-main-info">
                     <h3>${formatCategoryName(issue.category)} Issue - ${issue.specificLocation}</h3><br>

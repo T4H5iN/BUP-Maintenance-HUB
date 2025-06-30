@@ -4,25 +4,28 @@ function showSection(sectionName) {
     document.querySelectorAll('.section').forEach(section => {
         section.classList.remove('active');
     });
-    
+
     document.getElementById(sectionName).classList.add('active');
-    
+
     document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('active');
     });
-    
+
     document.querySelector(`[href="#${sectionName}"]`).classList.add('active');
-    
+
     currentSection = sectionName;
-    
+
     if (sectionName === 'dashboard') {
-        updateDashboard();
+        // updateDashboard(); // <-- Remove this line
+        if (typeof updateDashboardStats === 'function') {
+            updateDashboardStats();
+        }
     } else if (sectionName === 'reports') {
         // Check if user has permission to view reports
         if (currentUser) {
             const hasFullAccess = currentUser.role === 'administrator' || currentUser.role === 'moderator';
             const hasTechnicianAccess = currentUser.role === 'technician';
-            
+
             // Adapt reports section based on role
             customizeReportsForRole(hasFullAccess, hasTechnicianAccess);
         } else {
@@ -34,7 +37,7 @@ function showSection(sectionName) {
             currentSection = 'home';
             return;
         }
-        
+
         updateReports();
     }
 }
@@ -45,7 +48,7 @@ function updateReports() {
         console.log('Initializing reports from updateReports function');
         initializeReports();
     }
-    
+
     // Initialize analytics and charts if analyticsManager exists
     if (typeof analyticsManager !== 'undefined') {
         try {
@@ -53,7 +56,7 @@ function updateReports() {
             if (typeof analyticsManager.initializeAnalytics === 'function') {
                 analyticsManager.initializeAnalytics();
             }
-            
+
             // Generate charts - wrap in try-catch to handle Chart.js loading errors
             try {
                 analyticsManager.generateTrendsChart();
@@ -76,13 +79,13 @@ function showTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
     });
-    
+
     document.getElementById(tabName).classList.add('active');
-    
+
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    
+
     event.target.classList.add('active');
 }
 
@@ -197,7 +200,7 @@ function updateNavigation() {
             } else {
                 // Option 1: Hide reports for regular users
                 // reportsLink.style.display = 'none';
-                
+
                 // Option 2: Show reports with limited access (recommended)
                 reportsLink.style.display = 'block';
                 reportsLink.dataset.limitedAccess = 'true';
@@ -219,7 +222,7 @@ function customizeReportsForRole(hasFullAccess, hasTechnicianAccess) {
     const exportButtons = document.querySelectorAll('.report-actions button');
     const reportFilters = document.querySelector('.reports-filters');
     const reportTables = document.querySelector('.report-tables');
-    
+
     if (hasFullAccess) {
         // Admin/Authority: Show everything
         exportButtons.forEach(btn => btn.style.display = 'block');
@@ -234,7 +237,7 @@ function customizeReportsForRole(hasFullAccess, hasTechnicianAccess) {
         // Regular user: Limited view
         exportButtons.forEach(btn => btn.style.display = 'none');
         if (reportFilters) reportFilters.style.display = 'none';
-        
+
         // Add a message for regular users
         const reportsContent = document.querySelector('.reports-content');
         if (reportsContent) {
@@ -299,21 +302,105 @@ async function approveIssue(issueId) {
 }
 
 /**
- * Assign a technician to an issue (Moderator)
+ * Show modal to select a technician for assignment (fetches from backend)
  */
-async function assignTechnician(issueId) {
+async function showTechnicianAssignModal(issueId) {
+    // Remove any existing modal
+    const existing = document.getElementById('assignTechnicianModal');
+    if (existing) existing.remove();
+
+    // Show loading modal first
+    const loadingModal = document.createElement('div');
+    loadingModal.className = 'modal';
+    loadingModal.id = 'assignTechnicianModal';
+    loadingModal.innerHTML = `
+        <div class="modal-content">
+            <span class="close" onclick="closeAssignTechnicianModal()">&times;</span>
+            <h2>Assign Technician</h2>
+            <div style="padding: 20px; text-align: center;">
+                <i class="fas fa-spinner fa-spin"></i> Loading technicians...
+            </div>
+        </div>
+    `;
+    document.body.appendChild(loadingModal);
+    loadingModal.style.display = 'block';
+
+    let technicians = [];
+    try {
+        const token = localStorage.getItem('bup-token');
+        const res = await fetch('http://localhost:3000/api/users?role=technician', {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        });
+        const data = await res.json();
+        // Try both possible structures
+        if (res.ok && Array.isArray(data.users)) {
+            technicians = data.users;
+        } else if (res.ok && Array.isArray(data)) {
+            technicians = data;
+        }
+    } catch (e) {
+        // ignore, will show no technicians below
+    }
+
+    if (!technicians.length) {
+        loadingModal.querySelector('.modal-content').innerHTML = `
+            <span class="close" onclick="closeAssignTechnicianModal()">&times;</span>
+            <h2>Assign Technician</h2>
+            <div style="padding: 20px; text-align: center;">
+                <i class="fas fa-exclamation-triangle"></i> No technicians available to assign.
+            </div>
+        `;
+        return;
+    }
+
+    // Build modal HTML with technician options
+    loadingModal.querySelector('.modal-content').innerHTML = `
+        <span class="close" onclick="closeAssignTechnicianModal()">&times;</span>
+        <h2>Assign Technician</h2>
+        <form id="assignTechnicianForm">
+            <div class="form-group">
+                <label for="technicianSelect">Select Technician:</label>
+                <select id="technicianSelect" required>
+                    <option value="">-- Select Technician --</option>
+                    ${technicians.map(t => `<option value="${t.id || t._id}">${t.name || t.email}</option>`).join('')}
+                </select>
+            </div>
+            <button type="submit" class="btn-primary">Assign</button>
+        </form>
+    `;
+
+    loadingModal.querySelector('#assignTechnicianForm').onsubmit = function(e) {
+        e.preventDefault();
+        const techId = loadingModal.querySelector('#technicianSelect').value;
+        if (!techId) {
+            showNotification('Please select a technician.', 'warning');
+            return;
+        }
+        assignTechnicianToIssue(issueId, techId);
+    };
+}
+
+function closeAssignTechnicianModal() {
+    const modal = document.getElementById('assignTechnicianModal');
+    if (modal) modal.remove();
+}
+
+/**
+ * Assign a technician to an issue (Moderator) - with technician selection
+ */
+async function assignTechnicianToIssue(issueId, technicianId) {
     const issue = window.issues.find(i => (i.issueId || i.id) === issueId);
     if (!issue) return;
 
     try {
         const token = localStorage.getItem('bup-token');
-        const res = await fetch(`http://localhost:3000/api/issues/${issueId}/status`, {
+        const res = await fetch(`http://localhost:3000/api/issues/${issueId}/assign`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
                 ...(token ? { 'Authorization': `Bearer ${token}` } : {})
             },
-            body: JSON.stringify({ status: 'assigned' })
+            body: JSON.stringify({ technicianId })
         });
         const data = await res.json();
         if (!res.ok) {
@@ -321,7 +408,9 @@ async function assignTechnician(issueId) {
             return;
         }
         issue.status = 'assigned';
+        issue.assignedTo = data.assignedTo || technicianId;
         showNotification(`Technician assigned to issue #${issueId}.`, 'success');
+        closeAssignTechnicianModal();
         updateModeratorPanel();
         if (typeof loadAllIssuesFromBackend === 'function') loadAllIssuesFromBackend();
     } catch (err) {
@@ -330,11 +419,67 @@ async function assignTechnician(issueId) {
 }
 
 /**
- * Reject an issue (Moderator)
+ * Assign a technician to an issue (Moderator) - triggers modal
  */
-async function rejectIssue(issueId) {
+function assignTechnician(issueId) {
+    showTechnicianAssignModal(issueId);
+}
+
+/**
+ * Show modal to enter rejection reason
+ */
+function showRejectReasonModal(issueId) {
+    // Remove any existing modal
+    const existing = document.getElementById('rejectReasonModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'rejectReasonModal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <span class="close" onclick="closeRejectReasonModal()">&times;</span>
+            <h2>Reject Issue</h2>
+            <form id="rejectReasonForm">
+                <div class="form-group">
+                    <label for="rejectReasonInput">Reason for rejection:</label>
+                    <textarea id="rejectReasonInput" rows="3" required placeholder="Please provide a reason for rejecting this issue..."></textarea>
+                </div>
+                <button type="submit" class="btn-danger">Reject Issue</button>
+            </form>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    modal.style.display = 'block';
+
+    modal.querySelector('#rejectReasonForm').onsubmit = function(e) {
+        e.preventDefault();
+        const reason = modal.querySelector('#rejectReasonInput').value.trim();
+        if (!reason) {
+            showNotification('Please provide a rejection reason.', 'warning');
+            return;
+        }
+        rejectIssue(issueId, reason);
+    };
+}
+
+function closeRejectReasonModal() {
+    const modal = document.getElementById('rejectReasonModal');
+    if (modal) modal.remove();
+}
+
+/**
+ * Reject an issue (Moderator) with reason
+ */
+async function rejectIssue(issueId, reason) {
     const issue = window.issues.find(i => (i.issueId || i.id) === issueId);
     if (!issue) return;
+
+    // If no reason provided, show modal
+    if (typeof reason === 'undefined') {
+        showRejectReasonModal(issueId);
+        return;
+    }
 
     try {
         const token = localStorage.getItem('bup-token');
@@ -344,7 +489,7 @@ async function rejectIssue(issueId) {
                 'Content-Type': 'application/json',
                 ...(token ? { 'Authorization': `Bearer ${token}` } : {})
             },
-            body: JSON.stringify({ status: 'rejected' })
+            body: JSON.stringify({ status: 'rejected', rejectReason: reason })
         });
         const data = await res.json();
         if (!res.ok) {
@@ -352,7 +497,9 @@ async function rejectIssue(issueId) {
             return;
         }
         issue.status = 'rejected';
+        issue.rejectReason = reason;
         showNotification(`Issue #${issueId} rejected.`, 'warning');
+        closeRejectReasonModal();
         updateModeratorPanel();
         if (typeof loadAllIssuesFromBackend === 'function') loadAllIssuesFromBackend();
     } catch (err) {
@@ -435,7 +582,7 @@ function renderModeratorIssues(issues) {
         if (issue.status === 'pending-review') {
             moderatorActions = `
                 <button class="btn-success" onclick="approveIssue('${issue.issueId || issue.id}')">Approve</button>
-                <button class="btn-danger" onclick="rejectIssue('${issue.issueId || issue.id}')">Reject</button>
+                <button class="btn-danger" onclick="showRejectReasonModal('${issue.issueId || issue.id}')">Reject</button>
             `;
         } else if (issue.status === 'approved') {
             moderatorActions = `
@@ -526,7 +673,11 @@ window.closeAllNotificationsPanel = closeAllNotificationsPanel;
 window.updateNavigation = updateNavigation;
 window.customizeReportsForRole = customizeReportsForRole;
 window.approveIssue = approveIssue;
-window.assignTechnician = assignTechnician;
+window.showTechnicianAssignModal = showTechnicianAssignModal;
+window.closeAssignTechnicianModal = closeAssignTechnicianModal;
+window.assignTechnicianToIssue = assignTechnicianToIssue;
+window.showRejectReasonModal = showRejectReasonModal;
+window.closeRejectReasonModal = closeRejectReasonModal;
 window.rejectIssue = rejectIssue;
 window.addNote = addNote;
 window.filterModeratorIssues = filterModeratorIssues;
