@@ -168,11 +168,11 @@ router.delete('/:id/vote', auth, async (req, res) => {
     }
 });
 
-// Update issue status (including rejection reason)
+// Update issue status (including rejection reason and schedule)
 router.patch('/:id/status', async (req, res) => {
     try {
         const { id } = req.params;
-        const { status, rejectReason } = req.body;
+        const { status, rejectReason, scheduledDate, scheduledTime, rescheduleReason } = req.body;
 
         const issue = await Issue.findOne({ $or: [{ issueId: id }, { id: id }] });
         if (!issue) {
@@ -185,6 +185,12 @@ router.patch('/:id/status', async (req, res) => {
         } else if (status !== 'rejected') {
             issue.rejectReason = undefined;
         }
+
+        // Update schedule fields if provided
+        if (scheduledDate) issue.scheduledDate = scheduledDate;
+        if (scheduledTime) issue.scheduledTime = scheduledTime;
+        if (rescheduleReason) issue.rescheduleReason = rescheduleReason;
+
         await issue.save();
 
         res.json({ message: 'Issue status updated', issue });
@@ -227,6 +233,56 @@ router.patch('/:id/assign', async (req, res) => {
         });
     } catch (err) {
         res.status(500).json({ message: 'Failed to assign technician', error: err.message });
+    }
+});
+
+// Get issues assigned to the logged-in technician
+router.get('/assigned-to-me', auth, async (req, res) => {
+    try {
+        // Find issues where assignedTo matches technician's name or email
+        const user = req.user;
+        if (!user || user.role !== 'technician') {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+        const assignedIssues = await Issue.find({
+            assignedTo: { $in: [user.name, user.email] }
+        }).sort({ createdAt: -1 });
+        res.json({ issues: assignedIssues });
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to fetch assigned issues', error: err.message });
+    }
+});
+
+// PATCH /api/issues/:id
+router.patch('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        // Only try to match _id if id is a valid ObjectId (24 hex chars)
+        const orQuery = [
+            { issueId: id },
+            { id: id }
+        ];
+        // Add _id only if id looks like a valid ObjectId
+        if (/^[a-fA-F0-9]{24}$/.test(id)) {
+            orQuery.push({ _id: id });
+        }
+        const issue = await Issue.findOne({ $or: orQuery });
+        if (!issue) {
+            return res.status(404).json({ message: 'Issue not found' });
+        }
+
+        // Only update fields that are present in the request body
+        if (typeof req.body.progress !== 'undefined') issue.progress = req.body.progress;
+        if (typeof req.body.status !== 'undefined') issue.status = req.body.status;
+        if (typeof req.body.assignedTo !== 'undefined') issue.assignedTo = req.body.assignedTo;
+        if (typeof req.body.rejectReason !== 'undefined') issue.rejectReason = req.body.rejectReason;
+        // ...add any other updatable fields as needed...
+
+        await issue.save();
+        res.json(issue);
+    } catch (err) {
+        console.error('PATCH /api/issues/:id error:', err);
+        res.status(500).json({ message: err.message || 'Failed to update issue' });
     }
 });
 

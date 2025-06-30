@@ -254,3 +254,34 @@ window.formatCategoryName = formatCategoryName;
 window.generateStarRating = generateStarRating;
 window.getRandomRating = getRandomRating;
 window.loadMoreIssues = loadMoreIssues;
+
+// Listen for progress updates and update the progress bar for all users
+window.addEventListener('progressUpdated', function(e) {
+    const { issueId, progress } = e.detail || {};
+    if (!issueId) return;
+    // Update progress bar or slider in the all issues section
+    const slider = document.getElementById(`progress-slider-home-${issueId}`);
+    if (slider) {
+        slider.value = progress;
+        // Also update the label
+        const label = slider.parentElement.querySelector('.progress-slider-label');
+        if (label) label.textContent = `${progress}%`;
+    }
+    // Update static bar for non-technicians
+    // Find the progress bar-fill by traversing all .progress-bar-fill elements
+    document.querySelectorAll('.progress-bar-fill').forEach(barFill => {
+        // Find the parent container to get the issue id from the sibling label
+        const barContainer = barFill.closest('.progress-bar-container');
+        if (barContainer) {
+            // Try to find the label next to the bar to get the issue id
+            const label = barContainer.querySelector('.progress-slider-label');
+            // Try to find the parent .issue-card to get the issue id
+            const card = barContainer.closest('.issue-card');
+            if (card && (card.dataset.issueId === issueId || card.querySelector('.issue-id')?.textContent?.replace('#', '') === issueId)) {
+                barFill.style.width = `${progress}%`;
+                if (label) label.textContent = `${progress}%`;
+            }
+        }
+    });
+});
+

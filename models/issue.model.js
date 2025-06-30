@@ -13,6 +13,7 @@ const issueSchema = new mongoose.Schema({
     submittedDate: { type: Date, default: Date.now },
     status: { type: String, default: 'pending-review' },
     images: [String], // Store paths to uploaded images
+    progress: { type: Number, default: 0 }, // <-- Add this line to persist progress
     progressUpdates: [{
         date: { type: Date, default: Date.now },
         by: String,

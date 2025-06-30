@@ -99,14 +99,95 @@ function createCompletionModal(taskId) {
     return modal;
 }
 
-function finalizeCompletion(taskId) {
-    showNotification(`Task ${taskId} marked as complete`, 'success');
-    closeCompletionModal();
+async function finalizeCompletion(taskId) {
+    // Optionally collect completion summary, time, etc. here
+    const token = localStorage.getItem('bup-token');
+    if (!token) {
+        showNotification('You must be logged in to complete a task.', 'warning');
+        return;
+    }
+
+    try {
+        const res = await fetch(`http://localhost:3000/api/issues/${taskId}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                status: 'resolved'
+                // Optionally add: completionSummary, totalTime, etc.
+            })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            showNotification(data.message || 'Failed to mark task as complete', 'error');
+            return;
+        }
+        // Update local issue status
+        if (window.issues && Array.isArray(window.issues)) {
+            const issue = window.issues.find(i => (i.issueId || i.id) == taskId);
+            if (issue) {
+                issue.status = 'resolved';
+            }
+        }
+        showNotification(`Task ${taskId} marked as complete`, 'success');
+        closeCompletionModal();
+        if (typeof loadTechnicianAssignments === 'function') loadTechnicianAssignments();
+        if (typeof loadAllIssuesFromBackend === 'function') loadAllIssuesFromBackend();
+    } catch (err) {
+        showNotification('Failed to mark task as complete', 'error');
+    }
 }
 
-function startTask(taskId) {
-    updateTaskStatus(taskId, 'in-progress');
-    showNotification(`Task ${taskId} started`, 'success');
+async function startTask(taskId) {
+    // Find the issue in window.issues (optional, for local update)
+    const issue = (window.issues || []).find(i => (i.issueId || i.id) === taskId);
+
+    // Get current date and time for scheduling
+    const now = new Date();
+    const scheduledDate = now.toISOString().split('T')[0];
+    const scheduledTime = now.toTimeString().slice(0, 5);
+
+    // Update status and schedule in backend
+    const token = localStorage.getItem('bup-token');
+    if (!token) {
+        showNotification('You must be logged in to start a task.', 'warning');
+        return;
+    }
+
+    try {
+        const res = await fetch(`http://localhost:3000/api/issues/${taskId}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                status: 'in-progress',
+                scheduledDate,
+                scheduledTime
+            })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            showNotification(data.message || 'Failed to start task', 'error');
+            return;
+        }
+        showNotification(`Task ${taskId} started`, 'success');
+        // Update local issue status and schedule if present
+        if (issue) {
+            issue.status = 'in-progress';
+            issue.scheduledDate = scheduledDate;
+            issue.scheduledTime = scheduledTime;
+        }
+        // Optionally reload assignments
+        if (typeof loadTechnicianAssignments === 'function') loadTechnicianAssignments();
+        // Optionally reload all issues for UI consistency
+        if (typeof loadAllIssuesFromBackend === 'function') loadAllIssuesFromBackend();
+    } catch (err) {
+        showNotification('Failed to start task', 'error');
+    }
 }
 
 function viewTaskDetails(taskId) {
@@ -154,15 +235,311 @@ function createRescheduleModal(taskId) {
     return modal;
 }
 
-function submitReschedule(taskId) {
+async function submitReschedule(taskId) {
     const newDate = document.getElementById('newDate').value;
-    showNotification(`Task ${taskId} rescheduled to ${newDate}`, 'success');
-    closeRescheduleModal();
+    const newStartTime = document.getElementById('newStartTime').value;
+    // Optionally, you can use both start and end time, but for now, store start time as scheduledTime
+    const scheduledDate = newDate;
+    const scheduledTime = newStartTime;
+    const reason = document.getElementById('rescheduleReason').value;
+
+    const token = localStorage.getItem('bup-token');
+    if (!token) {
+        showNotification('You must be logged in to reschedule a task.', 'warning');
+        return;
+    }
+
+    try {
+        const res = await fetch(`http://localhost:3000/api/issues/${taskId}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                status: 'in-progress',
+                scheduledDate,
+                scheduledTime,
+                rescheduleReason: reason
+            })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            showNotification(data.message || 'Failed to reschedule task', 'error');
+            return;
+        }
+        // Update local issue
+        if (window.issues && Array.isArray(window.issues)) {
+            const issue = window.issues.find(i => (i.issueId || i.id) == taskId);
+            if (issue) {
+                issue.scheduledDate = scheduledDate;
+                issue.scheduledTime = scheduledTime;
+            }
+        }
+        showNotification(`Task ${taskId} rescheduled to ${scheduledDate} ${scheduledTime}`, 'success');
+        closeRescheduleModal();
+        if (typeof loadTechnicianAssignments === 'function') loadTechnicianAssignments();
+        if (typeof loadAllIssuesFromBackend === 'function') loadAllIssuesFromBackend();
+    } catch (err) {
+        showNotification('Failed to reschedule task', 'error');
+    }
 }
+
+/**
+ * Fetch and render assigned issues for the logged-in technician
+ */
+async function loadTechnicianAssignments() {
+    const token = localStorage.getItem('bup-token');
+    if (!token) return;
+
+    try {
+        const res = await fetch('http://localhost:3000/api/issues/assigned-to-me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            showNotification(data.message || 'Failed to load assignments', 'error');
+            return;
+        }
+        // Save all issues for filtering
+        window.technicianAllIssues = data.issues || [];
+        // Dynamically update technician stats
+        updateTechnicianStats(window.technicianAllIssues);
+        // Render with current filters
+        renderTechnicianAssignments(filterTechnicianIssues(window.technicianAllIssues));
+    } catch (err) {
+        showNotification('Failed to load assignments', 'error');
+    }
+}
+
+/**
+ * Filter technician issues based on panel filters
+ * @param {Array} issues
+ * @returns {Array}
+ */
+function filterTechnicianIssues(issues) {
+    const statusFilter = document.getElementById('techStatusFilter')?.value || 'all';
+    const priorityFilter = document.getElementById('techPriorityFilter')?.value || 'all';
+    const dateFilter = document.getElementById('techDateFilter')?.value;
+
+    return (issues || []).filter(issue => {
+        // Status filter
+        if (statusFilter !== 'all') {
+            if (statusFilter === 'completed') {
+                if (issue.status !== 'resolved') return false;
+            } else if (issue.status !== statusFilter) {
+                return false;
+            }
+        }
+        // Priority filter
+        if (priorityFilter !== 'all' && issue.priority !== priorityFilter) return false;
+        // Date filter (scheduledDate)
+        if (dateFilter) {
+            if (!issue.scheduledDate) return false;
+            // Compare only date part
+            const issueDate = new Date(issue.scheduledDate).toISOString().split('T')[0];
+            if (issueDate !== dateFilter) return false;
+        }
+        return true;
+    });
+}
+
+/**
+ * Update technician panel stats (assigned, in-progress, completed)
+ * @param {Array} issues
+ */
+function updateTechnicianStats(issues) {
+    // Count assigned, in-progress, and completed (resolved) issues
+    let assigned = 0, inProgress = 0, completed = 0;
+    issues.forEach(issue => {
+        if (issue.status === 'assigned') assigned++;
+        else if (issue.status === 'in-progress') inProgress++;
+        else if (issue.status === 'resolved') completed++;
+    });
+
+    // Update the stat cards in the technician panel
+    const statCards = document.querySelectorAll('#technician-panel .stat-card');
+    statCards.forEach(card => {
+        const label = card.querySelector('.stat-label');
+        const number = card.querySelector('.stat-number');
+        if (!label || !number) return;
+        const labelText = label.textContent.trim().toLowerCase();
+        if (labelText.includes('assigned')) number.textContent = assigned;
+        else if (labelText.includes('in progress')) number.textContent = inProgress;
+        else if (labelText.includes('completed')) number.textContent = completed;
+    });
+}
+
+/**
+ * Update progress for a task (slider change)
+ */
+async function updateTaskProgressSlider(taskId, value) {
+    const token = localStorage.getItem('bup-token');
+    if (!token) return;
+
+    try {
+        // Use PATCH /api/issues/:id (not /status) for partial update
+        const res = await fetch(`http://localhost:3000/api/issues/${taskId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                progress: Number(value),
+                status: value < 100 ? 'in-progress' : 'resolved'
+            })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            showNotification(data.message || 'Failed to update progress', 'error');
+            return;
+        }
+        showNotification(`Progress updated to ${value}%`, 'success');
+        // Update local issue progress so UI reflects immediately
+        if (window.issues && Array.isArray(window.issues)) {
+            const issue = window.issues.find(i => (i.issueId || i.id) == taskId);
+            if (issue) {
+                issue.progress = Number(value);
+                if (value >= 100) issue.status = 'resolved';
+                else issue.status = 'in-progress';
+            }
+        }
+        window.dispatchEvent(new CustomEvent('progressUpdated', {
+            detail: { issueId: taskId, progress: Number(value) }
+        }));
+        if (typeof loadTechnicianAssignments === 'function') loadTechnicianAssignments();
+    } catch (err) {
+        showNotification('Failed to update progress', 'error');
+    }
+}
+
+/**
+ * Render technician assignments in the technician panel
+ */
+function renderTechnicianAssignments(issues) {
+    const container = document.querySelector('.technician-tasks');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (!issues.length) {
+        container.innerHTML = '<div class="no-issues-message"><i class="fas fa-clipboard-list"></i><p>No assigned tasks found.</p></div>';
+        return;
+    }
+
+    issues.forEach(issue => {
+        const progress = typeof issue.progress === 'number' ? issue.progress : 0;
+        const status = issue.status || 'pending';
+        const scheduled = issue.scheduledDate
+            ? `${new Date(issue.scheduledDate).toLocaleDateString()}${issue.scheduledTime ? ', ' + issue.scheduledTime : ''}`
+            : 'Not scheduled';
+
+        const card = document.createElement('div');
+        card.className = 'tech-task-card';
+
+        // Progress bar slider HTML
+        let progressBarHtml = '';
+        if (status === 'in-progress' || status === 'assigned') {
+            progressBarHtml = `
+                <div class="progress-slider-container" style="width:100%;margin-bottom:0;">
+                    <input type="range" min="0" max="100" value="${progress}" step="5"
+                        class="progress-slider"
+                        id="progress-slider-${issue.issueId || issue.id}"
+                        onchange="updateTaskProgressSlider('${issue.issueId || issue.id}', this.value)">
+                    <span class="progress-slider-label">${progress}%</span>
+                </div><br>
+            `;
+        }
+
+        // Button logic
+        let actionButtonHtml = '';
+        if (status === 'assigned') {
+            actionButtonHtml = `
+                <button class="btn-primary" onclick="startTask('${issue.issueId || issue.id}')">
+                    <i class="fas fa-play"></i> Start Task
+                </button>
+            `;
+        } else if (status === 'in-progress') {
+            actionButtonHtml = `
+                <button class="btn-inprogress" disabled>
+                    <i class="fas fa-spinner fa-spin"></i> In Progress
+                </button>
+            `;
+        }
+
+        card.innerHTML = `
+            <div class="task-header">
+                <div class="task-id-container">
+                    <span class="issue-id">#${issue.issueId || issue.id}</span>
+                    <span class="issue-priority ${issue.priority}">${issue.priority}</span>
+                </div>
+                <div class="task-status">
+                    <span class="status-label">${status.replace(/-/g, ' ')}</span>
+                </div>
+            </div>
+            <div class="task-content">
+                <h4>${issue.description ? issue.description.slice(0, 40) + (issue.description.length > 40 ? '...' : '') : 'No Title'}</h4>
+                <p class="task-location"><i class="fas fa-map-marker-alt"></i> ${issue.specificLocation || ''}</p>
+                <p class="task-schedule"><i class="fas fa-calendar-day"></i> Scheduled: ${scheduled}</p>
+                <p class="task-description">${issue.description || ''}</p>
+                ${progressBarHtml}
+                <div class="task-actions">
+                    ${actionButtonHtml}
+                    <button class="btn-secondary" onclick="viewIssueDetails('${issue.issueId || issue.id}')">
+                        <i class="fas fa-eye"></i> View Details
+                    </button>
+                    <button class="btn-warning" onclick="rescheduleTask('${issue.issueId || issue.id}')">
+                        <i class="fas fa-calendar-alt"></i> Reschedule
+                    </button>
+                    <button class="btn-success" onclick="completeTask('${issue.issueId || issue.id}')">
+                        <i class="fas fa-check-circle"></i> Mark Complete
+                    </button>
+                </div>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+// Setup technician panel filter event listeners
+function setupTechnicianPanelFilters() {
+    const statusFilter = document.getElementById('techStatusFilter');
+    const priorityFilter = document.getElementById('techPriorityFilter');
+    const dateFilter = document.getElementById('techDateFilter');
+    const handler = function() {
+        if (!window.technicianAllIssues) return;
+        renderTechnicianAssignments(filterTechnicianIssues(window.technicianAllIssues));
+        updateTechnicianStats(filterTechnicianIssues(window.technicianAllIssues));
+    };
+    if (statusFilter) statusFilter.addEventListener('change', handler);
+    if (priorityFilter) priorityFilter.addEventListener('change', handler);
+    if (dateFilter) dateFilter.addEventListener('change', handler);
+}
+
+// Load assignments when technician panel is shown
+document.addEventListener('DOMContentLoaded', function() {
+    const techTab = document.getElementById('technicianTab');
+    if (techTab) {
+        techTab.addEventListener('click', loadTechnicianAssignments);
+    }
+    // Also load if technician panel is default visible
+    if (document.getElementById('technician-panel')?.classList.contains('active')) {
+        loadTechnicianAssignments();
+    }
+    // Setup technician panel filter listeners
+    setupTechnicianPanelFilters();
+});
 
 // Add this stub to avoid ReferenceError if not implemented elsewhere
 function showScheduleView() {
-    showNotification('Technician schedule view is not implemented yet.', 'info');
+    // Open the modal and load the schedule
+    const modal = document.getElementById('technicianScheduleModal');
+    if (modal) {
+        modal.style.display = 'block';
+        if (typeof loadTechnicianSchedule === 'function') {
+            loadTechnicianSchedule();
+        }
+    }
 }
 
 // Add this stub to avoid ReferenceError if not implemented elsewhere
@@ -272,3 +649,6 @@ window.viewTaskDetails = viewTaskDetails;
 window.rescheduleTask = rescheduleTask;
 window.createRescheduleModal = createRescheduleModal;
 window.submitReschedule = submitReschedule;
+window.loadTechnicianAssignments = loadTechnicianAssignments;
+window.renderTechnicianAssignments = renderTechnicianAssignments;
+window.updateTaskProgressSlider = updateTaskProgressSlider;

@@ -34,7 +34,33 @@ function viewIssueDetails(issueId) {
     
     // Generate action buttons based on issue status and user role
     let actionButtons = '';
-    
+    let progressSliderHtml = '';
+
+    // Add progress bar/slider for all users if in-progress
+    if (issue.status === 'in-progress') {
+        const progress = typeof issue.progress === 'number' ? issue.progress : 0;
+        progressSliderHtml = `
+                <div class="progress-bar-container">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width:${progress}%;"></div>
+                    </div>
+                    <span class="progress-slider-label">${progress}%</span>
+                </div>
+            `;
+    }
+
+    // Only show technician controls if NOT on the home page (all campus issues section)
+    // Assume: if window.location.hash is "#dashboard" and technician panel is active, show controls
+    // Otherwise, hide technician controls in modal for all campus issues
+    let showTechnicianControls = false;
+    if (
+        currentUser &&
+        currentUser.role === 'technician' &&
+        (window.location.hash === '#dashboard' && document.getElementById('technician-panel')?.classList.contains('active'))
+    ) {
+        showTechnicianControls = true;
+    }
+
     if (currentUser) {
         if (issue.status === 'resolved' && isSubmitter) {
             actionButtons = `
@@ -62,8 +88,33 @@ function viewIssueDetails(issueId) {
                     </button>
                 `;
             }
-        } else if (currentUser.role === 'technician' && (issue.status === 'assigned' || issue.status === 'in-progress')) {
+        } else if (
+            showTechnicianControls &&
+            (issue.status === 'assigned' || issue.status === 'in-progress')
+        ) {
+            // Only show technician controls in technician dashboard context
+            const progress = typeof issue.progress === 'number' ? issue.progress : 0;
+            if (issue.status === 'in-progress') {
+                progressSliderHtml = `
+                    <div class="progress-slider-container" style="margin-bottom:10px;">
+                        <input type="range" min="0" max="100" value="${progress}" step="5"
+                            class="progress-slider"
+                            id="progress-slider-modal-${issue.issueId || issue.id}"
+                            onchange="updateTaskProgressSlider('${issue.issueId || issue.id}', this.value)">
+                        <span class="progress-slider-label">${progress}%</span>
+                    </div>
+                `;
+            }
             actionButtons = `
+                ${issue.status === 'assigned' ? `
+                <button class="btn-primary" onclick="startTask('${issueId}')">
+                    <i class="fas fa-play"></i> Start Task
+                </button>
+                ` : `
+                <button class="btn-inprogress" disabled>
+                    <i class="fas fa-spinner fa-spin"></i> In Progress
+                </button>
+                `}
                 <button class="btn-primary" onclick="updateTaskProgress('${issueId}')">
                     <i class="fas fa-tools"></i> Update Progress
                 </button>
@@ -187,14 +238,24 @@ function viewIssueDetails(issueId) {
                         <div class="detail-label"><i class="fas fa-info-circle"></i> Status:</div>
                         <div class="detail-value status-${issue.status}">${statusDisplay}</div>
                     </div>
-                    
+
+                    ${(issue.status === 'in-progress' && (issue.scheduledDate || issue.scheduledTime)) ? `
+                    <div class="detail-row">
+                        <div class="detail-label"><i class="fas fa-clock"></i> Scheduled:</div>
+                        <div class="detail-value">
+                            ${issue.scheduledDate ? new Date(issue.scheduledDate).toLocaleDateString() : ''}
+                            ${issue.scheduledTime ? issue.scheduledTime : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+
                     ${issue.assignedTo ? `
                     <div class="detail-row">
                         <div class="detail-label"><i class="fas fa-user-cog"></i> Assigned To:</div>
                         <div class="detail-value">${issue.assignedTo}</div>
                     </div>` : ''}
                     
-                    ${issue.scheduledDate ? `
+                    ${issue.scheduledDate && issue.status !== 'in-progress' ? `
                     <div class="detail-row">
                         <div class="detail-label"><i class="fas fa-clock"></i> Scheduled:</div>
                         <div class="detail-value">${new Date(issue.scheduledDate).toLocaleDateString()} 
@@ -206,6 +267,7 @@ function viewIssueDetails(issueId) {
                         <p>${issue.description}</p>
                     </div>
                     
+                    ${progressSliderHtml}
                     ${imageGallery}
                     ${progressHistory || ''}
                 </div>
