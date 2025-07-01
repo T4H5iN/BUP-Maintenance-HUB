@@ -601,9 +601,9 @@
                         <button class="btn-primary" onclick="generateReport()">
                             <i class="fas fa-file-pdf"></i> Generate Report
                         </button>
-                        <button class="btn-warning" onclick="showOverdueIssues()">
+                        <!-- <button class="btn-warning" onclick="showOverdueIssues()">
                             <i class="fas fa-exclamation-triangle"></i> Overdue Issues
-                        </button>
+                        </button> -->
                     </div>
                 </div>
 
@@ -990,6 +990,10 @@
     <link rel="stylesheet" href="css/technician-schedule.css">
     <script src="js/technician-schedule.js"></script>
 
+    <!-- Admin Panel CSS and JS -->
+    <link rel="stylesheet" href="css/administrator.css">
+    <script src="js/administrator.js" defer></script>
+
     <!-- Load the main entry point last -->
     <script src="js/index.js"></script>
 
@@ -1158,6 +1162,61 @@
         });
       }
     });
+  </script>
+
+  <!-- Add fallback functions for modals to prevent errors -->
+  <script>
+    // Ensure critical modal closing functions are always available
+    if (typeof closeUrgentAssignmentModal !== 'function') {
+      window.closeUrgentAssignmentModal = function() {
+        const modal = document.getElementById('urgentAssignmentModal');
+        if (modal) {
+          modal.style.display = 'none';
+          setTimeout(() => modal.remove(), 300);
+        }
+      };
+    }
+    
+    // Add other modal closing functions as fallbacks
+    if (typeof closeEscalationModal !== 'function') {
+      window.closeEscalationModal = function() {
+        const modal = document.getElementById('escalationModal');
+        if (modal) {
+          modal.style.display = 'none';
+          setTimeout(() => modal.remove(), 300);
+        }
+      };
+    }
+    
+    if (typeof closeReportGenerationModal !== 'function') {
+      window.closeReportGenerationModal = function() {
+        const modal = document.getElementById('reportGenerationModal');
+        if (modal) {
+          modal.style.display = 'none';
+          setTimeout(() => modal.remove(), 300);
+        }
+      };
+    }
+    
+    if (typeof closeReportPreviewModal !== 'function') {
+      window.closeReportPreviewModal = function() {
+        const modal = document.getElementById('reportPreviewModal');
+        if (modal) {
+          modal.style.display = 'none';
+          setTimeout(() => modal.remove(), 300);
+        }
+      };
+    }
+    
+    if (typeof closeOverdueIssuesModal !== 'function') {
+      window.closeOverdueIssuesModal = function() {
+        const modal = document.getElementById('overdueIssuesModal');
+        if (modal) {
+          modal.style.display = 'none';
+          setTimeout(() => modal.remove(), 300);
+        }
+      };
+    }
   </script>
 </body>
 </html>
