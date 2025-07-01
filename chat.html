@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Messenger-Style Gemini Chatbot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    #chat-container {
+      width: 400px;
+      height: 600px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #chat-header {
+      background-color: #0084ff;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    #chat-box {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    #chat-box p {
+      margin: 6px 0;
+      padding: 10px 15px;
+      border-radius: 18px;
+      max-width: 75%;
+    }
+    .user {
+      align-self: flex-end;
+      background-color: #dcf8c6;
+    }
+    .bot {
+      align-self: flex-start;
+      background-color: #f1f0f0;
+    }
+    #suggested {
+      padding: 10px;
+      border-top: 1px solid #eee;
+      background: #fafafa;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      justify-content: center;
+    }
+    .suggested-btn {
+      padding: 6px 12px;
+      border-radius: 16px;
+      border: none;
+      background-color: #e4e6eb;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    #chat-input-area {
+      display: flex;
+      border-top: 1px solid #ccc;
+      padding: 10px;
+    }
+    #chat-input {
+      flex: 1;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 15px;
+      font-size: 14px;
+      background: #f0f0f0;
+      margin-right: 10px;
+    }
+    #send-btn {
+      background-color: #0084ff;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="chat-container">
+    <div id="chat-header">BUP Maintenance AI Chatbot</div>
+    <div id="chat-box"></div>
+    <div id="suggested">
+      <button class="suggested-btn" onclick="quickAsk('How do I report an issue?')">How do I report an issue?</button>
+      <button class="suggested-btn" onclick="quickAsk('How can I check issue status?')">Check issue status</button>
+      <button class="suggested-btn" onclick="quickAsk('When will my problem be fixed?')">Fix time</button>
+      <button class="suggested-btn" onclick="quickAsk('Where to mention location?')">Mention location</button>
+      <button class="suggested-btn" onclick="quickAsk('How can i login my account?')">Login Account</button>
+    </div>
+    <div id="chat-input-area">
+      <input type="text" id="chat-input" placeholder="Type your message...">
+      <button id="send-btn" onclick="sendMessage()">➤</button>
+    </div>
+  </div>
+  <script src="chatbot.js"></script>
+</body>
+</html>
