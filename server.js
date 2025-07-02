@@ -14,6 +14,7 @@ mongoose.set('strictQuery', true);
 
 const userRoutes = require('./routes/user.routes');
 const issueRoutes = require('./routes/issue.routes');
+const chatbotRoutes = require('./routes/chatbot.routes'); // Add this line
 
 const app = express();
 app.use(express.json()); 
@@ -34,6 +35,7 @@ app.get('/auth', (req, res) => {
 
 app.use('/api/users', userRoutes);
 app.use('/api/issues', issueRoutes);
+app.use('/api/chatbot', chatbotRoutes); // Add this line
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
