@@ -56,8 +56,13 @@ async function loadAllIssuesFromBackend() {
         // Hide loading indicators
         hideLoadingIndicators();
         
+        // Ensure window.issues is accessible before dispatching event
+        console.log(`Dispatching issuesLoaded event with ${window.issues.length} issues`);
+        
         // Dispatch event to notify other components that issues were loaded
-        window.dispatchEvent(new CustomEvent('issuesLoaded', { detail: { count: data.length } }));
+        window.dispatchEvent(new CustomEvent('issuesLoaded', { 
+            detail: { count: data.length } 
+        }));
     } catch (err) {
         hideLoadingIndicators();
         showNotification('Failed to load issues from server - network error', 'error');

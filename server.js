@@ -19,6 +19,19 @@ const app = express();
 app.use(express.json()); 
 app.use(cors());
 
+// Serve static files from the root directory
+app.use(express.static(path.join(__dirname)));
+
+// Serve index.html for the root path
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Serve auth.html
+app.get('/auth', (req, res) => {
+    res.sendFile(path.join(__dirname, 'auth.html'));
+});
+
 app.use('/api/users', userRoutes);
 app.use('/api/issues', issueRoutes);
 
@@ -63,6 +76,14 @@ app.post('/api/upload', upload.array('images', 5), (req, res) => {
         res.json({ success: true, filePaths });
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+});
+
+// Handle other routes by serving index.html for client-side routing
+app.get('*', (req, res) => {
+    // Skip API routes and existing static files
+    if (!req.path.startsWith('/api/') && !req.path.startsWith('/image/')) {
+        res.sendFile(path.join(__dirname, 'index.html'));
     }
 });
 

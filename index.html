@@ -206,7 +206,7 @@
                 <div class="hero-content">
                     <h1>Welcome to BUP Maintenance HUB</h1>
                     <p>Report campus maintenance issues quickly and efficiently. Help us maintain a better learning environment for everyone.</p>
-                    <div class="hero-stats">
+                    <!-- <div class="hero-stats">
                         <div class="stat">
                             <span class="stat-number" id="resolved-count">--</span>
                             <span class="stat-label">Issues Resolved</span>
@@ -219,7 +219,7 @@
                             <span class="stat-number" id="avg-rating">--</span>
                             <span class="stat-label">Avg Rating</span>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
 
@@ -663,9 +663,9 @@
                         <button class="btn-primary" onclick="showScheduleView()">
                             <i class="fas fa-calendar-alt"></i> View Schedule
                         </button>
-                        <button class="btn-success" onclick="markAvailability()">
+                        <!-- <button class="btn-success" onclick="markAvailability()">
                             <i class="fas fa-check-circle"></i> Update Availability
-                        </button>
+                        </button> -->
                     </div>
                 </div>
 
@@ -810,14 +810,6 @@
         <section id="reports" class="section">
             <div class="reports-header">
                 <h2>Reports & Analytics</h2>
-                <div class="report-actions">
-                    <button class="btn-primary" onclick="exportReport('pdf')">
-                        <i class="fas fa-file-pdf"></i> Export PDF
-                    </button>
-                    <button class="btn-success" onclick="exportReport('excel')">
-                        <i class="fas fa-file-excel"></i> Export Excel
-                    </button>
-                </div>
             </div>
 
             <!-- Reports section filters row -->
@@ -986,6 +978,8 @@
 
     <!-- Load external libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     
     <!-- Load the script loader first -->
     <script src="js/loader.js"></script>
@@ -1042,6 +1036,7 @@
     <!-- Admin Panel CSS and JS -->
     <link rel="stylesheet" href="css/administrator.css">
     <script src="js/administrator.js" defer></script>
+    <script src="js/reportGenerator.js"></script>
 
     <!-- Load the main entry point last -->
     <script src="js/index.js"></script>

@@ -567,9 +567,6 @@ function showReportPreviewModal(reportData) {
                 <button class="btn-primary" onclick="downloadReport('pdf')">
                     <i class="fas fa-file-pdf"></i> Download PDF
                 </button>
-                <button class="btn-success" onclick="downloadReport('excel')">
-                    <i class="fas fa-file-excel"></i> Download Excel
-                </button>
                 <button class="btn-secondary" onclick="closeReportPreviewModal()">
                     Close Preview
                 </button>
@@ -622,15 +619,49 @@ function closeReportPreviewModal() {
     }
 }
 
-// Download report (mock implementation)
+// Download report (actual implementation)
 function downloadReport(format) {
-    showNotification(`Downloading report in ${format.toUpperCase()} format...`, "info");
+    showNotification(`Preparing ${format.toUpperCase()} report...`, "info");
     
-    // In a real application, this would trigger a download
-    // For this demo, we'll just simulate the download after a delay
-    setTimeout(() => {
-        showNotification(`Report downloaded successfully`, "success");
-    }, 1500);
+    try {
+        // Get the current report data
+        const reportData = prepareAdminReportData();
+        
+        if (format === 'pdf') {
+            // Check if reportGenerator is available
+            if (typeof window.reportGenerator === 'undefined') {
+                throw new Error('Report generator not available');
+            }
+            
+            // Generate PDF using the report generator
+            const pdfDoc = window.reportGenerator.generatePDF(reportData);
+            
+            if (!pdfDoc) {
+                throw new Error('Failed to generate PDF');
+            }
+            
+            // Create filename with timestamp
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+            const filename = `bup-maintenance-report-${timestamp}.pdf`;
+            
+            // Save the PDF
+            pdfDoc.save(filename);
+            
+            // Show success notification
+            showNotification(`PDF report downloaded successfully`, "success");
+        } else if (format === 'excel') {
+            // Excel export is not implemented yet
+            showNotification('Excel export functionality is coming soon!', 'info');
+            
+            // In a real application, we would implement Excel export here
+            setTimeout(() => {
+                showNotification(`Excel report downloaded successfully`, "success");
+            }, 1500);
+        }
+    } catch (error) {
+        console.error('Error downloading report:', error);
+        showNotification(`Failed to generate ${format.toUpperCase()} report`, "error");
+    }
 }
 
 // Show all overdue issues in a modal

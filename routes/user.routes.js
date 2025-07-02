@@ -40,7 +40,7 @@ async function sendOTPEmail(email, otp, subject = 'Email Verification') {
         // Add plain text alternative for better deliverability
         text: `Your verification code for BUP Maintenance HUB is: ${otp}\n\nThis code will expire in 1 hour.\n\nIf you did not request this verification, please ignore this email.\n\nIMPORTANT: If you don't see emails from us, please check your spam/junk folder and mark our emails as 'Not Spam'.`,
         html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+            <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
                 <h2 style="color: #1e3a8a; text-align: center;">BUP Maintenance HUB</h2>
                 <h3 style="text-align: center;">${subject}</h3>
                 <p>Please use the following verification code to ${subject === 'Email Verification' ? 'complete your registration' : 'reset your password'}:</p>

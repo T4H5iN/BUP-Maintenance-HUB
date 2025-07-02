@@ -420,9 +420,10 @@ body.dark-mode .summary-stats-grid {
 }
 
 body.dark-mode .summary-stat {
-    background-color: #334155;
+    background-color: #263344;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    color: var(--gray-300);
+    color: white;
+    margin-bottom: 5px;
 }
 
 body.dark-mode .summary-stat:hover {
