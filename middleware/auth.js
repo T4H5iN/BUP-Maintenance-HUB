@@ -35,9 +35,9 @@ const auth = async (req, res, next) => {
             return res.status(401).json({ message: 'User not found' });
         }
 
-        // Add user info to request object
+        // Add user info to request object - ensure _id is accessible
         req.user = user;
-        req.userId = user._id;
+        req.userId = user._id; // Specifically set userId for easy access
         
         // Continue to the next middleware or route handler
         next();

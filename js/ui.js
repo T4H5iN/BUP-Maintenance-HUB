@@ -408,7 +408,12 @@ async function assignTechnicianToIssue(issueId, technicianId) {
 
     try {
         const token = localStorage.getItem('bup-token');
-        const res = await fetch(`http://localhost:3000/api/issues/${issueId}/assign`, {
+        console.log(`Assigning technician ${technicianId} to issue ${issueId}`);
+        
+        // Use the issueId or id property - this should match what the backend expects
+        const idToUse = issue.issueId || issue.id;
+        
+        const res = await fetch(`http://localhost:3000/api/issues/${idToUse}/assign`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -416,19 +421,45 @@ async function assignTechnicianToIssue(issueId, technicianId) {
             },
             body: JSON.stringify({ technicianId })
         });
-        const data = await res.json();
+        
         if (!res.ok) {
-            showNotification(data.message || 'Failed to assign technician', 'error');
+            let errorMessage = 'Failed to assign technician';
+            try {
+                const errorData = await res.json();
+                errorMessage = errorData.message || errorMessage;
+                console.error('Error response:', errorData);
+            } catch (parseError) {
+                console.error('Error parsing error response:', parseError);
+            }
+            showNotification(errorMessage, 'error');
             return;
         }
-        issue.status = 'assigned';
-        issue.assignedTo = data.assignedTo || technicianId;
+        
+        const data = await res.json();
+        console.log('Assignment response:', data);
+        
+        // Update local issue status and assignment data
+        if (data.issue) {
+            // Use the returned issue data
+            Object.assign(issue, data.issue);
+        } else {
+            // Fallback to basic fields
+            issue.status = 'assigned';
+            issue.assignedTo = technicianId;
+            issue.assignedToName = data.assignedTo || 'Assigned Technician';
+        }
+        
         showNotification(`Technician assigned to issue #${issueId}.`, 'success');
         closeAssignTechnicianModal();
         updateModeratorPanel();
-        if (typeof loadAllIssuesFromBackend === 'function') loadAllIssuesFromBackend();
+        
+        // Reload all issues for UI consistency
+        if (typeof loadAllIssuesFromBackend === 'function') {
+            loadAllIssuesFromBackend();
+        }
     } catch (err) {
-        showNotification('Failed to assign technician', 'error');
+        console.error('Error assigning technician:', err);
+        showNotification('Failed to assign technician: ' + (err.message || 'Unknown error'), 'error');
     }
 }
 
@@ -459,22 +490,37 @@ function showRejectReasonModal(issueId) {
                     <label for="rejectReasonInput">Reason for rejection:</label>
                     <textarea id="rejectReasonInput" rows="3" required placeholder="Please provide a reason for rejecting this issue..."></textarea>
                 </div>
-                <button type="submit" class="btn-danger">Reject Issue</button>
+                <div class="rejection-actions">
+                    <button type="submit" class="btn-danger">Reject Issue</button>
+                    <button type="button" class="btn-secondary" onclick="closeRejectReasonModal()">Cancel</button>
+                </div>
             </form>
         </div>
     `;
     document.body.appendChild(modal);
     modal.style.display = 'block';
 
-    modal.querySelector('#rejectReasonForm').onsubmit = function(e) {
-        e.preventDefault();
-        const reason = modal.querySelector('#rejectReasonInput').value.trim();
-        if (!reason) {
-            showNotification('Please provide a rejection reason.', 'warning');
-            return;
+    // Make sure the form submission is properly handled
+    const form = modal.querySelector('#rejectReasonForm');
+    if (form) {
+        form.onsubmit = function(e) {
+            e.preventDefault();
+            const reason = modal.querySelector('#rejectReasonInput').value.trim();
+            if (!reason) {
+                showNotification('Please provide a rejection reason.', 'warning');
+                return;
+            }
+            rejectIssue(issueId, reason);
+        };
+    }
+    
+    // Add ESC key handler to close modal
+    document.addEventListener('keydown', function escHandler(e) {
+        if (e.key === 'Escape') {
+            closeRejectReasonModal();
+            document.removeEventListener('keydown', escHandler);
         }
-        rejectIssue(issueId, reason);
-    };
+    });
 }
 
 function closeRejectReasonModal() {

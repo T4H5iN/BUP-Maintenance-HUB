@@ -23,6 +23,7 @@ async function handleIssueSubmission(e) {
     try {
         // First, upload any images
         const imagePaths = await uploadImages();
+        console.log('Uploaded image paths:', imagePaths); // Debug log
         
         const issueData = {
             issueId: generateIssueId(),
@@ -31,49 +32,66 @@ async function handleIssueSubmission(e) {
             location: document.getElementById('location').value,
             specificLocation: document.getElementById('specificLocation').value,
             description: document.getElementById('description').value,
-            submittedBy: currentUser.name || currentUser.email,
+            // Store submitter name in submittedBy
+            submittedBy: currentUser.name || currentUser.email.split('@')[0],
+            // Store submitter email
             submitterEmail: currentUser.email,
+            // Store actual user ID reference separately
+            submitterId: currentUser._id,
             submittedDate: new Date().toISOString(),
             status: 'pending-review',
             images: imagePaths // Include paths to uploaded images
         };
 
+        console.log('Submitting issue data:', issueData); // Debug log
+
         // Get token from localStorage
         const token = localStorage.getItem('bup-token');
         const headers = { 'Content-Type': 'application/json' };
+        
+        // Add authorization header if token exists
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
-        
-        const res = await fetch('http://localhost:3000/api/issues', {
+
+        // Send the issue to the server
+        const response = await fetch('http://localhost:3000/api/issues', {
             method: 'POST',
-            headers,
+            headers: headers,
             body: JSON.stringify(issueData)
         });
-        
-        const data = await res.json();
-        if (!res.ok) {
-            showNotification(data.error || 'Failed to submit issue', 'error');
-            return;
-        }
-        
-        showNotification('Issue submitted successfully! You will receive updates via email/SMS.', 'success');
-        document.getElementById('issueForm').reset();
-        document.getElementById('imagePreview').innerHTML = '';
-        
-        // Reset uploaded images - access the variable from imageHandler.js
-        if (typeof window.uploadedImages !== 'undefined') {
-            window.uploadedImages = [];
-        } else {
-            // If not directly accessible, use empty array for next upload
+
+        // Parse the response
+        const data = await response.json();
+        console.log('Server response:', data); // Debug log
+
+        // Handle success
+        if (response.ok) {
+            // Clear form
+            document.getElementById('issueForm').reset();
+            
+            // Clear image preview
+            const imagePreview = document.getElementById('imagePreview');
+            if (imagePreview) {
+                imagePreview.innerHTML = '';
+            }
+            
+            // Reset uploaded images array
             uploadedImages = [];
+            
+            // Show success notification
+            showNotification('Issue reported successfully! You can track its status in your dashboard.', 'success');
+            
+            // Reload issues list if we're on the home page
+            if (currentSection === 'home' && typeof loadAllIssuesFromBackend === 'function') {
+                loadAllIssuesFromBackend();
+            }
+        } else {
+            throw new Error(data.message || 'Failed to submit issue');
         }
-        
-        // Refresh the issues list
-        updateHomeIssuesList();
     } catch (err) {
-        console.error('Submission error:', err);
-        showNotification('Failed to submit issue', 'error');
+        console.error('Error submitting issue:', err);
+        showNotification(err.message || 'Error submitting issue. Please try again.', 'error');
     }
 }
 
@@ -81,7 +99,13 @@ async function handleIssueSubmission(e) {
 document.addEventListener('DOMContentLoaded', function() {
     const issueForm = document.getElementById('issueForm');
     if (issueForm) {
+        // Remove any existing event listeners
+        issueForm.removeEventListener('submit', handleIssueSubmission);
+        // Add fresh event listener
         issueForm.addEventListener('submit', handleIssueSubmission);
+        console.log('Issue form submission listener attached');
+    } else {
+        console.warn('Issue form not found in DOM');
     }
 });
 

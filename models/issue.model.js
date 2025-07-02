@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// Make sure we have separate fields for submitterId (ObjectId) and submittedBy (String)
 const issueSchema = new mongoose.Schema({
     issueId: { type: String, required: true },
     id: { type: String }, // Always duplicate issueId for frontend compatibility
@@ -8,18 +9,24 @@ const issueSchema = new mongoose.Schema({
     location: { type: String, required: true },
     specificLocation: String,
     description: { type: String, required: true },
-    submittedBy: String, // Store submitter's name
+    submittedBy: String, // Store submitter's name as string
     submitterEmail: String, // Store email separately
+    submitterId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Store reference to user model
     submittedDate: { type: Date, default: Date.now },
     status: { type: String, default: 'pending-review' },
     images: [String], // Store paths to uploaded images
-    progress: { type: Number, default: 0 }, // <-- Add this line to persist progress
+    progress: { type: Number, default: 0 },
     progressUpdates: [{
         date: { type: Date, default: Date.now },
         by: String,
         note: String
     }],
-    assignedTo: String,
+    // Update assignedTo to allow both ObjectId and String types for backward compatibility
+    assignedTo: { 
+        type: mongoose.Schema.Types.Mixed, // Allow both ObjectId and String
+        ref: 'User' 
+    },
+    assignedToName: String, // Store technician name for display
     scheduledDate: Date,
     scheduledTime: String,
     // Add vote tracking

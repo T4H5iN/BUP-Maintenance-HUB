@@ -14,7 +14,8 @@ mongoose.set('strictQuery', true);
 
 const userRoutes = require('./routes/user.routes');
 const issueRoutes = require('./routes/issue.routes');
-const chatbotRoutes = require('./routes/chatbot.routes'); // Add this line
+const chatbotRoutes = require('./routes/chatbot.routes');
+const notificationRoutes = require('./routes/notification.routes'); // Add this line
 
 const app = express();
 app.use(express.json()); 
@@ -35,7 +36,8 @@ app.get('/auth', (req, res) => {
 
 app.use('/api/users', userRoutes);
 app.use('/api/issues', issueRoutes);
-app.use('/api/chatbot', chatbotRoutes); // Add this line
+app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/notifications', notificationRoutes); // Add this line
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -70,14 +72,28 @@ const upload = multer({
 // Serve static files from the image directory
 app.use('/image', express.static(path.join(__dirname, 'image')));
 
-// Image upload route
+// Image upload route - improved error handling
 app.post('/api/upload', upload.array('images', 5), (req, res) => {
     try {
+        console.log('Files uploaded:', req.files ? req.files.length : 0);
+        
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'No files were uploaded' 
+            });
+        }
+        
         // Return the paths to the uploaded files
         const filePaths = req.files.map(file => `/image/issues/${file.filename}`);
         res.json({ success: true, filePaths });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Error during file upload:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error uploading files',
+            error: error.message 
+        });
     }
 });
 

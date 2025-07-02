@@ -129,11 +129,6 @@ function showUserMenu() {
                 <i class="fas fa-cog"></i>
                 <span>Settings</span>
             </a>
-            <a href="#" onclick="showNotifications(); closeUserMenu();">
-                <i class="fas fa-bell"></i>
-                <span>Notifications</span>
-                <span class="notification-badge">3</span>
-            </a>
             <div class="user-dropdown-divider"></div>
             <a href="#" onclick="showHelp(); closeUserMenu();">
                 <i class="fas fa-question-circle"></i>

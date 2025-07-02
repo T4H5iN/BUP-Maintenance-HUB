@@ -290,25 +290,62 @@ async function submitReschedule(taskId) {
  */
 async function loadTechnicianAssignments() {
     const token = localStorage.getItem('bup-token');
-    if (!token) return;
+    if (!token) {
+        showNotification('You must be logged in to view assignments', 'warning');
+        return;
+    }
+
+    // Show loading indicator in the technician tasks container
+    const container = document.querySelector('.technician-tasks');
+    if (container) {
+        container.innerHTML = '<div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i> Loading your assignments...</div>';
+    }
 
     try {
+        console.log('Fetching technician assignments...');
+        
+        // Fetch all assignments for the logged-in technician
         const res = await fetch('http://localhost:3000/api/issues/assigned-to-me', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        const data = await res.json();
+        
+        // Log response status for debugging
+        console.log('Assignment fetch response status:', res.status);
+        
         if (!res.ok) {
-            showNotification(data.message || 'Failed to load assignments', 'error');
+            const errorText = await res.text();
+            console.error('Error response:', errorText);
+            try {
+                const data = JSON.parse(errorText);
+                showNotification(data.message || 'Failed to load assignments', 'error');
+            } catch (e) {
+                showNotification('Failed to load assignments: ' + res.status, 'error');
+            }
+            
+            if (container) {
+                container.innerHTML = `<div class="error-message"><i class="fas fa-exclamation-circle"></i> Failed to load assignments</div>`;
+            }
             return;
         }
+        
+        const data = await res.json();
+        console.log('Assignments loaded:', data.issues ? data.issues.length : 0);
+        
         // Save all issues for filtering
         window.technicianAllIssues = data.issues || [];
+        
         // Dynamically update technician stats
         updateTechnicianStats(window.technicianAllIssues);
+        
         // Render with current filters
         renderTechnicianAssignments(filterTechnicianIssues(window.technicianAllIssues));
     } catch (err) {
-        showNotification('Failed to load assignments', 'error');
+        console.error('Error loading assignments:', err);
+        showNotification('Failed to load assignments: ' + (err.message || 'Network error'), 'error');
+        
+        if (container) {
+            container.innerHTML = `<div class="error-message"><i class="fas fa-exclamation-circle"></i> Failed to load assignments: ${err.message || 'Network error'}</div>`;
+        }
     }
 }
 

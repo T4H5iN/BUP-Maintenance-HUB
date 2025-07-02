@@ -2,21 +2,48 @@ const express = require('express');
 const router = express.Router();
 const Issue = require('../models/issue.model');
 const auth = require('../middleware/auth'); // Ensure you have the auth middleware
+const notificationMiddleware = require('../middleware/notification-middleware');
+const mongoose = require('mongoose');
+
+// Helper function to check if a string is a valid ObjectId
+function isValidObjectId(id) {
+    if (!id) return false;
+    try {
+        return mongoose.Types.ObjectId.isValid(id);
+    } catch (err) {
+        return false;
+    }
+}
 
 // Create a new issue
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
     try {
         const data = req.body;
+        
+        // Generate a unique issue ID if not provided
+        if (!data.issueId) {
+            const prefix = 'BUP';
+            const timestamp = new Date().getTime();
+            const random = Math.floor(Math.random() * 1000);
+            data.issueId = `${prefix}${timestamp.toString().slice(-6)}${random}`;
+        }
+        
+        // If authenticated, use current user's ID and name
+        if (req.user) {
+            data.submitterId = req.user._id; // Use _id (the MongoDB ObjectId)
+            data.submittedBy = req.user.name || req.user.email.split('@')[0]; // Use name or fallback
+            data.submitterEmail = req.user.email; // Store email
+        }
         
         // Ensure submittedBy contains the name string, not an ObjectId
         // Always set id = issueId for frontend compatibility
         const issue = new Issue({
             ...data,
             id: data.issueId,
-            // Make sure submittedBy is a string name, not an ObjectId
+            // Make sure both fields are set correctly
             submittedBy: typeof data.submittedBy === 'string' ? data.submittedBy : 'Anonymous',
-            // Store email if available
             submitterEmail: data.submitterEmail || data.email || null,
+            submitterId: isValidObjectId(data.submitterId) ? data.submitterId : undefined,
             // Ensure images are stored as an array of paths
             images: Array.isArray(data.images) ? data.images : []
         });
@@ -25,7 +52,7 @@ router.post('/', async (req, res) => {
         res.status(201).json(issue);
     } catch (err) {
         console.error('Issue creation error:', err);
-        res.status(500).json({ error: 'Failed to create issue' });
+        res.status(500).json({ message: 'Error creating issue', error: err.message });
     }
 });
 
@@ -168,39 +195,52 @@ router.delete('/:id/vote', auth, async (req, res) => {
     }
 });
 
-// Update issue status (including rejection reason and schedule)
-router.patch('/:id/status', async (req, res) => {
+// Update issue status
+router.patch('/:issueId/status', auth, notificationMiddleware.issueStatusChange, async (req, res) => {
     try {
-        const { id } = req.params;
-        const { status, rejectReason, scheduledDate, scheduledTime, rescheduleReason } = req.body;
-
-        const issue = await Issue.findOne({ $or: [{ issueId: id }, { id: id }] });
+        const { issueId } = req.params;
+        const { status, previousStatus } = req.body;
+        
+        if (!status) {
+            return res.status(400).json({ message: 'Status is required' });
+        }
+        
+        // Find and update the issue
+        const issue = await Issue.findOne({ $or: [{ id: issueId }, { issueId: issueId }] });
+        
         if (!issue) {
             return res.status(404).json({ message: 'Issue not found' });
         }
-
+        
+        // Store previous status for notification middleware
+        req.body.previousStatus = issue.status;
+        
+        // Update the status
         issue.status = status;
-        if (status === 'rejected' && rejectReason) {
-            issue.rejectReason = rejectReason;
-        } else if (status !== 'rejected') {
-            issue.rejectReason = undefined;
+        
+        // Update other related fields based on status
+        if (status === 'resolved') {
+            issue.resolvedDate = new Date();
         }
-
-        // Update schedule fields if provided
-        if (scheduledDate) issue.scheduledDate = scheduledDate;
-        if (scheduledTime) issue.scheduledTime = scheduledTime;
-        if (rescheduleReason) issue.rescheduleReason = rescheduleReason;
-
+        
         await issue.save();
-
-        res.json({ message: 'Issue status updated', issue });
+        
+        res.json({ 
+            message: 'Issue status updated successfully', 
+            issue,
+            previousStatus: req.body.previousStatus
+        });
     } catch (err) {
+        console.error('Error updating issue status:', err);
         res.status(500).json({ message: 'Failed to update issue status', error: err.message });
     }
 });
 
 // Assign a technician to an issue
-router.patch('/:id/assign', async (req, res) => {
+router.patch('/:id/assign', 
+    auth, 
+    notificationMiddleware.issueAssignment,
+    async (req, res) => {
     try {
         const { id } = req.params;
         const { technicianId } = req.body;
@@ -215,23 +255,33 @@ router.patch('/:id/assign', async (req, res) => {
             return res.status(404).json({ message: 'Technician not found' });
         }
 
-        // Find the issue by issueId or id
-        const issue = await Issue.findOne({ $or: [{ issueId: id }, { id: id }] });
+        // Find the issue by issueId or id - NEVER try to use the string ID as _id directly
+        const issue = await Issue.findOne({ 
+            $or: [
+                { issueId: id },
+                { id: id }
+            ] 
+        });
+        
         if (!issue) {
             return res.status(404).json({ message: 'Issue not found' });
         }
 
-        // Assign the technician and update status
-        issue.assignedTo = technician.name || technician.email;
+        // Store both technician ID and name
+        issue.assignedTo = technician._id; // Store the ObjectId reference
+        issue.assignedToName = technician.name || technician.email; // Store name for display
         issue.status = 'assigned';
         await issue.save();
 
         res.json({
             message: 'Technician assigned successfully',
-            assignedTo: issue.assignedTo,
+            issue: issue,
+            assignedTo: issue.assignedToName,
+            assignedToId: issue.assignedTo,
             issueId: issue.issueId || issue.id
         });
     } catch (err) {
+        console.error('Error assigning technician:', err);
         res.status(500).json({ message: 'Failed to assign technician', error: err.message });
     }
 });
@@ -239,17 +289,64 @@ router.patch('/:id/assign', async (req, res) => {
 // Get issues assigned to the logged-in technician
 router.get('/assigned-to-me', auth, async (req, res) => {
     try {
-        // Find issues where assignedTo matches technician's name or email
+        // Get the authenticated user
         const user = req.user;
-        if (!user || user.role !== 'technician') {
-            return res.status(403).json({ message: 'Access denied' });
+        if (!user) {
+            return res.status(401).json({ message: 'Authentication required' });
         }
-        const assignedIssues = await Issue.find({
-            assignedTo: { $in: [user.name, user.email] }
+        
+        if (user.role !== 'technician') {
+            return res.status(403).json({ message: 'Access denied: not a technician' });
+        }
+        
+        console.log(`Fetching assignments for technician: ${user._id}`);
+        
+        // First try finding issues where assignedTo is the user's ObjectId
+        let assignedIssues = await Issue.find({ 
+            assignedTo: user._id 
         }).sort({ createdAt: -1 });
+        
+        // If no issues found by ID, try finding by email, name, or stored in assignedToName
+        if (assignedIssues.length === 0) {
+            console.log('No issues found by ID, trying by other identifiers');
+            
+            // Create an array of possible identifiers
+            const possibleIdentifiers = [
+                user.email,
+                user.name
+            ].filter(Boolean); // Remove any undefined/null values
+            
+            if (possibleIdentifiers.length > 0) {
+                try {
+                    // Try to find issues where assignedTo equals any of the identifiers
+                    // or where assignedToName equals any of the identifiers
+                    assignedIssues = await Issue.find({
+                        $or: [
+                            { assignedTo: { $in: possibleIdentifiers } },
+                            { assignedToName: { $in: possibleIdentifiers } }
+                        ]
+                    }).sort({ createdAt: -1 });
+                } catch (lookupError) {
+                    // This might fail if assignedTo is strictly typed as ObjectId
+                    console.warn('Error during string lookup:', lookupError.message);
+                    
+                    // Try one more approach - look for exact matches on assignedToName
+                    assignedIssues = await Issue.find({
+                        assignedToName: { $in: possibleIdentifiers }
+                    }).sort({ createdAt: -1 });
+                }
+            }
+        }
+        
+        console.log(`Found ${assignedIssues.length} assigned issues`);
         res.json({ issues: assignedIssues });
     } catch (err) {
-        res.status(500).json({ message: 'Failed to fetch assigned issues', error: err.message });
+        console.error('Error fetching assigned issues:', err);
+        res.status(500).json({ 
+            message: 'Failed to fetch assigned issues', 
+            error: err.message,
+            stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+        });
     }
 });
 
