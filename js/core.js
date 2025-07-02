@@ -34,13 +34,20 @@ function initializeApp() {
 }
 
 function setupEventListeners() {
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const section = link.getAttribute('href').substring(1);
-            showSection(section);
+    // Use the dedicated function for nav links
+    if (typeof setupNavigationEvents === 'function') {
+        setupNavigationEvents();
+    } else {
+        // Fallback to the original approach
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const section = this.getAttribute('href').substring(1);
+                console.log(`Navigation link clicked (fallback): ${section}`);
+                showSection(section);
+            });
         });
-    });
+    }
 
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
     document.getElementById('registerForm').addEventListener('submit', handleRegistration);
@@ -237,6 +244,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (mapFilter) {
         mapFilter.removeEventListener('change', filterMapIssues);
         mapFilter.addEventListener('change', filterMapIssues);
+    }
+    
+    // Re-setup navigation event listeners
+    if (typeof setupNavigationEvents === 'function') {
+        setupNavigationEvents();
     }
     
     // Explicitly setup the home issues filter event listeners again to ensure they work

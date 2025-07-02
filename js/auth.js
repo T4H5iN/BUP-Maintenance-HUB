@@ -134,10 +134,6 @@ function showUserMenu() {
                 <span>Notifications</span>
                 <span class="notification-badge">3</span>
             </a>
-            <a href="#" onclick="showMyIssues(); closeUserMenu();">
-                <i class="fas fa-list"></i>
-                <span>My Issues</span>
-            </a>
             <div class="user-dropdown-divider"></div>
             <a href="#" onclick="showHelp(); closeUserMenu();">
                 <i class="fas fa-question-circle"></i>

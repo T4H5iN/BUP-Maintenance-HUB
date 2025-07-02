@@ -1,17 +1,31 @@
 // UI management functions
 
 function showSection(sectionName) {
+    console.log(`Showing section: ${sectionName}`);
+    
+    // Validate section exists before trying to show it
+    const targetSection = document.getElementById(sectionName);
+    if (!targetSection) {
+        console.error(`Section with ID "${sectionName}" does not exist`);
+        return;
+    }
+
     document.querySelectorAll('.section').forEach(section => {
         section.classList.remove('active');
     });
 
-    document.getElementById(sectionName).classList.add('active');
+    targetSection.classList.add('active');
 
     document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('active');
     });
 
-    document.querySelector(`[href="#${sectionName}"]`).classList.add('active');
+    // Use try-catch to handle case where the matching link doesn't exist
+    try {
+        document.querySelector(`[href="#${sectionName}"]`).classList.add('active');
+    } catch (e) {
+        console.warn(`No navigation link found for section: ${sectionName}`);
+    }
 
     currentSection = sectionName;
 
@@ -641,6 +655,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('moderator-panel')) {
         filterModeratorIssues();
     }
+
+    // Setup navigation events
+    setupNavigationEvents();
 });
 
 // Update moderator panel when issues are loaded/refreshed
@@ -649,6 +666,30 @@ window.addEventListener('issuesLoaded', function() {
         filterModeratorIssues();
     }
 });
+
+/**
+ * Setup navigation event listeners - call this function directly after DOM is loaded
+ */
+function setupNavigationEvents() {
+    console.log('Setting up navigation event listeners');
+    
+    document.querySelectorAll('.nav-link').forEach(link => {
+        // Remove any existing listeners to avoid duplicates
+        link.removeEventListener('click', handleNavLinkClick);
+        // Add the event listener
+        link.addEventListener('click', handleNavLinkClick);
+    });
+}
+
+/**
+ * Handle navigation link click
+ */
+function handleNavLinkClick(e) {
+    e.preventDefault();
+    const section = this.getAttribute('href').substring(1);
+    console.log(`Navigation link clicked: ${section}`);
+    showSection(section);
+}
 
 // Make these functions accessible globally
 window.showSection = showSection;
@@ -683,3 +724,4 @@ window.addNote = addNote;
 window.filterModeratorIssues = filterModeratorIssues;
 window.updateModeratorPanel = updateModeratorPanel;
 window.renderModeratorIssues = renderModeratorIssues;
+window.setupNavigationEvents = setupNavigationEvents;
