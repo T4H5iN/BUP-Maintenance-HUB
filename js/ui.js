@@ -771,3 +771,295 @@ window.filterModeratorIssues = filterModeratorIssues;
 window.updateModeratorPanel = updateModeratorPanel;
 window.renderModeratorIssues = renderModeratorIssues;
 window.setupNavigationEvents = setupNavigationEvents;
+
+/**
+ * Show help and support modal
+ */
+function showHelp() {
+    // Remove any existing modal
+    const existingModal = document.getElementById('helpModal');
+    if (existingModal) existingModal.remove();
+    
+    // Create modal element
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'helpModal';
+    
+    modal.innerHTML = `
+        <div class="modal-content help-modal">
+            <span class="close" onclick="closeHelpModal()">&times;</span>
+            <h2>Help & Support</h2>
+            
+            <div class="help-tabs">
+                <button class="help-tab-btn active" data-tab="faq">FAQs</button>
+                <button class="help-tab-btn" data-tab="contact">Contact Support</button>
+                <button class="help-tab-btn" data-tab="guide">User Guide</button>
+            </div>
+            
+            <div class="help-content">
+                <div id="faq-tab" class="help-tab-content active">
+                    <h3>Frequently Asked Questions</h3>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i>
+                            <h4>How do I report a new maintenance issue?</h4>
+                            <i class="fas fa-chevron-down faq-toggle"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>To report a new issue, navigate to the Home page and scroll down to the "Report an Issue" form. 
+                            Fill in all required fields including category, location, and description. You can also upload images 
+                            to help illustrate the problem.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i>
+                            <h4>How can I check the status of my reported issues?</h4>
+                            <i class="fas fa-chevron-down faq-toggle"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Go to the Dashboard page and select the "My Issues" tab. This will display all issues you've 
+                            submitted along with their current status. You can filter issues by status, category, or date.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i>
+                            <h4>What do the different issue statuses mean?</h4>
+                            <i class="fas fa-chevron-down faq-toggle"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <ul>
+                                <li><strong>Pending Review:</strong> Your issue has been submitted and is awaiting initial review.</li>
+                                <li><strong>Approved:</strong> The issue has been reviewed and approved for resolution.</li>
+                                <li><strong>Assigned:</strong> A technician has been assigned to address your issue.</li>
+                                <li><strong>In Progress:</strong> Work is currently being done to resolve the issue.</li>
+                                <li><strong>Resolved:</strong> The issue has been fixed and is now considered closed.</li>
+                                <li><strong>Rejected:</strong> The issue was reviewed but not approved for action.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i>
+                            <h4>How do I provide feedback on a resolved issue?</h4>
+                            <i class="fas fa-chevron-down faq-toggle"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>When an issue is marked as "Resolved," you'll see a "Provide Feedback" button on the issue card 
+                            in your dashboard. Click this button to rate the resolution and provide any additional comments.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i>
+                            <h4>I forgot my password. How do I reset it?</h4>
+                            <i class="fas fa-chevron-down faq-toggle"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>On the login page, click the "Forgot password?" link. Enter your BUP email address, and 
+                            you'll receive a verification code. Enter this code to reset your password.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="contact-tab" class="help-tab-content">
+                    <h3>Contact Support</h3>
+                    
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <h4>Email Support</h4>
+                                <p>maintenance-support@bup.edu.bd</p>
+                                <p>Response time: Within 24 hours</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <i class="fas fa-phone-alt"></i>
+                            <div>
+                                <h4>Phone Support</h4>
+                                <p>+880 2-XXX-XXXX (Ext. 1234)</p>
+                                <p>Available: Sun-Thu, 9:00 AM - 4:00 PM</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <h4>In-Person Support</h4>
+                                <p>Maintenance Office, Ground Floor, Admin Building</p>
+                                <p>Office Hours: 9:00 AM - 5:00 PM</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-form">
+                        <h4>Send a Support Request</h4>
+                        <form id="supportRequestForm">
+                            <div class="form-group">
+                                <label for="supportSubject">Subject:</label>
+                                <input type="text" id="supportSubject" required placeholder="Brief description of your issue">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="supportMessage">Message:</label>
+                                <textarea id="supportMessage" rows="5" required placeholder="Please describe your issue in detail..."></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="supportPriority">Priority:</label>
+                                <select id="supportPriority">
+                                    <option value="low">Low - General question</option>
+                                    <option value="medium" selected>Medium - Need assistance</option>
+                                    <option value="high">High - Urgent issue</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-paper-plane"></i> Send Request
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div id="guide-tab" class="help-tab-content">
+                    <h3>User Guide</h3>
+                    
+                    <div class="guide-section">
+                        <h4>Getting Started</h4>
+                        <p>Welcome to the BUP Maintenance HUB! This platform allows you to report maintenance issues 
+                        across campus, track their progress, and get updates when they're resolved.</p>
+                        
+                        <div class="guide-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h5>Create an Account</h5>
+                                <p>Use your BUP email address to register. Student emails should end with @student.bup.edu.bd, 
+                                while faculty and staff emails end with @bup.edu.bd.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="guide-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h5>Report an Issue</h5>
+                                <p>From the Home page, fill out the issue report form with as much detail as possible. 
+                                Adding images helps the maintenance team understand the problem better.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="guide-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h5>Track Progress</h5>
+                                <p>Check your Dashboard to monitor the status of your reported issues. You'll also 
+                                receive notifications when there are updates.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="guide-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h5>Provide Feedback</h5>
+                                <p>Once an issue is resolved, please take a moment to rate the service and provide 
+                                feedback to help us improve.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="download-guides">
+                        <h4>Downloadable Guides</h4>
+                        <div class="guide-downloads">
+                            <a href="#" class="guide-download-btn" onclick="alert('User manual downloading will be available soon!')">
+                                <i class="fas fa-file-pdf"></i>
+                                <span>Complete User Manual</span>
+                            </a>
+                            <a href="#" class="guide-download-btn" onclick="alert('Quick start guide downloading will be available soon!')">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Quick Start Guide</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add to document body
+    document.body.appendChild(modal);
+    
+    // Show modal
+    modal.style.display = 'block';
+    
+    // Add event listeners for tabs
+    const tabButtons = modal.querySelectorAll('.help-tab-btn');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons and contents
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            modal.querySelectorAll('.help-tab-content').forEach(content => 
+                content.classList.remove('active')
+            );
+            
+            // Add active class to clicked button and corresponding content
+            this.classList.add('active');
+            const tabName = this.getAttribute('data-tab');
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        });
+    });
+    
+    // Add event listeners for FAQ toggles
+    const faqQuestions = modal.querySelectorAll('.faq-question');
+    faqQuestions.forEach(question => {
+        question.addEventListener('click', function() {
+            const answer = this.nextElementSibling;
+            const isOpen = answer.style.display === 'block';
+            
+            // Toggle the answer visibility
+            answer.style.display = isOpen ? 'none' : 'block';
+            
+            // Toggle the icon
+            const icon = this.querySelector('.faq-toggle');
+            icon.classList.toggle('fa-chevron-down', !isOpen);
+            icon.classList.toggle('fa-chevron-up', isOpen);
+        });
+    });
+    
+    // Handle support form submission
+    const supportForm = document.getElementById('supportRequestForm');
+    if (supportForm) {
+        supportForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const subject = document.getElementById('supportSubject').value;
+            const message = document.getElementById('supportMessage').value;
+            const priority = document.getElementById('supportPriority').value;
+            
+            // In a real application, send this data to the server
+            console.log('Support request:', { subject, message, priority });
+            
+            // Show success message
+            showNotification('Your support request has been submitted. We will respond shortly.', 'success');
+            
+            // Reset form
+            this.reset();
+        });
+    }
+}
+
+/**
+ * Close the help modal
+ */
+function closeHelpModal() {
+    const modal = document.getElementById('helpModal');
+    if (modal) {
+        modal.style.display = 'none';
+        setTimeout(() => modal.remove(), 300);
+    }
+}

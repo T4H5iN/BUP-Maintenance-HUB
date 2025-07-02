@@ -1,6 +1,6 @@
 ```
 npm init -y
-npm install express dotenv multer nodemailer mongoose bcryptjs cors jsonwebtoken 
+npm install express dotenv multer nodemailer mongoose bcryptjs cors jsonwebtoken @google/generative-ai
 node server.js
 
 .env
@@ -8,4 +8,8 @@ node server.js
     MONGODB_URI=
     EMAIL_USER=
     EMAIL_PASS=
+    GEMINI_API_KEY=
+    GEMINI_MODEL=
+    GEMINI_MAX_TOKENS=
+    GEMINI_TEMPERATURE=
 ```
