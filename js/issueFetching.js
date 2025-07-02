@@ -48,6 +48,11 @@ async function loadAllIssuesFromBackend() {
             updateCampusMap(window.issues);
         }
         
+        // Update filter options based on user role
+        if (typeof updateFilterOptionsForRole === 'function') {
+            updateFilterOptionsForRole();
+        }
+        
         // Hide loading indicators
         hideLoadingIndicators();
         

@@ -86,6 +86,17 @@ function filterMapIssues() {
  * @param {Array} filteredIssues - Array of issues to display on the map
  */
 function updateCampusMap(filteredIssues) {
+    // Filter out pending-review issues for non-admin/mod users (students, faculty, technicians)
+    if (currentUser && 
+        (currentUser.role === 'student' || 
+         currentUser.role === 'faculty' || 
+         currentUser.role === 'technician')) {
+        filteredIssues = filteredIssues.filter(issue => issue.status !== 'pending-review');
+    }
+    
+    // Filter out rejected issues for all users
+    filteredIssues = filteredIssues.filter(issue => issue.status !== 'rejected');
+    
     // The comprehensive mapping between HTML data-building attributes and database location values
     const locationMapping = {
         'academic': ['academic-building', 'academic'],
@@ -209,9 +220,20 @@ function showBuildingDetails(buildingName, issueCount, buildingId) {
     const locationValues = locationMapping[buildingId] || [buildingId];
     
     // Get issues for this building
-    const buildingIssues = (window.issues || []).filter(issue => 
+    let buildingIssues = (window.issues || []).filter(issue => 
         locationValues.includes(issue.location)
     );
+    
+    // Filter out pending-review issues for non-admin/mod users (students, faculty, technicians)
+    if (currentUser && 
+        (currentUser.role === 'student' || 
+         currentUser.role === 'faculty' || 
+         currentUser.role === 'technician')) {
+        buildingIssues = buildingIssues.filter(issue => issue.status !== 'pending-review');
+    }
+    
+    // Filter out rejected issues for all users
+    buildingIssues = buildingIssues.filter(issue => issue.status !== 'rejected');
     
     console.log(`Found ${buildingIssues.length} issues for ${buildingName} (${buildingId})`);
     

@@ -8,9 +8,9 @@ function updateHomeIssuesList() {
     // Reset the display limit
     currentDisplayLimit = 10;
     
-    // Only show issues that are NOT pending-review or rejected for students/faculty
+    // Only show issues that are NOT pending-review or rejected for students/faculty/technicians
     let issuesToShow = window.issues || [];
-    if (currentUser && (currentUser.role === 'student' || currentUser.role === 'faculty')) {
+    if (currentUser && (currentUser.role === 'student' || currentUser.role === 'faculty' || currentUser.role === 'technician')) {
         // Only hide pending-review and rejected, show approved/assigned/in-progress/resolved
         issuesToShow = issuesToShow.filter(issue => issue.status !== 'pending-review' && issue.status !== 'rejected');
     }
@@ -39,8 +39,8 @@ function filterHomeIssues() {
     };
 
     let filteredIssues = (window.issues || []).filter(issue => {
-        // Hide pending-review and rejected issues for student/faculty
-        if (currentUser && (currentUser.role === 'student' || currentUser.role === 'faculty')) {
+        // Hide pending-review and rejected issues for student/faculty/technician
+        if (currentUser && (currentUser.role === 'student' || currentUser.role === 'faculty' || currentUser.role === 'technician')) {
             if (issue.status === 'pending-review' || issue.status === 'rejected') return false;
         }
         // Filter by status if not "all"
@@ -244,6 +244,42 @@ function getStatusIcon(status) {
     }
 }
 
+// Function to update home page filter options based on user role
+// Controls which filter options different user roles can see
+function updateFilterOptionsForRole() {
+    const homeStatusFilter = document.getElementById('homeStatusFilter');
+    if (!homeStatusFilter) return;
+    
+    // Get current user role
+    const userRole = currentUser?.role || 'guest';
+    
+    // Check if user is admin or moderator
+    const isAdminOrMod = userRole === 'administrator' || userRole === 'moderator';
+    
+    // Get all options in the status filter
+    const options = homeStatusFilter.querySelectorAll('option');
+    
+    // Find the pending-review option and hide/show based on role
+    options.forEach(option => {
+        if (option.value === 'pending-review') {
+            if (isAdminOrMod) {
+                option.style.display = ''; // Show for admin/mod
+            } else {
+                option.style.display = 'none'; // Hide for others (including technicians)
+                
+                // If the current selection is pending-review, change it to 'all'
+                if (homeStatusFilter.value === 'pending-review') {
+                    homeStatusFilter.value = 'all';
+                    // Trigger filter update if the function exists
+                    if (typeof filterHomeIssues === 'function') {
+                        filterHomeIssues();
+                    }
+                }
+            }
+        }
+    });
+}
+
 // Make functions available globally
 window.updateHomeIssuesList = updateHomeIssuesList;
 window.filterHomeIssues = filterHomeIssues;
@@ -254,6 +290,7 @@ window.formatCategoryName = formatCategoryName;
 window.generateStarRating = generateStarRating;
 window.getRandomRating = getRandomRating;
 window.loadMoreIssues = loadMoreIssues;
+window.updateFilterOptionsForRole = updateFilterOptionsForRole;
 
 // Listen for progress updates and update the progress bar for all users
 window.addEventListener('progressUpdated', function(e) {
@@ -282,6 +319,17 @@ window.addEventListener('progressUpdated', function(e) {
                 if (label) label.textContent = `${progress}%`;
             }
         }
+    });
+});
+
+// When the DOM is loaded, set up event listeners for auth changes
+document.addEventListener('DOMContentLoaded', function() {
+    // Update filter options when page loads
+    updateFilterOptionsForRole();
+    
+    // Listen for authentication state changes to update filters
+    window.addEventListener('authStateChanged', function() {
+        updateFilterOptionsForRole();
     });
 });
 

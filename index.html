@@ -208,15 +208,15 @@
                     <p>Report campus maintenance issues quickly and efficiently. Help us maintain a better learning environment for everyone.</p>
                     <div class="hero-stats">
                         <div class="stat">
-                            <span class="stat-number">245</span>
+                            <span class="stat-number" id="resolved-count">--</span>
                             <span class="stat-label">Issues Resolved</span>
                         </div>
                         <div class="stat">
-                            <span class="stat-number">12</span>
+                            <span class="stat-number" id="pending-count">--</span>
                             <span class="stat-label">Pending Issues</span>
                         </div>
                         <div class="stat">
-                            <span class="stat-number">4.8</span>
+                            <span class="stat-number" id="avg-rating">--</span>
                             <span class="stat-label">Avg Rating</span>
                         </div>
                     </div>
@@ -308,6 +308,7 @@
                         <select id="homeStatusFilter">
                             <option value="all">All Status</option>
                             <option value="pending-review">Pending Review</option>
+                            <option value="approved">Approved</option>
                             <option value="assigned">Assigned</option>
                             <option value="in-progress">In Progress</option>
                             <option value="resolved">Resolved</option>
@@ -935,6 +936,54 @@
         </div>
     </div>
 
+    <!-- Technician Availability Modal -->
+    <div id="availabilityModal" class="modal">
+        <div class="modal-content availability-modal">
+            <span class="close" onclick="closeAvailabilityModal()">&times;</span>
+            <h2>Update Availability Status</h2>
+            <form id="availabilityForm">
+                <div class="form-group">
+                    <label for="availabilityStatus">Current Availability:</label>
+                    <select id="availabilityStatus" required>
+                        <option value="available">Available</option>
+                        <option value="busy">Busy (Can take limited tasks)</option>
+                        <option value="unavailable">Unavailable</option>
+                        <option value="on-leave">On Leave</option>
+                        <option value="sick-leave">Sick Leave</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="availabilityNote">Additional Notes:</label>
+                    <textarea id="availabilityNote" rows="3" placeholder="Optional: Add details about your availability..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="availabilityUntil">Status Valid Until:</label>
+                    <div class="availability-period">
+                        <select id="availabilityUntil">
+                            <option value="today">End of Today</option>
+                            <option value="tomorrow">End of Tomorrow</option>
+                            <option value="week">End of Week</option>
+                            <option value="specific">Specific Date</option>
+                            <option value="indefinite">Until Changed</option>
+                        </select>
+                        <input type="date" id="specificDate" style="display: none;">
+                    </div>
+                </div>
+                
+                <div class="availability-actions">
+                    <button type="submit" class="btn-success">
+                        <i class="fas fa-check-circle"></i> Update Status
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="closeAvailabilityModal()">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Load external libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     
@@ -1218,5 +1267,18 @@
       };
     }
   </script>
+
+  <!-- Load statistics functionality - add this before the closing body tag -->
+<script src="js/statistics.js" onload="registerModuleLoaded('statistics')" onerror="handleScriptError('statistics', event)"></script>
+
+<!-- Add this right before closing body tag (inside existing script tags) -->
+<script>
+    // Initialize statistics when issues are loaded
+    window.addEventListener('issuesLoaded', function() {
+        if (typeof initializeStatistics === 'function') {
+            initializeStatistics();
+        }
+    });
+</script>
 </body>
 </html>

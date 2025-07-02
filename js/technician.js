@@ -488,12 +488,14 @@ function renderTechnicianAssignments(issues) {
                     <button class="btn-secondary" onclick="viewIssueDetails('${issue.issueId || issue.id}')">
                         <i class="fas fa-eye"></i> View Details
                     </button>
+                    ${status !== 'resolved' ? `
                     <button class="btn-warning" onclick="rescheduleTask('${issue.issueId || issue.id}')">
                         <i class="fas fa-calendar-alt"></i> Reschedule
                     </button>
                     <button class="btn-success" onclick="completeTask('${issue.issueId || issue.id}')">
                         <i class="fas fa-check-circle"></i> Mark Complete
                     </button>
+                    ` : ''}
                 </div>
             </div>
         `;
@@ -530,115 +532,200 @@ document.addEventListener('DOMContentLoaded', function() {
     setupTechnicianPanelFilters();
 });
 
-// Add this stub to avoid ReferenceError if not implemented elsewhere
-function showScheduleView() {
-    // Open the modal and load the schedule
-    const modal = document.getElementById('technicianScheduleModal');
-    if (modal) {
-        modal.style.display = 'block';
-        if (typeof loadTechnicianSchedule === 'function') {
-            loadTechnicianSchedule();
+/**
+ * Show availability modal to update technician availability status
+ */
+function markAvailability() {
+    // Create modal if it doesn't exist
+    if (!document.getElementById('availabilityModal')) {
+        showNotification('Error loading availability form', 'error');
+        return;
+    }
+    
+    // Show the modal
+    const modal = document.getElementById('availabilityModal');
+    modal.style.display = 'block';
+    
+    // Set current availability if available
+    if (currentUser && currentUser.availability) {
+        const statusSelect = document.getElementById('availabilityStatus');
+        if (statusSelect) {
+            // Try to match the status or default to 'available'
+            const currentStatus = currentUser.availability.toLowerCase();
+            for (let i = 0; i < statusSelect.options.length; i++) {
+                if (statusSelect.options[i].value === currentStatus) {
+                    statusSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        // Set notes if available
+        if (currentUser.availabilityNote) {
+            document.getElementById('availabilityNote').value = currentUser.availabilityNote;
+        }
+    }
+    
+    // Add event handler for the availability period dropdown
+    const availabilityUntil = document.getElementById('availabilityUntil');
+    const specificDate = document.getElementById('specificDate');
+    
+    if (availabilityUntil && specificDate) {
+        availabilityUntil.addEventListener('change', function() {
+            if (this.value === 'specific') {
+                specificDate.style.display = 'block';
+                // Set default date to tomorrow
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                specificDate.value = tomorrow.toISOString().split('T')[0];
+            } else {
+                specificDate.style.display = 'none';
+            }
+        });
+    }
+    
+    // Add event handler for form submission
+    const form = document.getElementById('availabilityForm');
+    if (form) {
+        form.removeEventListener('submit', handleAvailabilityUpdate);
+        form.addEventListener('submit', handleAvailabilityUpdate);
+    }
+}
+
+/**
+ * Handle availability form submission
+ * @param {Event} e - Form submission event
+ */
+async function handleAvailabilityUpdate(e) {
+    e.preventDefault();
+    
+    const status = document.getElementById('availabilityStatus').value;
+    const note = document.getElementById('availabilityNote').value;
+    const untilType = document.getElementById('availabilityUntil').value;
+    
+    // Calculate end date based on selection
+    let validUntil = null;
+    if (untilType === 'specific') {
+        validUntil = document.getElementById('specificDate').value;
+    } else if (untilType === 'today') {
+        const today = new Date();
+        today.setHours(23, 59, 59, 999);
+        validUntil = today.toISOString();
+    } else if (untilType === 'tomorrow') {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(23, 59, 59, 999);
+        validUntil = tomorrow.toISOString();
+    } else if (untilType === 'week') {
+        const endOfWeek = new Date();
+        const daysToSunday = 7 - endOfWeek.getDay();
+        endOfWeek.setDate(endOfWeek.getDate() + daysToSunday);
+        endOfWeek.setHours(23, 59, 59, 999);
+        validUntil = endOfWeek.toISOString();
+    }
+    
+    // Show loading indicator
+    const submitButton = document.querySelector('#availabilityForm .btn-success');
+    if (submitButton) {
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+        submitButton.disabled = true;
+    }
+    
+    try {
+        // Get token from localStorage
+        const token = localStorage.getItem('bup-token');
+        if (!token) {
+            throw new Error('Authentication token not found');
+        }
+        
+        // Send update to server
+        const response = await fetch('http://localhost:3000/api/users/availability', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                availability: status,
+                availabilityNote: note,
+                validUntil: validUntil
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update availability');
+        }
+        
+        const data = await response.json();
+        
+        // Update current user object
+        if (currentUser) {
+            currentUser.availability = status;
+            currentUser.availabilityNote = note;
+            currentUser.availabilityValidUntil = validUntil;
+            
+            // Update in localStorage
+            localStorage.setItem('bup-current-user', JSON.stringify(currentUser));
+        }
+        
+        // Show success notification
+        showNotification('Availability status updated successfully', 'success');
+        
+        // Update technician status indicator if exists
+        updateTechnicianStatusIndicator();
+        
+        // Close the modal
+        closeAvailabilityModal();
+        
+    } catch (error) {
+        console.error('Error updating availability:', error);
+        showNotification(error.message || 'Failed to update availability', 'error');
+        
+        // Re-enable submit button
+        if (submitButton) {
+            submitButton.innerHTML = '<i class="fas fa-check-circle"></i> Update Status';
+            submitButton.disabled = false;
         }
     }
 }
 
-// Add this stub to avoid ReferenceError if not implemented elsewhere
-function markAvailability() {
-    showNotification('Mark availability functionality is not implemented yet.', 'info');
+/**
+ * Update the technician status indicator in the UI
+ */
+function updateTechnicianStatusIndicator() {
+    if (!currentUser || !currentUser.availability) return;
+    
+    const statusIndicator = document.querySelector('.technician-status-indicator');
+    if (!statusIndicator) return;
+    
+    // Remove all status classes
+    statusIndicator.classList.remove('available', 'busy', 'unavailable', 'on-leave', 'sick-leave');
+    
+    // Add appropriate class
+    statusIndicator.classList.add(currentUser.availability);
+    
+    // Update text
+    const statusText = statusIndicator.querySelector('.status-text');
+    if (statusText) {
+        statusText.textContent = currentUser.availability.replace('-', ' ');
+    }
 }
 
-// Add this stub to avoid ReferenceError if not implemented elsewhere
-function createAvailabilityModal() {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.id = 'availabilityModal';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <span class="close" onclick="closeAvailabilityModal()">&times;</span>
-            <h2>Update Availability</h2>
-            <form id="availabilityForm">
-                <div class="form-group">
-                    <label>Status:</label>
-                    <select id="availabilityStatus" required>
-                        <option value="available">Available</option>
-                        <option value="busy">Busy (On Task)</option>
-                        <option value="unavailable">Unavailable</option>
-                        <option value="leave">On Leave</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Available From:</label>
-                    <input type="date" id="availableFrom" required>
-                </div>
-                <div class="form-group">
-                    <label>Available To:</label>
-                    <input type="date" id="availableTo" required>
-                </div>
-                <div class="form-group">
-                    <label>Working Hours:</label>
-                    <div class="time-range">
-                        <input type="time" id="workStart" value="08:00" required>
-                        <span>to</span>
-                        <input type="time" id="workEnd" value="17:00" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Notes:</label>
-                    <textarea id="availabilityNotes" rows="3" placeholder="Additional notes about your availability..."></textarea>
-                </div>
-                <button type="button" class="btn-primary" onclick="saveAvailability()">Update Availability</button>
-            </form>
-        </div>
-    `;
-    return modal;
+/**
+ * Close the availability modal
+ */
+function closeAvailabilityModal() {
+    const modal = document.getElementById('availabilityModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
-// Add this stub to avoid ReferenceError if not implemented elsewhere
-function saveAvailability() {
-    showNotification('Availability updated (stub function).', 'success');
-    closeAvailabilityModal();
-}
-
-// Add this stub to avoid ReferenceError if not implemented elsewhere
-function updateTaskStatus(taskId, status) {
-    showNotification(`Task ${taskId} status updated to: ${status}`, 'success');
-    // Would typically update the task in the database
-}
-
-// Add this stub to avoid ReferenceError if not implemented elsewhere
-function updateTaskProgress(taskId) {
-    showNotification(`Update progress for task ${taskId} (stub function).`, 'info');
-}
-
-// Add this stub to avoid ReferenceError if not implemented elsewhere
-function createProgressModal(taskId) {
-    showNotification(`Progress modal for task ${taskId} (stub function).`, 'info');
-    // You can implement the actual modal as needed
-    return document.createElement('div');
-}
-
-// Add this stub to avoid ReferenceError if not implemented elsewhere
-function saveProgress(taskId) {
-    showNotification(`Progress for task ${taskId} saved (stub function).`, 'success');
-    closeProgressModal && closeProgressModal();
-}
-
-// Add this stub to avoid ReferenceError if not implemented elsewhere
-function requestParts(taskId) {
-    showNotification(`Request parts for task ${taskId} (stub function).`, 'info');
-    // You can implement the actual modal as needed
-}
-
-// Make functions available globally
-window.showScheduleView = showScheduleView;
+// Add functions to window
 window.markAvailability = markAvailability;
-window.createAvailabilityModal = createAvailabilityModal;
-window.saveAvailability = saveAvailability;
-window.updateTaskStatus = updateTaskStatus;
-window.updateTaskProgress = updateTaskProgress;
-window.createProgressModal = createProgressModal;
-window.saveProgress = saveProgress;
-window.requestParts = requestParts;
+window.handleAvailabilityUpdate = handleAvailabilityUpdate;
+window.closeAvailabilityModal = closeAvailabilityModal;
 window.createPartsRequestModal = createPartsRequestModal;
 window.submitPartsRequest = submitPartsRequest;
 window.completeTask = completeTask;

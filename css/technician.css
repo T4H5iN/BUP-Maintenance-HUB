@@ -1,0 +1,74 @@
+/* Technician panel specific styles */
+
+/* Add styles for availability modal */
+.availability-modal {
+    max-width: 500px;
+}
+
+.availability-period {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.availability-period select,
+.availability-period input {
+    flex: 1;
+}
+
+.availability-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Technician status indicator */
+.technician-status-indicator {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    margin-left: 15px;
+}
+
+.technician-status-indicator.available {
+    background-color: rgba(46, 204, 113, 0.2);
+    color: #27ae60;
+}
+
+.technician-status-indicator.busy {
+    background-color: rgba(241, 196, 15, 0.2);
+    color: #f39c12;
+}
+
+.technician-status-indicator.unavailable,
+.technician-status-indicator.on-leave,
+.technician-status-indicator.sick-leave {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+}
+
+.technician-status-indicator i {
+    margin-right: 5px;
+}
+
+/* Dark mode styles */
+.dark-mode .technician-status-indicator.available {
+    background-color: rgba(46, 204, 113, 0.3);
+    color: #2ecc71;
+}
+
+.dark-mode .technician-status-indicator.busy {
+    background-color: rgba(241, 196, 15, 0.3);
+    color: #f1c40f;
+}
+
+.dark-mode .technician-status-indicator.unavailable,
+.dark-mode .technician-status-indicator.on-leave,
+.dark-mode .technician-status-indicator.sick-leave {
+    background-color: rgba(231, 76, 60, 0.3);
+    color: #e74c3c;
+}

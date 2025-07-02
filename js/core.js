@@ -208,6 +208,11 @@ function updateUIForLoggedInUser() {
         document.getElementById('technicianTab').style.display = 'block';
     }
     
+    // Update filter options based on role
+    if (typeof updateFilterOptionsForRole === 'function') {
+        updateFilterOptionsForRole();
+    }
+    
     // Update navigation options based on role
     updateNavigation();
     
