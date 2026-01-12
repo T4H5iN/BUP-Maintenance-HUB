@@ -23,7 +23,7 @@ async function handleIssueSubmission(e) {
     try {
         // First, upload any images
         const imagePaths = await uploadImages();
-        console.log('Uploaded image paths:', imagePaths); // Debug log
+
 
         const issueData = {
             issueId: generateIssueId(),
@@ -43,7 +43,7 @@ async function handleIssueSubmission(e) {
             images: imagePaths // Include paths to uploaded images
         };
 
-        console.log('Submitting issue data:', issueData); // Debug log
+
 
         // Get token from localStorage
         const token = localStorage.getItem('bup-token');
@@ -63,7 +63,7 @@ async function handleIssueSubmission(e) {
 
         // Parse the response
         const data = await response.json();
-        console.log('Server response:', data); // Debug log
+
 
         // Handle success
         if (response.ok) {
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function () {
         issueForm.removeEventListener('submit', handleIssueSubmission);
         // Add fresh event listener
         issueForm.addEventListener('submit', handleIssueSubmission);
-        console.log('Issue form submission listener attached');
+
     } else {
         console.warn('Issue form not found in DOM');
     }

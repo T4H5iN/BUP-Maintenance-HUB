@@ -1,7 +1,7 @@
 // UI management functions
 
 function showSection(sectionName) {
-    console.log(`Showing section: ${sectionName}`);
+
 
     // Validate section exists before trying to show it
     const targetSection = document.getElementById(sectionName);
@@ -59,7 +59,7 @@ function showSection(sectionName) {
 function updateReports() {
     // First trigger reports initialization if function exists
     if (typeof initializeReports === 'function') {
-        console.log('Initializing reports from updateReports function');
+
         initializeReports();
     }
 
@@ -408,7 +408,7 @@ async function assignTechnicianToIssue(issueId, technicianId) {
 
     try {
         const token = localStorage.getItem('bup-token');
-        console.log(`Assigning technician ${technicianId} to issue ${issueId}`);
+
 
         // Use the issueId or id property - this should match what the backend expects
         const idToUse = issue.issueId || issue.id;
@@ -436,7 +436,7 @@ async function assignTechnicianToIssue(issueId, technicianId) {
         }
 
         const data = await res.json();
-        console.log('Assignment response:', data);
+
 
         // Update local issue status and assignment data
         if (data.issue) {
@@ -717,7 +717,7 @@ window.addEventListener('issuesLoaded', function () {
  * Setup navigation event listeners - call this function directly after DOM is loaded
  */
 function setupNavigationEvents() {
-    console.log('Setting up navigation event listeners');
+
 
     document.querySelectorAll('.nav-link').forEach(link => {
         // Remove any existing listeners to avoid duplicates
@@ -733,7 +733,7 @@ function setupNavigationEvents() {
 function handleNavLinkClick(e) {
     e.preventDefault();
     const section = this.getAttribute('href').substring(1);
-    console.log(`Navigation link clicked: ${section}`);
+
     showSection(section);
 }
 
@@ -1042,7 +1042,7 @@ function showHelp() {
             const priority = document.getElementById('supportPriority').value;
 
             // In a real application, send this data to the server
-            console.log('Support request:', { subject, message, priority });
+
 
             // Show success message
             showNotification('Your support request has been submitted. We will respond shortly.', 'success');

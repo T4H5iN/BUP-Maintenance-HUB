@@ -5,7 +5,7 @@
 
 // Initialize the administrator dashboard
 function initializeAdministratorPanel() {
-    console.log("Initializing administrator panel...");
+
 
     // Load admin dashboard statistics
     loadAdminDashboardStats();
@@ -264,7 +264,7 @@ function setupAdminEventListeners() {
 
 // Generate a comprehensive report
 function generateReport() {
-    console.log("Generating administrative report...");
+
     showNotification("Preparing administrative report...", "info");
 
     // Show a loading modal
@@ -666,7 +666,7 @@ function downloadReport(format) {
 
 // Show all overdue issues in a modal
 function showAllOverdueIssues() {
-    console.log("Showing all overdue issues...");
+
 
     const allIssues = window.issues || [];
     if (!allIssues.length) {
@@ -865,7 +865,7 @@ function filterOverdueIssues() {
 
 // Escalate an issue (notify higher management)
 function escalateIssue(issueId) {
-    console.log(`Escalating issue ${issueId}`);
+
 
     // Show escalation modal
     showEscalationModal(issueId);
@@ -980,11 +980,11 @@ function handleEscalationSubmit() {
     const deadline = document.getElementById('escalationDeadline').value;
     const notifySubmitter = document.getElementById('notifySubmitter').checked;
 
-    console.log(`Escalating issue ${issueId} to ${level}`);
-    console.log(`Reason: ${reason}`);
-    console.log(`Priority: ${priority}`);
-    console.log(`Deadline: ${deadline}`);
-    console.log(`Notify submitter: ${notifySubmitter}`);
+
+
+
+
+
 
     // In a real application, this would send the data to the server
     // For this demo, we'll just show a notification and close the modal
@@ -1041,7 +1041,7 @@ function handleEscalationSubmit() {
 
 // Assign an issue urgently
 function assignUrgent(issueId) {
-    console.log(`Assigning issue ${issueId} urgently`);
+
 
     // Show urgent assignment modal
     showUrgentAssignmentModal(issueId);
@@ -1231,11 +1231,11 @@ async function handleUrgentAssignmentSubmit() {
     const deadline = document.getElementById('urgentDeadline').value;
     const sendSMS = document.getElementById('sendUrgentSMS').checked;
 
-    console.log(`Urgently assigning issue ${issueId} to technician ${technicianId}`);
-    console.log(`Priority: ${priority}`);
-    console.log(`Instructions: ${instructions}`);
-    console.log(`Deadline: ${deadline}`);
-    console.log(`Send SMS: ${sendSMS}`);
+
+
+
+
+
 
     // Show loading indicator
     const submitButton = document.querySelector('#urgentAssignmentForm .btn-warning');

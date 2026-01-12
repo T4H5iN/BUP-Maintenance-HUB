@@ -57,8 +57,6 @@ const upload = multer({
 // Image upload route - uploads to Cloudinary
 app.post('/api/upload', upload.array('images', 5), async (req, res) => {
     try {
-        console.log('Files received:', req.files ? req.files.length : 0);
-
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({
                 success: false,
@@ -75,9 +73,8 @@ app.post('/api/upload', upload.array('images', 5), async (req, res) => {
 
         // Return the Cloudinary URLs
         const filePaths = results.map(result => result.secure_url);
-        console.log('Files uploaded to Cloudinary:', filePaths.length);
-
         res.json({ success: true, filePaths });
+
     } catch (error) {
         console.error('Error during file upload:', error);
         res.status(500).json({
@@ -101,8 +98,7 @@ const PORT = process.env.PORT || 5000;
 // Add error handling for MongoDB connection
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => {
-        console.log('Connected to MongoDB');
-        app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+        app.listen(PORT, () => { });
     })
     .catch(err => {
         console.error('MongoDB connection error:', err);

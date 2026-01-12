@@ -190,8 +190,8 @@ router.post('/verify-otp', async (req, res) => {
         if (!otpDoc) {
             // Log all OTPs for this email to help debugging
             const allOtps = await OTP.find({ email });
-            console.log(`Found ${allOtps.length} OTPs for ${email}:`,
-                allOtps.map(doc => ({ otp: doc.otp, createdAt: doc.createdAt })));
+
+            return res.status(400).json({ message: 'Invalid or expired verification code' });
 
             return res.status(400).json({ message: 'Invalid or expired verification code' });
         }
@@ -204,7 +204,7 @@ router.post('/verify-otp', async (req, res) => {
         ).select('-password');
 
         if (!user) {
-            console.log('No user found with email:', email);
+            return res.status(404).json({ message: 'User not found' });
             return res.status(404).json({ message: 'User not found' });
         }
 

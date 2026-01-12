@@ -19,7 +19,7 @@ function isValidObjectId(id) {
 router.post('/', auth, async (req, res) => {
     try {
         const data = req.body;
-        
+
         // Generate a unique issue ID if not provided
         if (!data.issueId) {
             const prefix = 'BUP';
@@ -27,14 +27,14 @@ router.post('/', auth, async (req, res) => {
             const random = Math.floor(Math.random() * 1000);
             data.issueId = `${prefix}${timestamp.toString().slice(-6)}${random}`;
         }
-        
+
         // If authenticated, use current user's ID and name
         if (req.user) {
             data.submitterId = req.user._id; // Use _id (the MongoDB ObjectId)
             data.submittedBy = req.user.name || req.user.email.split('@')[0]; // Use name or fallback
             data.submitterEmail = req.user.email; // Store email
         }
-        
+
         // Ensure submittedBy contains the name string, not an ObjectId
         // Always set id = issueId for frontend compatibility
         const issue = new Issue({
@@ -102,12 +102,12 @@ router.post('/:id/vote', auth, async (req, res) => {
                     issue.downvoters = issue.downvoters.filter(email => email !== userEmail);
                     issue.downvotes = Math.max(0, issue.downvotes - 1);
                 }
-                
+
                 // Add upvote
                 issue.upvoters.push(userEmail);
                 issue.upvotes = issue.upvotes + 1;
             }
-        } 
+        }
         // Handle downvote
         else if (voteType === 'down') {
             // If already downvoted, do nothing (handled by frontend as toggle)
@@ -117,7 +117,7 @@ router.post('/:id/vote', auth, async (req, res) => {
                     issue.upvoters = issue.upvoters.filter(email => email !== userEmail);
                     issue.upvotes = Math.max(0, issue.upvotes - 1);
                 }
-                
+
                 // Add downvote
                 issue.downvoters.push(userEmail);
                 issue.downvotes = issue.downvotes + 1;
@@ -125,9 +125,9 @@ router.post('/:id/vote', auth, async (req, res) => {
         }
 
         await issue.save();
-        
+
         // Return more detailed response with issue data
-        res.json({ 
+        res.json({
             message: 'Vote recorded successfully',
             issue: {
                 id: issue.id,
@@ -169,7 +169,7 @@ router.delete('/:id/vote', auth, async (req, res) => {
             issue.upvoters = issue.upvoters.filter(email => email !== userEmail);
             issue.upvotes = Math.max(0, issue.upvotes - 1);
         }
-        
+
         // Remove downvote if exists
         if (hasDownvoted) {
             issue.downvoters = issue.downvoters.filter(email => email !== userEmail);
@@ -177,9 +177,9 @@ router.delete('/:id/vote', auth, async (req, res) => {
         }
 
         await issue.save();
-        
+
         // Return more detailed response with issue data
-        res.json({ 
+        res.json({
             message: 'Vote removed successfully',
             issue: {
                 id: issue.id,
@@ -200,33 +200,33 @@ router.patch('/:issueId/status', auth, notificationMiddleware.issueStatusChange,
     try {
         const { issueId } = req.params;
         const { status, previousStatus } = req.body;
-        
+
         if (!status) {
             return res.status(400).json({ message: 'Status is required' });
         }
-        
+
         // Find and update the issue
         const issue = await Issue.findOne({ $or: [{ id: issueId }, { issueId: issueId }] });
-        
+
         if (!issue) {
             return res.status(404).json({ message: 'Issue not found' });
         }
-        
+
         // Store previous status for notification middleware
         req.body.previousStatus = issue.status;
-        
+
         // Update the status
         issue.status = status;
-        
+
         // Update other related fields based on status
         if (status === 'resolved') {
             issue.resolvedDate = new Date();
         }
-        
+
         await issue.save();
-        
-        res.json({ 
-            message: 'Issue status updated successfully', 
+
+        res.json({
+            message: 'Issue status updated successfully',
             issue,
             previousStatus: req.body.previousStatus
         });
@@ -237,54 +237,54 @@ router.patch('/:issueId/status', auth, notificationMiddleware.issueStatusChange,
 });
 
 // Assign a technician to an issue
-router.patch('/:id/assign', 
-    auth, 
+router.patch('/:id/assign',
+    auth,
     notificationMiddleware.issueAssignment,
     async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { technicianId } = req.body;
-        if (!technicianId) {
-            return res.status(400).json({ message: 'Technician ID is required' });
+        try {
+            const { id } = req.params;
+            const { technicianId } = req.body;
+            if (!technicianId) {
+                return res.status(400).json({ message: 'Technician ID is required' });
+            }
+
+            // Find the technician user
+            const User = require('../models/user.model');
+            const technician = await User.findById(technicianId);
+            if (!technician || technician.role !== 'technician') {
+                return res.status(404).json({ message: 'Technician not found' });
+            }
+
+            // Find the issue by issueId or id - NEVER try to use the string ID as _id directly
+            const issue = await Issue.findOne({
+                $or: [
+                    { issueId: id },
+                    { id: id }
+                ]
+            });
+
+            if (!issue) {
+                return res.status(404).json({ message: 'Issue not found' });
+            }
+
+            // Store both technician ID and name
+            issue.assignedTo = technician._id; // Store the ObjectId reference
+            issue.assignedToName = technician.name || technician.email; // Store name for display
+            issue.status = 'assigned';
+            await issue.save();
+
+            res.json({
+                message: 'Technician assigned successfully',
+                issue: issue,
+                assignedTo: issue.assignedToName,
+                assignedToId: issue.assignedTo,
+                issueId: issue.issueId || issue.id
+            });
+        } catch (err) {
+            console.error('Error assigning technician:', err);
+            res.status(500).json({ message: 'Failed to assign technician', error: err.message });
         }
-
-        // Find the technician user
-        const User = require('../models/user.model');
-        const technician = await User.findById(technicianId);
-        if (!technician || technician.role !== 'technician') {
-            return res.status(404).json({ message: 'Technician not found' });
-        }
-
-        // Find the issue by issueId or id - NEVER try to use the string ID as _id directly
-        const issue = await Issue.findOne({ 
-            $or: [
-                { issueId: id },
-                { id: id }
-            ] 
-        });
-        
-        if (!issue) {
-            return res.status(404).json({ message: 'Issue not found' });
-        }
-
-        // Store both technician ID and name
-        issue.assignedTo = technician._id; // Store the ObjectId reference
-        issue.assignedToName = technician.name || technician.email; // Store name for display
-        issue.status = 'assigned';
-        await issue.save();
-
-        res.json({
-            message: 'Technician assigned successfully',
-            issue: issue,
-            assignedTo: issue.assignedToName,
-            assignedToId: issue.assignedTo,
-            issueId: issue.issueId || issue.id
-        });
-    } catch (err) {
-        console.error('Error assigning technician:', err);
-        res.status(500).json({ message: 'Failed to assign technician', error: err.message });
-    }
-});
+    });
 
 // Get issues assigned to the logged-in technician
 router.get('/assigned-to-me', auth, async (req, res) => {
@@ -294,28 +294,28 @@ router.get('/assigned-to-me', auth, async (req, res) => {
         if (!user) {
             return res.status(401).json({ message: 'Authentication required' });
         }
-        
+
         if (user.role !== 'technician') {
             return res.status(403).json({ message: 'Access denied: not a technician' });
         }
-        
-        console.log(`Fetching assignments for technician: ${user._id}`);
-        
+
+
+
         // First try finding issues where assignedTo is the user's ObjectId
-        let assignedIssues = await Issue.find({ 
-            assignedTo: user._id 
+        let assignedIssues = await Issue.find({
+            assignedTo: user._id
         }).sort({ createdAt: -1 });
-        
+
         // If no issues found by ID, try finding by email, name, or stored in assignedToName
         if (assignedIssues.length === 0) {
-            console.log('No issues found by ID, trying by other identifiers');
-            
+
+
             // Create an array of possible identifiers
             const possibleIdentifiers = [
                 user.email,
                 user.name
             ].filter(Boolean); // Remove any undefined/null values
-            
+
             if (possibleIdentifiers.length > 0) {
                 try {
                     // Try to find issues where assignedTo equals any of the identifiers
@@ -329,7 +329,7 @@ router.get('/assigned-to-me', auth, async (req, res) => {
                 } catch (lookupError) {
                     // This might fail if assignedTo is strictly typed as ObjectId
                     console.warn('Error during string lookup:', lookupError.message);
-                    
+
                     // Try one more approach - look for exact matches on assignedToName
                     assignedIssues = await Issue.find({
                         assignedToName: { $in: possibleIdentifiers }
@@ -337,13 +337,13 @@ router.get('/assigned-to-me', auth, async (req, res) => {
                 }
             }
         }
-        
-        console.log(`Found ${assignedIssues.length} assigned issues`);
+
+
         res.json({ issues: assignedIssues });
     } catch (err) {
         console.error('Error fetching assigned issues:', err);
-        res.status(500).json({ 
-            message: 'Failed to fetch assigned issues', 
+        res.status(500).json({
+            message: 'Failed to fetch assigned issues',
             error: err.message,
             stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
         });

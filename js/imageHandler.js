@@ -27,7 +27,7 @@ function handleImageUpload(e) {
 
         // Convert map values back to an array, and limit to 5
         uploadedImages = Array.from(filesMap.values()).slice(0, 5);
-        console.log(`Updated uploadedImages array - ${uploadedImages.length} images`); // Debug log
+
     }
 
     // Update the preview with the master list of images
@@ -41,7 +41,7 @@ function handleImageUpload(e) {
 function removeUploadedImage(index) {
     if (index > -1 && index < uploadedImages.length) {
         uploadedImages.splice(index, 1);
-        console.log(`Removed image at index ${index}. ${uploadedImages.length} images remaining`); // Debug log
+
         // Re-render the preview with the modified array
         updateImagePreview(uploadedImages);
     }
@@ -93,11 +93,11 @@ function updateImagePreview(images) {
 // Upload images to server and get their paths
 async function uploadImages() {
     if (!uploadedImages || uploadedImages.length === 0) {
-        console.log('No images to upload');
+
         return [];
     }
 
-    console.log(`Uploading ${uploadedImages.length} images to server`);
+
     const formData = new FormData();
     uploadedImages.forEach(file => {
         formData.append('images', file);
@@ -123,7 +123,7 @@ async function uploadImages() {
         }
 
         const data = await res.json();
-        console.log('Image upload successful:', data.filePaths);
+
         return data.filePaths || [];
     } catch (error) {
         console.error('Error uploading images:', error);

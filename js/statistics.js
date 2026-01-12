@@ -26,7 +26,7 @@ async function fetchSummaryStatistics() {
         }
 
         const data = await response.json();
-        console.log('Statistics data fetched successfully:', data);
+
         return data;
     } catch (error) {
         console.error('Error fetching statistics:', error);
@@ -39,7 +39,7 @@ async function fetchSummaryStatistics() {
 
 // Calculate statistics from already loaded issues as fallback
 function calculateStatisticsFromLocalData() {
-    console.log('Calculating statistics from local data...');
+
 
     // Generate sample data for demonstration if no issues are available
     if (!window.issues || !Array.isArray(window.issues) || window.issues.length === 0) {
@@ -55,7 +55,7 @@ function calculateStatisticsFromLocalData() {
 
     // Calculate statistics from existing issues
     const totalIssues = window.issues.length;
-    console.log(`Calculating statistics from ${totalIssues} issues`);
+
 
     const resolvedIssues = window.issues.filter(issue => issue.status === 'resolved').length;
     const pendingIssues = window.issues.filter(issue =>
@@ -84,13 +84,13 @@ function calculateStatisticsFromLocalData() {
         avgRating: avgRating
     };
 
-    console.log('Calculated statistics:', stats);
+
     return stats;
 }
 
 // Update the hero stats in the UI
 function updateHeroStats(statistics) {
-    console.log('Updating hero stats UI with:', statistics);
+
 
     // Get the stat elements
     const resolvedElement = document.getElementById('resolved-count');
@@ -139,7 +139,7 @@ function animateNumbers() {
 
 // Initialize statistics when page loads
 async function initializeStatistics() {
-    console.log('Initializing statistics...');
+
 
     // First load statistics from local data to show something immediately
     const quickStats = calculateStatisticsFromLocalData();
@@ -165,13 +165,13 @@ window.fetchSummaryStatistics = fetchSummaryStatistics;
 
 // Initialize statistics on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('DOM loaded - initializing statistics');
+
     // Set a timeout to ensure other scripts have loaded
     setTimeout(initializeStatistics, 500);
 
     // Listen for the issuesLoaded event to update statistics when issues are loaded
     window.addEventListener('issuesLoaded', function (event) {
-        console.log('Issues loaded event received, refreshing statistics');
+
         initializeStatistics();
     });
 });

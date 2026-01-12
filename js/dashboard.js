@@ -15,14 +15,14 @@ let dashboardStats = {
  * Initialize the dashboard with real data
  */
 function initializeDashboard() {
-    console.log("Initializing dashboard...");
-    
+
+
     // Update dashboard stats based on actual issues data
     updateDashboardStats();
-    
+
     // Setup dashboard filters
     setupDashboardFilters();
-    
+
     // Load user's issues if authenticated
     if (currentUser) {
         loadUserIssues();
@@ -39,10 +39,10 @@ function updateDashboardStats() {
         console.warn("No issues data available for dashboard stats");
         return;
     }
-    
+
     const allIssues = window.issues;
-    console.log(`Total issues in system: ${allIssues.length}`);
-    
+
+
     // Calculate user-specific stats if user is logged in
     if (currentUser) {
         // Improved user issue detection by checking multiple fields
@@ -52,7 +52,7 @@ function updateDashboardStats() {
                 const match = issue.submitterEmail.toLowerCase() === currentUser.email.toLowerCase();
                 if (match) return true;
             }
-            
+
             // Check submittedBy against email and name
             if (issue.submittedBy) {
                 if (currentUser.email && issue.submittedBy.toLowerCase() === currentUser.email.toLowerCase()) {
@@ -62,41 +62,41 @@ function updateDashboardStats() {
                     return true;
                 }
             }
-            
+
             // Check submitterName against name
             if (issue.submitterName && currentUser.name) {
                 return issue.submitterName.toLowerCase() === currentUser.name.toLowerCase();
             }
-            
+
             return false;
         });
-        
-        console.log(`Found ${userIssues.length} issues for user ${currentUser.email || currentUser.name}`);
-        
+
+
+
         // Update dashboard stats with counts
         dashboardStats.totalSubmitted = userIssues.length;
-        
+
         // Count pending issues (both pending-review and assigned statuses)
-        const pendingIssues = userIssues.filter(issue => 
+        const pendingIssues = userIssues.filter(issue =>
             issue.status === 'pending-review' || issue.status === 'assigned'
         );
         dashboardStats.pending = pendingIssues.length;
-        console.log(`Pending issues: ${dashboardStats.pending}`);
-        
+
+
         // Count in-progress issues
-        const inProgressIssues = userIssues.filter(issue => 
+        const inProgressIssues = userIssues.filter(issue =>
             issue.status === 'in-progress'
         );
         dashboardStats.inProgress = inProgressIssues.length;
-        console.log(`In-progress issues: ${dashboardStats.inProgress}`);
-        
+
+
         // Count resolved issues
-        const resolvedIssues = userIssues.filter(issue => 
+        const resolvedIssues = userIssues.filter(issue =>
             issue.status === 'resolved'
         );
         dashboardStats.resolved = resolvedIssues.length;
-        console.log(`Resolved issues: ${dashboardStats.resolved}`);
-        
+
+
         // Calculate average rating if available
         const ratedIssues = userIssues.filter(issue => issue.rating);
         if (ratedIssues.length > 0) {
@@ -113,7 +113,7 @@ function updateDashboardStats() {
         dashboardStats.resolved = 0;
         dashboardStats.avgRating = "N/A";
     }
-    
+
     // Update the dashboard UI with the calculated stats
     updateDashboardUI();
 }
@@ -122,18 +122,18 @@ function updateDashboardStats() {
  * Update the dashboard UI elements with calculated stats
  */
 function updateDashboardUI() {
-    console.log("Updating dashboard UI with stats:", dashboardStats);
-    
+
+
     // Update stat cards in the user dashboard
     document.querySelectorAll('#user-dashboard .stat-card').forEach(statCard => {
         // Get the label element to determine which stat to show
         const labelElement = statCard.querySelector('.stat-label');
         if (!labelElement) return;
-        
+
         const statType = labelElement.textContent.trim().toLowerCase();
         const numberElement = statCard.querySelector('.stat-number');
         if (!numberElement) return;
-        
+
         // Update the appropriate stat based on the label text
         if (statType.includes('total') || statType.includes('submitted')) {
             numberElement.textContent = dashboardStats.totalSubmitted;
@@ -158,46 +158,46 @@ function loadUserIssues() {
         showNoIssuesMessage("No issues could be loaded. Please try again later.");
         return;
     }
-    
+
     // Filter issues by the current user's email or name
     const userIssues = window.issues.filter(issue => {
         // Match by email first (most reliable)
         if (issue.submitterEmail && currentUser.email) {
             return issue.submitterEmail.toLowerCase() === currentUser.email.toLowerCase();
         }
-        
+
         // If email doesn't match, try matching by name
-        if ((issue.submittedBy && currentUser.name) || 
+        if ((issue.submittedBy && currentUser.name) ||
             (issue.submitterName && currentUser.name)) {
             const issueName = (issue.submittedBy || issue.submitterName || '').toLowerCase();
             const userName = currentUser.name.toLowerCase();
             return issueName.includes(userName) || userName.includes(issueName);
         }
-        
+
         return false;
     });
-    
-    console.log(`Found ${userIssues.length} issues for user ${currentUser.email || currentUser.name}`);
-    
+
+
+
     // Sort issues by date (newest first)
     userIssues.sort((a, b) => new Date(b.submittedDate || 0) - new Date(a.submittedDate || 0));
-    
+
     // Get the issues list container
     const issuesListContainer = document.querySelector('#user-dashboard .issues-list');
     if (!issuesListContainer) {
         console.warn("Issues list container not found in dashboard");
         return;
     }
-    
+
     // Clear existing content
     issuesListContainer.innerHTML = '';
-    
+
     // Check if we have any issues
     if (userIssues.length === 0) {
         showNoIssuesMessage("You haven't submitted any issues yet.");
         return;
     }
-    
+
     // Create and append issue cards
     userIssues.forEach(issue => {
         const issueCard = createIssueCard(issue);
@@ -212,7 +212,7 @@ function loadUserIssues() {
 function showNoIssuesMessage(message) {
     const issuesListContainer = document.querySelector('#user-dashboard .issues-list');
     if (!issuesListContainer) return;
-    
+
     issuesListContainer.innerHTML = `
         <div class="no-issues-message">
             <i class="fas fa-clipboard-list"></i>
@@ -230,7 +230,7 @@ function showNoIssuesMessage(message) {
 function showLoginPrompt() {
     const issuesListContainer = document.querySelector('#user-dashboard .issues-list');
     if (!issuesListContainer) return;
-    
+
     issuesListContainer.innerHTML = `
         <div class="no-issues-message">
             <i class="fas fa-user-lock"></i>
@@ -252,22 +252,22 @@ function createIssueCard(issue) {
     const card = document.createElement('div');
     card.className = 'issue-card';
     card.dataset.issueId = issue.issueId || issue.id;
-    
+
     // Format date for display
-    const submittedDate = issue.submittedDate ? 
+    const submittedDate = issue.submittedDate ?
         new Date(issue.submittedDate).toLocaleDateString() : 'Unknown';
-    
+
     // Get status icon
-    const statusIcon = typeof getStatusIcon === 'function' ? 
+    const statusIcon = typeof getStatusIcon === 'function' ?
         getStatusIcon(issue.status) : 'fas fa-info-circle';
-    
+
     // Prepare action buttons based on issue status
     let actionButtons = `
         <button class="btn-secondary" onclick="viewIssueDetails('${issue.issueId || issue.id}')">
             View Details
         </button>
     `;
-    
+
     // Add feedback button for resolved issues
     if (issue.status === 'resolved' && !issue.rating) {
         actionButtons += `
@@ -276,13 +276,13 @@ function createIssueCard(issue) {
             </button>
         `;
     }
-    
+
     // Add rating display for issues that have been rated
     let ratingDisplay = '';
     if (issue.status === 'resolved' && issue.rating) {
         const filledStars = issue.rating;
         const emptyStars = 5 - filledStars;
-        
+
         ratingDisplay = `
             <div class="rating">
                 <span>Your Rating:</span>
@@ -293,7 +293,7 @@ function createIssueCard(issue) {
             </div>
         `;
     }
-    
+
     // Build the card HTML
     // Limit description to 120 characters, add ellipsis if longer
     const maxDescLength = 120;
@@ -325,7 +325,7 @@ function createIssueCard(issue) {
             ${ratingDisplay}
         </div>
     `;
-    
+
     return card;
 }
 
@@ -338,13 +338,13 @@ function setupDashboardFilters() {
     if (statusFilter) {
         statusFilter.addEventListener('change', filterUserIssues);
     }
-    
+
     // Category filter
     const categoryFilter = document.getElementById('categoryFilter');
     if (categoryFilter) {
         categoryFilter.addEventListener('change', filterUserIssues);
     }
-    
+
     // Date filter
     const dateFilter = document.getElementById('dateFilter');
     if (dateFilter) {
@@ -362,30 +362,30 @@ function filterUserIssues() {
         console.warn("Cannot filter user issues - missing data");
         return;
     }
-    
+
     // Get filter values
     const statusFilter = document.getElementById('statusFilter').value;
     const categoryFilter = document.getElementById('categoryFilter').value;
     const dateFilter = document.getElementById('dateFilter').value;
-    
+
     // Filter issues by the current user
     let filteredIssues = window.issues.filter(issue => {
         // Match by email first (most reliable)
         if (issue.submitterEmail && currentUser.email) {
             return issue.submitterEmail.toLowerCase() === currentUser.email.toLowerCase();
         }
-        
+
         // If email doesn't match, try matching by name
-        if ((issue.submittedBy && currentUser.name) || 
+        if ((issue.submittedBy && currentUser.name) ||
             (issue.submitterName && currentUser.name)) {
             const issueName = (issue.submittedBy || issue.submitterName || '').toLowerCase();
             const userName = currentUser.name.toLowerCase();
             return issueName.includes(userName) || userName.includes(issueName);
         }
-        
+
         return false;
     });
-    
+
     // Apply status filter
     if (statusFilter !== 'all') {
         filteredIssues = filteredIssues.filter(issue => {
@@ -399,12 +399,12 @@ function filterUserIssues() {
             return true;
         });
     }
-    
+
     // Apply category filter
     if (categoryFilter !== 'all') {
         filteredIssues = filteredIssues.filter(issue => issue.category === categoryFilter);
     }
-    
+
     // Apply date filter
     if (dateFilter) {
         const filterDate = new Date(dateFilter);
@@ -414,17 +414,17 @@ function filterUserIssues() {
             return issueDate.toDateString() === filterDate.toDateString();
         });
     }
-    
+
     // Sort filtered issues by date (newest first)
     filteredIssues.sort((a, b) => new Date(b.submittedDate || 0) - new Date(a.submittedDate || 0));
-    
+
     // Update the issues list
     const issuesListContainer = document.querySelector('#user-dashboard .issues-list');
     if (!issuesListContainer) return;
-    
+
     // Clear existing content
     issuesListContainer.innerHTML = '';
-    
+
     // Check if we have any issues after filtering
     if (filteredIssues.length === 0) {
         issuesListContainer.innerHTML = `
@@ -438,7 +438,7 @@ function filterUserIssues() {
         `;
         return;
     }
-    
+
     // Create and append filtered issue cards
     filteredIssues.forEach(issue => {
         const issueCard = createIssueCard(issue);
@@ -452,13 +452,13 @@ function filterUserIssues() {
 function resetFilters() {
     document.getElementById('statusFilter').value = 'all';
     document.getElementById('categoryFilter').value = 'all';
-    
+
     // Clear the date filter value instead of setting min date
     const dateFilter = document.getElementById('dateFilter');
     if (dateFilter) {
         dateFilter.value = '';
     }
-    
+
     // Reload user issues without filters
     loadUserIssues();
 }
@@ -469,7 +469,7 @@ function resetFilters() {
 function scrollToReportForm() {
     // Switch to home section
     showSection('home');
-    
+
     // Scroll to quick-report form
     const reportForm = document.querySelector('.quick-report');
     if (reportForm) {
@@ -482,7 +482,7 @@ function scrollToReportForm() {
  */
 function formatLocationName(location) {
     if (!location) return 'Unknown';
-    
+
     const locationMap = {
         'academic': 'Academic Building',
         'academic-building': 'Academic Building',
@@ -502,29 +502,29 @@ function formatLocationName(location) {
         'day-care-center': 'Day Care Center',
         'staff-canteen': 'Staff Canteen'
     };
-    
+
     return locationMap[location] || location.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }
 
 // Initialize dashboard when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM loaded - setting up dashboard listeners");
-    
+document.addEventListener('DOMContentLoaded', function () {
+
+
     // Add a listener for the issues loaded event
-    window.addEventListener('issuesLoaded', function() {
-        console.log('Issues loaded event received - initializing dashboard...');
+    window.addEventListener('issuesLoaded', function () {
+
         initializeDashboard();
     });
-    
+
     // If issues are already loaded, initialize the dashboard now
     if (window.issues && Array.isArray(window.issues) && window.issues.length > 0) {
-        console.log(`Issues already available (${window.issues.length}) - initializing dashboard immediately`);
+
         initializeDashboard();
     }
-    
+
     // Listen for auth changes
-    window.addEventListener('authStateChanged', function(e) {
-        console.log('Auth state changed - updating dashboard');
+    window.addEventListener('authStateChanged', function (e) {
+
         if (e.detail && e.detail.user) {
             // User just logged in, update dashboard
             currentUser = e.detail.user;
@@ -535,10 +535,10 @@ document.addEventListener('DOMContentLoaded', function() {
             showLoginPrompt();
         }
     });
-    
+
     // Listen for tab changes to update dashboard
     document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             if (this.textContent.trim().toLowerCase().includes('issues')) {
                 updateDashboardStats();
                 loadUserIssues();

@@ -27,7 +27,7 @@ function initializeApp() {
             input.value = today;
         } else if (input.id === 'dateFilter') {
             // Don't set min date for dashboard filter - allows filtering by past dates
-            console.log("Initializing dashboard date filter without date restrictions");
+
         } else {
             // Only set min date for other inputs (like scheduling future maintenance)
             input.min = today;
@@ -49,7 +49,7 @@ function setupEventListeners() {
             link.addEventListener('click', function (e) {
                 e.preventDefault();
                 const section = this.getAttribute('href').substring(1);
-                console.log(`Navigation link clicked (fallback): ${section}`);
+
                 showSection(section);
             });
         });
@@ -137,6 +137,16 @@ function updateNavigation() {
 function toggleMobileMenu() {
     const navLinks = document.querySelector('.nav-links');
     navLinks.classList.toggle('mobile-active');
+
+    // Close menu when a link is clicked
+    if (navLinks.classList.contains('mobile-active')) {
+        const links = navLinks.querySelectorAll('a');
+        links.forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('mobile-active');
+            }, { once: true });
+        });
+    }
 }
 
 // Add this stub to avoid ReferenceError if not implemented elsewhere
@@ -146,7 +156,7 @@ function filterUserIssues() {
 
 function filterMapIssues() {
     const filter = document.getElementById('mapFilter').value;
-    console.log("Filter applied:", filter);  // Debug
+
 
     // Filter issues based on the selected criteria - use window.issues
     let filteredIssues = [];
@@ -165,7 +175,7 @@ function filterMapIssues() {
         filteredIssues = (window.issues || []).filter(issue => issue.status === 'resolved');
     }
 
-    console.log("Filtered issues:", filteredIssues.length);  // Debug
+
 
     // Update the campus map with filtered issues
     if (typeof updateCampusMap === 'function') {
@@ -263,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const element = document.getElementById(id);
         if (element) {
             element.addEventListener('change', function () {
-                console.log('Filter changed:', id);
+
                 if (window.filterHomeIssues) {
                     window.filterHomeIssues();
                 }
@@ -275,7 +285,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('homeSearchInput');
     if (searchInput) {
         searchInput.addEventListener('input', function () {
-            console.log('Search input changed');
+
             if (window.filterHomeIssues) {
                 window.filterHomeIssues();
             }

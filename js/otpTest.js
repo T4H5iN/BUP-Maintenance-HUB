@@ -17,18 +17,18 @@ let testModeActive = false;
 function generateTestOTP(email) {
     // Generate a random 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    
+
     // Store the OTP
     testOtps[email] = otp;
-    
+
     // Display the OTP in the console for testing
-    console.log(`[TEST MODE] OTP for ${email}: ${otp}`);
-    
+
+
     // Also show a notification if the function exists
     if (typeof showNotification === 'function') {
         showNotification(`[TEST MODE] OTP for ${email}: ${otp}`, 'info');
     }
-    
+
     return otp;
 }
 
@@ -51,7 +51,7 @@ async function mockVerifyOTP(email, otp) {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
             const isValid = verifyTestOTP(email, otp);
-            
+
             if (isValid) {
                 resolve({
                     ok: true,
@@ -83,14 +83,14 @@ async function mockVerifyOTP(email, otp) {
 const originalFetch = window.fetch;
 
 // Override the fetch function only when test mode is active
-window.fetch = function(url, options) {
+window.fetch = function (url, options) {
     // Only intercept if test mode is active
     if (testModeActive) {
         if (url.includes('/api/users/verify-otp')) {
             const body = JSON.parse(options.body);
             return mockVerifyOTP(body.email, body.otp);
         }
-        
+
         if (url.includes('/api/users/resend-otp')) {
             const body = JSON.parse(options.body);
             generateTestOTP(body.email);
@@ -99,7 +99,7 @@ window.fetch = function(url, options) {
                 json: () => ({ message: 'Verification code resent to your email' })
             });
         }
-        
+
         if (url.includes('/api/users')) {
             const body = JSON.parse(options.body);
             if (body.email) {
@@ -107,7 +107,7 @@ window.fetch = function(url, options) {
             }
         }
     }
-    
+
     // Use the original fetch for all other requests or when test mode is inactive
     return originalFetch(url, options);
 };
@@ -118,7 +118,7 @@ window.fetch = function(url, options) {
  */
 function toggleTestMode(active) {
     testModeActive = active;
-    console.log(`OTP Test Mode ${active ? 'enabled' : 'disabled'}`);
+
     if (typeof showNotification === 'function') {
         showNotification(`OTP Test Mode ${active ? 'enabled' : 'disabled'}`, 'info');
     }
@@ -132,4 +132,4 @@ window.generateTestOTP = generateTestOTP;
 window.verifyTestOTP = verifyTestOTP;
 window.toggleTestMode = toggleTestMode;
 
-console.log('OTP Test System loaded. Use toggleTestMode(true) to enable, toggleTestMode(false) to disable test mode.');
+

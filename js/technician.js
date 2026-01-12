@@ -302,7 +302,7 @@ async function loadTechnicianAssignments() {
     }
 
     try {
-        console.log('Fetching technician assignments...');
+
 
         // Fetch all assignments for the logged-in technician
         const res = await fetch('/api/issues/assigned-to-me', {
@@ -310,7 +310,7 @@ async function loadTechnicianAssignments() {
         });
 
         // Log response status for debugging
-        console.log('Assignment fetch response status:', res.status);
+
 
         if (!res.ok) {
             const errorText = await res.text();
@@ -329,7 +329,7 @@ async function loadTechnicianAssignments() {
         }
 
         const data = await res.json();
-        console.log('Assignments loaded:', data.issues ? data.issues.length : 0);
+
 
         // Save all issues for filtering
         window.technicianAllIssues = data.issues || [];

@@ -11,13 +11,13 @@ class GeminiChatbotService {
     this.modelName = process.env.GEMINI_MODEL || 'gemini-2.5-pro';
     this.maxOutputTokens = parseInt(process.env.GEMINI_MAX_TOKENS || '1024', 10);
     this.temperature = parseFloat(process.env.GEMINI_TEMPERATURE || '0.7');
-    
+
     // Initialize only if API key is available
     if (this.apiKey) {
       this.genAI = new GoogleGenerativeAI(this.apiKey);
       try {
         // Verify model exists and log more information
-        this.model = this.genAI.getGenerativeModel({ 
+        this.model = this.genAI.getGenerativeModel({
           model: this.modelName,
           generationConfig: {
             maxOutputTokens: this.maxOutputTokens,
@@ -27,7 +27,7 @@ class GeminiChatbotService {
           }
         });
         this.initialized = true;
-        console.log(`Gemini API initialized with model: ${this.modelName}`);
+
       } catch (error) {
         console.error(`Failed to initialize Gemini model ${this.modelName}:`, error);
         this.initialized = false;
@@ -36,11 +36,11 @@ class GeminiChatbotService {
       console.warn('GEMINI_API_KEY not found. Chatbot will use fallback responses.');
       this.initialized = false;
     }
-    
+
     // System prompt to define chatbot behavior
     this.systemPrompt = this.buildSystemPrompt();
   }
-  
+
   /**
    * Build the system prompt with instructions for the chatbot
    */
@@ -75,7 +75,7 @@ GUIDELINES:
 For very specific questions about particular issues, direct users to check their dashboard or contact support.
     `;
   }
-  
+
   /**
    * Generate a response to user messages
    * @param {Array} messages - Array of message objects with role and content
@@ -86,11 +86,11 @@ For very specific questions about particular issues, direct users to check their
     if (!this.initialized) {
       return this.getFallbackResponse();
     }
-    
+
     try {
       // Format messages for Gemini API
       const formattedMessages = this.formatMessagesForGemini(messages, userContext);
-      
+
       // Call Gemini API
       const result = await this.model.generateContent({
         contents: formattedMessages,
@@ -113,7 +113,7 @@ For very specific questions about particular issues, direct users to check their
           }
         ]
       });
-      
+
       // Extract and return the response text
       const responseText = result.response.text();
       return responseText.trim();
@@ -130,7 +130,7 @@ For very specific questions about particular issues, direct users to check their
       return this.getErrorResponse(error);
     }
   }
-  
+
   /**
    * Format messages for the Gemini API
    */
@@ -142,13 +142,13 @@ For very specific questions about particular issues, direct users to check their
         parts: [{ text: this.systemPrompt }]
       }
     ];
-    
+
     // Add user context as a system message
     formattedMessages.push({
       role: 'model',
       parts: [{ text: `Current user information: Role: ${userContext.role}, Department: ${userContext.department || 'Not specified'}` }]
     });
-    
+
     // Add conversation history
     messages.forEach(message => {
       const role = message.role === 'user' ? 'user' : 'model';
@@ -157,10 +157,10 @@ For very specific questions about particular issues, direct users to check their
         parts: [{ text: message.content }]
       });
     });
-    
+
     return formattedMessages;
   }
-  
+
   /**
    * Get a fallback response when API is not initialized
    */
@@ -171,19 +171,19 @@ For very specific questions about particular issues, direct users to check their
       "The BUP Maintenance HUB makes it easy to report and track campus issues. How can I assist you today?",
       "I'm your assistant for the maintenance platform. Ask me how to submit reports or check status updates."
     ];
-    
+
     return fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
   }
-  
+
   /**
    * Get an error response when API call fails
    */
   getErrorResponse(error) {
     console.error('Error generating response:', error);
-    
+
     return "I'm sorry, I'm having trouble connecting to my knowledge base right now. Please try again in a moment or contact support if you need immediate assistance.";
   }
-  
+
   /**
    * Check if the Gemini service is healthy
    */
@@ -191,20 +191,20 @@ For very specific questions about particular issues, direct users to check their
     if (!this.initialized) {
       return false;
     }
-    
+
     try {
       // Simple test query to check if API is responsive
       const result = await this.model.generateContent({
         contents: [{ role: 'user', parts: [{ text: 'Hello' }] }]
       });
-      
+
       return result && result.response;
     } catch (error) {
       console.error('Gemini API health check error:', error);
       return false;
     }
   }
-  
+
   /**
    * Get available models from the API
    * Useful for debugging model availability issues
@@ -213,7 +213,7 @@ For very specific questions about particular issues, direct users to check their
     if (!this.genAI) {
       return ['No API client initialized'];
     }
-    
+
     try {
       const models = await this.genAI.listModels();
       return models;

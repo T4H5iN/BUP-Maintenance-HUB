@@ -10,12 +10,12 @@ function initializeCampusMap() {
         console.error("Issues data not available for map initialization");
         return;
     }
-    
-    console.log(`Initializing campus map with ${window.issues.length} issues`);
-    
+
+
+
     // Update the map with all issues
     updateCampusMap(window.issues);
-    
+
     // Add click event listeners to all buildings
     document.querySelectorAll('.building').forEach(building => {
         // Remove any existing click listeners to avoid duplicates
@@ -23,7 +23,7 @@ function initializeCampusMap() {
         // Add fresh click listener
         building.addEventListener('click', handleBuildingClick);
     });
-    
+
     // Set up map filter
     const mapFilter = document.getElementById('mapFilter');
     if (mapFilter) {
@@ -42,9 +42,9 @@ function handleBuildingClick(e) {
     const buildingId = building.dataset.building;
     const buildingName = building.querySelector('.building-label').textContent;
     const issueCount = building.querySelector('.issue-count')?.textContent || '0';
-    
-    console.log(`Building clicked: ${buildingName} (${buildingId}) with ${issueCount} issues`);
-    
+
+
+
     showBuildingDetails(buildingName, issueCount, buildingId);
 }
 
@@ -53,11 +53,11 @@ function handleBuildingClick(e) {
  */
 function filterMapIssues() {
     const filter = document.getElementById('mapFilter').value;
-    console.log("Filter applied:", filter);
-    
+
+
     // Filter issues based on the selected criteria
     let filteredIssues = [];
-    
+
     if (filter === 'all') {
         filteredIssues = window.issues || [];
     } else if (filter === 'urgent') {
@@ -65,18 +65,18 @@ function filterMapIssues() {
     } else if (filter === 'high') {
         filteredIssues = (window.issues || []).filter(issue => issue.priority === 'high');
     } else if (filter === 'pending') {
-        filteredIssues = (window.issues || []).filter(issue => 
+        filteredIssues = (window.issues || []).filter(issue =>
             issue.status === 'pending-review' || issue.status === 'assigned'
         );
     } else if (filter === 'resolved') {
         filteredIssues = (window.issues || []).filter(issue => issue.status === 'resolved');
     }
-    
-    console.log("Filtered issues:", filteredIssues.length);
-    
+
+
+
     // Update the campus map with filtered issues
     updateCampusMap(filteredIssues);
-    
+
     // Show notification about the filter
     showNotification(`Showing ${filter} issues on the campus map`, 'info');
 }
@@ -87,16 +87,16 @@ function filterMapIssues() {
  */
 function updateCampusMap(filteredIssues) {
     // Filter out pending-review issues for non-admin/mod users (students, faculty, technicians)
-    if (currentUser && 
-        (currentUser.role === 'student' || 
-         currentUser.role === 'faculty' || 
-         currentUser.role === 'technician')) {
+    if (currentUser &&
+        (currentUser.role === 'student' ||
+            currentUser.role === 'faculty' ||
+            currentUser.role === 'technician')) {
         filteredIssues = filteredIssues.filter(issue => issue.status !== 'pending-review');
     }
-    
+
     // Filter out rejected issues for all users
     filteredIssues = filteredIssues.filter(issue => issue.status !== 'rejected');
-    
+
     // The comprehensive mapping between HTML data-building attributes and database location values
     const locationMapping = {
         'academic': ['academic-building', 'academic'],
@@ -110,7 +110,7 @@ function updateCampusMap(filteredIssues) {
         'daycare': ['day-care-center', 'daycare'],
         'staff-canteen': ['staff-canteen']
     };
-    
+
     // Create the reverse mapping from database values to HTML data-building attributes
     const reverseMapping = {};
     Object.entries(locationMapping).forEach(([buildingId, locationValues]) => {
@@ -118,61 +118,61 @@ function updateCampusMap(filteredIssues) {
             reverseMapping[location] = buildingId;
         });
     });
-    
+
     // Group issues by location using the reverse mapping
     const issuesByLocation = {};
-    
+
     filteredIssues.forEach(issue => {
         const location = issue.location;
         const buildingId = reverseMapping[location] || location;
-        
+
         if (!issuesByLocation[buildingId]) {
             issuesByLocation[buildingId] = [];
         }
         issuesByLocation[buildingId].push(issue);
     });
-    
-    console.log("Issues by location:", issuesByLocation);
-    
+
+
+
     // Update each building on the map
     document.querySelectorAll('.building').forEach(building => {
         const buildingId = building.dataset.building;
-        console.log("Processing building:", buildingId);
-        
+
+
         const issueCountElement = building.querySelector('.issue-count');
         if (!issueCountElement) {
-            console.log("No issue count element for:", buildingId);
+
             return;
         }
-        
+
         // If we have issues for this building
         if (issuesByLocation[buildingId] && issuesByLocation[buildingId].length > 0) {
             const buildingIssues = issuesByLocation[buildingId];
             const issueCount = buildingIssues.length;
-            
-            console.log(`${buildingId} has ${issueCount} issues`);
-            
+
+
+
             // Find highest priority
             let highestPriority = 'low';
             const priorityRank = { 'urgent': 4, 'high': 3, 'medium': 2, 'low': 1 };
-            
+
             buildingIssues.forEach(issue => {
                 if (priorityRank[issue.priority] > priorityRank[highestPriority]) {
                     highestPriority = issue.priority;
                 }
             });
-            
+
             // Update count and class
             issueCountElement.textContent = issueCount;
-            
+
             // Remove existing priority classes
             ['low', 'medium', 'high', 'urgent'].forEach(priority => {
                 issueCountElement.classList.remove(priority);
             });
-            
+
             // Add appropriate priority class
             issueCountElement.classList.add(highestPriority);
-            
+
             // Make building visible
             building.style.display = 'flex';
         } else {
@@ -183,7 +183,7 @@ function updateCampusMap(filteredIssues) {
             } else {
                 // Show building with zero count if we're showing all
                 issueCountElement.textContent = '0';
-                
+
                 // Remove priority classes and add low
                 ['low', 'medium', 'high', 'urgent'].forEach(priority => {
                     issueCountElement.classList.remove(priority);
@@ -215,45 +215,45 @@ function showBuildingDetails(buildingName, issueCount, buildingId) {
         'daycare': ['day-care-center', 'daycare'],
         'staff-canteen': ['staff-canteen']
     };
-    
+
     // Get all possible location values for this building
     const locationValues = locationMapping[buildingId] || [buildingId];
-    
+
     // Get issues for this building
-    let buildingIssues = (window.issues || []).filter(issue => 
+    let buildingIssues = (window.issues || []).filter(issue =>
         locationValues.includes(issue.location)
     );
-    
+
     // Filter out pending-review issues for non-admin/mod users (students, faculty, technicians)
-    if (currentUser && 
-        (currentUser.role === 'student' || 
-         currentUser.role === 'faculty' || 
-         currentUser.role === 'technician')) {
+    if (currentUser &&
+        (currentUser.role === 'student' ||
+            currentUser.role === 'faculty' ||
+            currentUser.role === 'technician')) {
         buildingIssues = buildingIssues.filter(issue => issue.status !== 'pending-review');
     }
-    
+
     // Filter out rejected issues for all users
     buildingIssues = buildingIssues.filter(issue => issue.status !== 'rejected');
-    
-    console.log(`Found ${buildingIssues.length} issues for ${buildingName} (${buildingId})`);
-    
+
+
+
     // Sort issues by priority (highest first) and then by submission date (newest first)
     buildingIssues.sort((a, b) => {
         // Priority ranking: urgent > high > medium > low
         const priorityRank = { 'urgent': 4, 'high': 3, 'medium': 2, 'low': 1 };
         const priorityDiff = (priorityRank[b.priority] || 0) - (priorityRank[a.priority] || 0);
-        
+
         if (priorityDiff !== 0) return priorityDiff;
-        
+
         // Then sort by date (newest first)
         return new Date(b.submittedDate || 0) - new Date(a.submittedDate || 0);
     });
-    
+
     // Create modal for displaying building details
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.id = 'buildingDetailsModal';
-    
+
     // Count issues by priority
     const priorityCounts = {
         urgent: buildingIssues.filter(i => i.priority === 'urgent').length,
@@ -261,7 +261,7 @@ function showBuildingDetails(buildingName, issueCount, buildingId) {
         medium: buildingIssues.filter(i => i.priority === 'medium').length,
         low: buildingIssues.filter(i => i.priority === 'low').length
     };
-    
+
     // Count issues by status
     const statusCounts = {
         'pending-review': buildingIssues.filter(i => i.status === 'pending-review').length,
@@ -270,7 +270,7 @@ function showBuildingDetails(buildingName, issueCount, buildingId) {
         'resolved': buildingIssues.filter(i => i.status === 'resolved').length,
         'rejected': buildingIssues.filter(i => i.status === 'rejected').length
     };
-    
+
     // Create issue breakdown
     let issueBreakdown = '';
     if (priorityCounts.urgent > 0) {
@@ -285,7 +285,7 @@ function showBuildingDetails(buildingName, issueCount, buildingId) {
     if (priorityCounts.low > 0) {
         issueBreakdown += `<div class="priority-count low">${priorityCounts.low} Low</div>`;
     }
-    
+
     // Create status breakdown
     let statusBreakdown = '';
     if (statusCounts['pending-review'] > 0) {
@@ -303,24 +303,24 @@ function showBuildingDetails(buildingName, issueCount, buildingId) {
     if (statusCounts['rejected'] > 0) {
         statusBreakdown += `<div class="status-count rejected">${statusCounts['rejected']} Rejected</div>`;
     }
-    
+
     // Generate issue cards for this building
     let issueCards = '';
-    
+
     if (buildingIssues.length === 0) {
         issueCards = '<div class="no-issues-container"><p class="no-issues">No issues reported for this building.</p></div>';
     } else {
         issueCards = '<div class="building-issues-grid">';
-        
+
         buildingIssues.forEach(issue => {
             // Format date for display
-            const submittedDate = issue.submittedDate ? 
+            const submittedDate = issue.submittedDate ?
                 new Date(issue.submittedDate).toLocaleDateString() : 'Unknown';
-            
+
             // Get status icon
-            const statusIcon = typeof getStatusIcon === 'function' ? 
+            const statusIcon = typeof getStatusIcon === 'function' ?
                 getStatusIcon(issue.status) : 'fas fa-info-circle';
-            
+
             issueCards += `
                 <div class="building-issue-card ${issue.priority}">
                     <div class="building-issue-header">
@@ -353,10 +353,10 @@ function showBuildingDetails(buildingName, issueCount, buildingId) {
                 </div>
             `;
         });
-        
+
         issueCards += '</div>';
     }
-    
+
     modal.innerHTML = `
         <div class="modal-content building-details-modal">
             <span class="close" onclick="closeBuildingDetailsModal()">&times;</span>
@@ -401,7 +401,7 @@ function showBuildingDetails(buildingName, issueCount, buildingId) {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(modal);
     modal.style.display = 'block';
 }
@@ -412,23 +412,23 @@ function showBuildingDetails(buildingName, issueCount, buildingId) {
  */
 function reportIssueForBuilding(buildingId) {
     closeBuildingDetailsModal();
-    
+
     // Scroll to the report form
     document.getElementById('home').classList.add('active');
     document.getElementById('map').classList.remove('active');
-    
+
     // Update nav links
     document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('active');
     });
     document.querySelector('[href="#home"]').classList.add('active');
-    
+
     // Set the location dropdown
     document.getElementById('location').value = buildingId;
-    
+
     // Scroll to the form
     document.querySelector('.quick-report').scrollIntoView({ behavior: 'smooth' });
-    
+
     // Update current section
     currentSection = 'home';
 }
@@ -436,16 +436,16 @@ function reportIssueForBuilding(buildingId) {
 /**
  * Initialize the map when the DOM is loaded
  */
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // When issues are loaded, initialize the map
-    window.addEventListener('issuesLoaded', function() {
-        console.log('Issues loaded, initializing campus map');
+    window.addEventListener('issuesLoaded', function () {
+
         initializeCampusMap();
     });
-    
+
     // If issues are already loaded, initialize the map now
     if (window.issues && Array.isArray(window.issues) && window.issues.length > 0) {
-        console.log('Issues already available, initializing campus map');
+
         initializeCampusMap();
     }
 });

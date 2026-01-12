@@ -370,7 +370,7 @@ function logout() {
         if (typeof showNotification === 'function') {
             showNotification('Logged out successfully', 'success');
         } else {
-            console.log('Logged out successfully');
+
         }
 
         // Close user menu

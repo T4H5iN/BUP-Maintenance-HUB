@@ -70,7 +70,7 @@ async function handleOtpVerification(e) {
     showLoading();
 
     try {
-        console.log('Sending verification request:', { email: verificationEmail, otp });
+
 
         const res = await fetch('/api/users/verify-otp', {
             method: 'POST',
@@ -85,7 +85,7 @@ async function handleOtpVerification(e) {
         hideLoading();
 
         // Log response for debugging
-        console.log('Verification response:', data, 'Status:', res.status);
+
 
         if (!res.ok) {
             showNotification(data.message || 'Verification failed', 'error');

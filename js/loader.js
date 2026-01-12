@@ -17,12 +17,12 @@ const loadedModules = {
 // Function to check if all required modules are loaded
 function checkAllModulesLoaded() {
     const allLoaded = Object.values(loadedModules).every(loaded => loaded);
-    
+
     if (allLoaded) {
-        console.log('All modules loaded successfully');
+
         // Initialize the application
         if (typeof initializeApp === 'function') {
-            console.log('Initializing application...');
+
             // Remove loading screen if present
             const loadingScreen = document.getElementById('loading-screen');
             if (loadingScreen) {
@@ -31,7 +31,7 @@ function checkAllModulesLoaded() {
                     loadingScreen.remove();
                 }, 500);
             }
-            
+
             // Call main initialization
             initializeApp();
         } else {
@@ -43,7 +43,7 @@ function checkAllModulesLoaded() {
 // Register a module as loaded
 function registerModuleLoaded(moduleName) {
     if (moduleName in loadedModules) {
-        console.log(`Module loaded: ${moduleName}`);
+
         loadedModules[moduleName] = true;
         checkAllModulesLoaded();
     } else {

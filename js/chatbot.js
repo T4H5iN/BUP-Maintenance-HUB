@@ -50,7 +50,7 @@ function initChatbot() {
   // Add suggested questions
   addSuggestedQuestions();
 
-  console.log('Chatbot initialized successfully');
+
 }
 
 /**

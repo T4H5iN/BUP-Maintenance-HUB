@@ -29,7 +29,7 @@ class AnalyticsManager {
         for (let i = 0; i < 100; i++) {
             const date = new Date();
             date.setDate(date.getDate() - Math.floor(Math.random() * 180));
-            
+
             const issue = {
                 id: `BUP${String(i + 1).padStart(3, '0')}`,
                 category: categories[Math.floor(Math.random() * categories.length)],
@@ -37,7 +37,7 @@ class AnalyticsManager {
                 location: locations[Math.floor(Math.random() * locations.length)],
                 submittedDate: date.toISOString().split('T')[0],
                 status: statuses[Math.floor(Math.random() * statuses.length)],
-                resolutionTime: Math.floor(Math.random() * 14) + 1 
+                resolutionTime: Math.floor(Math.random() * 14) + 1
             };
 
             this.data.issues.push(issue);
@@ -65,9 +65,9 @@ class AnalyticsManager {
 
     calculateMonthlyTrends() {
         const monthlyData = {};
-        
+
         this.data.issues.forEach(issue => {
-            const month = issue.submittedDate.substring(0, 7); 
+            const month = issue.submittedDate.substring(0, 7);
             if (!monthlyData[month]) {
                 monthlyData[month] = { submitted: 0, resolved: 0 };
             }
@@ -92,7 +92,7 @@ class AnalyticsManager {
         const resolvedIssues = this.data.issues.filter(i => i.status === 'resolved').length;
         const pendingIssues = this.data.issues.filter(i => i.status === 'pending').length;
         const inProgressIssues = this.data.issues.filter(i => i.status === 'in-progress').length;
-        
+
         const avgResolutionTime = this.data.issues
             .filter(i => i.status === 'resolved')
             .reduce((sum, issue) => sum + issue.resolutionTime, 0) / resolvedIssues;
@@ -123,7 +123,7 @@ class AnalyticsManager {
                 this.generateCategoryChart();
             }, 300);
         });
-        
+
         if (currentSection === 'reports') {
             setTimeout(() => {
                 this.generateTrendsChart();
@@ -135,18 +135,18 @@ class AnalyticsManager {
     generateTrendsChart() {
         const ctx = document.getElementById('trendsChart');
         if (!ctx) return;
-        
+
         // Check if Chart is defined
         if (typeof Chart === 'undefined') {
             console.error('Chart.js library is not loaded. Unable to generate trend chart.');
             this.renderFallbackChart(ctx, 'trends');
             return;
         }
-        
+
         if (this.trendsChartInstance) {
             this.trendsChartInstance.destroy();
         }
-        
+
         // Use actual data if available
         let chartData;
         if (window.reportData && Array.isArray(window.reportData.filteredIssues) && window.reportData.filteredIssues.length > 0) {
@@ -156,16 +156,16 @@ class AnalyticsManager {
             // Fall back to stored trends
             chartData = this.data.trends;
         }
-        
+
         const months = chartData.map(t => {
             const [year, month] = t.month.split('-');
             const date = new Date(year, month - 1);
             return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
         });
-        
+
         const submitted = chartData.map(t => t.submitted);
         const resolved = chartData.map(t => t.resolved);
-        
+
         this.trendsChartInstance = new Chart(ctx, {
             type: 'line',
             data: {
@@ -229,7 +229,7 @@ class AnalyticsManager {
         if (typeof isDarkMode !== 'undefined' && isDarkMode) {
             this.applyDarkModeToChart(this.trendsChartInstance);
         }
-        
+
         window.addEventListener('themeChanged', (event) => {
             if (event.detail.isDark) {
                 this.applyDarkModeToChart(this.trendsChartInstance);
@@ -241,11 +241,11 @@ class AnalyticsManager {
 
     calculateTrendsFromData(issues) {
         const monthlyData = {};
-        
+
         issues.forEach(issue => {
             if (!issue.submittedDate) return;
-            
-            const month = issue.submittedDate.substring(0, 7); 
+
+            const month = issue.submittedDate.substring(0, 7);
             if (!monthlyData[month]) {
                 monthlyData[month] = { submitted: 0, resolved: 0 };
             }
@@ -270,7 +270,7 @@ class AnalyticsManager {
         canvas.id = 'categoryChart';
         canvas.width = 400;
         canvas.height = 300;
-        
+
         const chartContainer = document.querySelector('.chart-container');
         if (chartContainer && !document.getElementById('categoryChart')) {
             const categoryChartDiv = document.createElement('div');
@@ -278,21 +278,21 @@ class AnalyticsManager {
             categoryChartDiv.appendChild(canvas);
             chartContainer.appendChild(categoryChartDiv);
         }
-        
+
         const ctx = document.getElementById('categoryChart');
         if (!ctx) return;
-        
+
         // Check if Chart is defined
         if (typeof Chart === 'undefined') {
             console.error('Chart.js library is not loaded. Unable to generate category chart.');
             this.renderFallbackChart(ctx, 'categories');
             return;
         }
-        
+
         if (this.categoryChartInstance) {
             this.categoryChartInstance.destroy();
         }
-        
+
         // Use actual data if available
         let categories, values;
         if (window.reportData && Array.isArray(window.reportData.filteredIssues) && window.reportData.filteredIssues.length > 0) {
@@ -305,7 +305,7 @@ class AnalyticsManager {
             categories = Object.keys(this.data.categories);
             values = Object.values(this.data.categories);
         }
-        
+
         const backgroundColors = [
             'rgba(30, 58, 138, 0.8)',
             'rgba(59, 130, 246, 0.8)',
@@ -314,7 +314,7 @@ class AnalyticsManager {
             'rgba(239, 68, 68, 0.8)',
             'rgba(139, 92, 246, 0.8)'
         ];
-        
+
         this.categoryChartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -375,27 +375,27 @@ class AnalyticsManager {
 
     applyDarkModeToChart(chart) {
         if (!chart) return;
-        
+
         chart.options.scales.x.ticks.color = '#cbd5e1';
         chart.options.scales.y.ticks.color = '#cbd5e1';
         chart.options.scales.x.title.color = '#cbd5e1';
         chart.options.scales.y.title.color = '#cbd5e1';
         chart.options.plugins.title.color = '#e2e8f0';
         chart.options.plugins.legend.labels = { color: '#cbd5e1' };
-        
+
         chart.update();
     }
 
     applyLightModeToChart(chart) {
         if (!chart) return;
-        
+
         chart.options.scales.x.ticks.color = '#475569';
         chart.options.scales.y.ticks.color = '#475569';
         chart.options.scales.x.title.color = '#475569';
         chart.options.scales.y.title.color = '#475569';
         chart.options.plugins.title.color = '#1e293b';
         chart.options.plugins.legend.labels = { color: '#475569' };
-        
+
         chart.update();
     }
 
@@ -423,8 +423,8 @@ class AnalyticsManager {
     }
 
     simulateReportGeneration(format, data) {
-        console.log(`Generating ${format} report...`);
-        
+
+
         if (format === 'pdf') {
             this.generatePDFReport(data);
         } else if (format === 'excel') {
@@ -435,7 +435,7 @@ class AnalyticsManager {
     generatePDFReport(data) {
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
-        
+
         const a = document.createElement('a');
         a.href = url;
         a.download = `bup-maintenance-report-${Date.now()}.json`;
@@ -447,14 +447,14 @@ class AnalyticsManager {
 
     generateExcelReport(data) {
         let csv = 'Issue ID,Category,Priority,Location,Status,Submitted Date,Resolution Time\n';
-        
+
         data.issues.forEach(issue => {
             csv += `${issue.id},${issue.category},${issue.priority},${issue.location},${issue.status},${issue.submittedDate},${issue.resolutionTime}\n`;
         });
-        
+
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
-        
+
         const a = document.createElement('a');
         a.href = url;
         a.download = `bup-maintenance-report-${Date.now()}.csv`;
@@ -469,11 +469,11 @@ class AnalyticsManager {
      */
     renderFallbackChart(container, type) {
         if (!container) return;
-        
+
         // Clear any existing content
         container.innerHTML = '';
         container.style.height = 'auto';
-        
+
         // Create fallback message
         const fallbackMessage = document.createElement('div');
         fallbackMessage.className = 'chart-fallback';
@@ -486,21 +486,21 @@ class AnalyticsManager {
                 </button>
             </div>
         `;
-        
+
         // Create a simple text-based visualization
         const dataDisplay = document.createElement('div');
         dataDisplay.className = 'fallback-data';
-        
+
         if (type === 'trends') {
             const trends = this.data.trends.slice(-5); // Show last 5 months
             let trendsHtml = '<h4>Recent Trends (Last 5 Months)</h4><table class="fallback-table">';
             trendsHtml += '<tr><th>Month</th><th>Submitted</th><th>Resolved</th><th>Rate</th></tr>';
-            
+
             trends.forEach(t => {
                 const [year, month] = t.month.split('-');
                 const date = new Date(year, month - 1);
                 const monthName = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-                
+
                 trendsHtml += `<tr>
                     <td>${monthName}</td>
                     <td>${t.submitted}</td>
@@ -508,24 +508,24 @@ class AnalyticsManager {
                     <td>${t.resolutionRate}%</td>
                 </tr>`;
             });
-            
+
             trendsHtml += '</table>';
             dataDisplay.innerHTML = trendsHtml;
         } else if (type === 'categories') {
             let categoriesHtml = '<h4>Issues by Category</h4><table class="fallback-table">';
             categoriesHtml += '<tr><th>Category</th><th>Issues</th></tr>';
-            
+
             Object.entries(this.data.categories).forEach(([category, count]) => {
                 categoriesHtml += `<tr>
                     <td>${category.charAt(0).toUpperCase() + category.slice(1)}</td>
                     <td>${count}</td>
                 </tr>`;
             });
-            
+
             categoriesHtml += '</table>';
             dataDisplay.innerHTML = categoriesHtml;
         }
-        
+
         // Append elements
         container.appendChild(fallbackMessage);
         container.appendChild(dataDisplay);
@@ -534,9 +534,9 @@ class AnalyticsManager {
 
 const analyticsManager = new AnalyticsManager();
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     analyticsManager.initializeAnalytics();
-    
+
     // Add this line to register that the analytics module is loaded
     if (typeof registerModuleLoaded === 'function') {
         registerModuleLoaded('analytics');
