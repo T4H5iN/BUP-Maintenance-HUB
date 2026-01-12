@@ -24,6 +24,9 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS
     },
     connectionTimeout: 10000,
+    logger: true,
+    debug: true,
+    family: 4 // Force IPv4
 });
 
 // Generate a random 6-digit OTP
