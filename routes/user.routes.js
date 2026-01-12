@@ -16,17 +16,13 @@ function capitalize(str) {
 
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
+    host: 'smtp-relay.brevo.com',
     port: 587,
     secure: false, // use STARTTLS
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
-    },
-    connectionTimeout: 10000,
-    logger: true,
-    debug: true,
-    family: 4 // Force IPv4
+    }
 });
 
 // Generate a random 6-digit OTP
