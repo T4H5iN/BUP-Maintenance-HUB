@@ -1,14 +1,13 @@
 ```
 npm init -y
-npm install express dotenv multer nodemailer mongoose bcryptjs cors jsonwebtoken cloudinary @google/generative-ai
+npm install express dotenv multer nodemailer nodemailer-brevo-transport mongoose bcryptjs cors jsonwebtoken cloudinary @google/generative-ai
 node server.js
 
 .env
     PORT=
     MONGODB_URI=
-    EMAIL_USER=
     EMAIL_FROM=
-    EMAIL_PASS=
+    BREVO_API_KEY=
     GEMINI_API_KEY=
     GEMINI_MODEL=
     GEMINI_MAX_TOKENS=

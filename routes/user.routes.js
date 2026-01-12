@@ -18,7 +18,7 @@ function capitalize(str) {
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport(
     new BrevoTransport({
-        apiKey: process.env.EMAIL_PASS
+        apiKey: process.env.BREVO_API_KEY
     })
 );
 
