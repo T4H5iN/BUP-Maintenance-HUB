@@ -7,6 +7,7 @@ node server.js
     PORT=
     MONGODB_URI=
     EMAIL_USER=
+    EMAIL_FROM=
     EMAIL_PASS=
     GEMINI_API_KEY=
     GEMINI_MODEL=

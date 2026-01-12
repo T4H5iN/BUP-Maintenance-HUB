@@ -5,6 +5,7 @@ const OTP = require('../models/otp.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const BrevoTransport = require('nodemailer-brevo-transport');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your_jwt_secret';
 
@@ -15,15 +16,11 @@ function capitalize(str) {
 }
 
 // Configure nodemailer transporter
-const transporter = nodemailer.createTransport({
-    host: 'smtp-relay.brevo.com',
-    port: 587,
-    secure: false, // use STARTTLS
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
+const transporter = nodemailer.createTransport(
+    new BrevoTransport({
+        apiKey: process.env.EMAIL_PASS
+    })
+);
 
 // Generate a random 6-digit OTP
 function generateOTP() {
@@ -35,7 +32,7 @@ async function sendOTPEmail(email, otp, subject = 'Email Verification') {
     const mailOptions = {
         from: {
             name: 'BUP Maintenance HUB',
-            address: process.env.EMAIL_USER
+            address: process.env.EMAIL_FROM
         },
         to: email,
         subject: `BUP Maintenance HUB - ${subject}`,
