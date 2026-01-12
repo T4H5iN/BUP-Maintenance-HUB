@@ -16,7 +16,9 @@ function capitalize(str) {
 
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // use SSL
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
@@ -106,24 +108,24 @@ router.post('/', async (req, res) => {
         if (!role || !email || !dept || !password) {
             return res.status(400).json({ message: 'All fields are required' });
         }
-        
+
         // Validate that the email is from an allowed BUP domain
         const validDomains = ['@bup.edu.bd', '@student.bup.edu.bd'];
         const isValidEmail = validDomains.some(domain => email.toLowerCase().endsWith(domain));
-        
+
         if (!isValidEmail) {
-            return res.status(400).json({ 
-                message: 'Only @bup.edu.bd or @student.bup.edu.bd email addresses are allowed' 
+            return res.status(400).json({
+                message: 'Only @bup.edu.bd or @student.bup.edu.bd email addresses are allowed'
             });
         }
-        
+
         const exists = await User.findOne({ email });
         if (exists) return res.status(400).json({ message: 'Email already exists' });
-        
+
         // Extract name from email
         let name = '';
         let studentId = null;
-        
+
         if (email.includes('@')) {
             // Faculty/staff: name@bup.edu.bd
             if (email.endsWith('@bup.edu.bd')) {
@@ -149,32 +151,32 @@ router.post('/', async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        
+
         // Create user with verified=false
-        const user = new User({ 
-            role, 
-            email, 
-            dept, 
-            password: hashedPassword, 
+        const user = new User({
+            role,
+            email,
+            dept,
+            password: hashedPassword,
             name,
             studentId, // Add the studentId field
-            verified: false 
+            verified: false
         });
         await user.save();
-        
+
         // Generate OTP and save it
         const otp = generateOTP();
         const otpDoc = new OTP({ email, otp });
         await otpDoc.save();
-        
+
         // Send verification email
         await sendOTPEmail(email, otp);
-        
-        res.status(201).json({ 
-            message: 'User created successfully. Please check your email for verification code.', 
+
+        res.status(201).json({
+            message: 'User created successfully. Please check your email for verification code.',
             user: { ...user.toObject(), password: undefined },
             requiresVerification: true
-        });  
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -183,38 +185,38 @@ router.post('/', async (req, res) => {
 // Verify OTP
 router.post('/verify-otp', async (req, res) => {
     const { email, otp } = req.body;
-    
+
     try {
         // Find the OTP document
         const otpDoc = await OTP.findOne({ email, otp });
-                
+
         if (!otpDoc) {
             // Log all OTPs for this email to help debugging
             const allOtps = await OTP.find({ email });
-            console.log(`Found ${allOtps.length} OTPs for ${email}:`, 
+            console.log(`Found ${allOtps.length} OTPs for ${email}:`,
                 allOtps.map(doc => ({ otp: doc.otp, createdAt: doc.createdAt })));
-                
+
             return res.status(400).json({ message: 'Invalid or expired verification code' });
         }
-        
+
         // Update user to verified
         const user = await User.findOneAndUpdate(
             { email },
             { verified: true },
             { new: true }
         ).select('-password');
-        
+
         if (!user) {
             console.log('No user found with email:', email);
             return res.status(404).json({ message: 'User not found' });
         }
-        
+
         // Delete the OTP document
         await OTP.deleteOne({ _id: otpDoc._id });
-        
+
         // Generate token
         const token = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: "1h" });
-        
+
         res.json({
             message: 'Email verified successfully',
             token,
@@ -229,25 +231,25 @@ router.post('/verify-otp', async (req, res) => {
 // Resend OTP
 router.post('/resend-otp', async (req, res) => {
     const { email } = req.body;
-    
+
     try {
         // Check if user exists
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        
+
         // Delete existing OTP if any
         await OTP.deleteMany({ email });
-        
+
         // Generate new OTP and save it
         const otp = generateOTP();
         const otpDoc = new OTP({ email, otp });
         await otpDoc.save();
-        
+
         // Send verification email
         await sendOTPEmail(email, otp);
-        
+
         res.json({ message: 'Verification code resent to your email' });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -260,40 +262,40 @@ router.post('/login', async (req, res) => {
     try {
         const user = await User.findOne({ email });
         if (!user) return res.status(404).json({ message: 'User not found' });
-        
+
         const match = await bcrypt.compare(password, user.password);
         if (!match) return res.status(400).json({ message: 'Incorrect password' });
-        
+
         // Check if user is verified
         if (!user.verified) {
             // Generate a new OTP
             const otp = generateOTP();
-            
+
             // Delete any existing OTP for this user
             await OTP.deleteMany({ email });
-            
+
             // Save the new OTP
             const otpDoc = new OTP({ email, otp });
             await otpDoc.save();
-            
+
             // Send verification email
             await sendOTPEmail(email, otp);
-            
-            return res.status(403).json({ 
+
+            return res.status(403).json({
                 message: 'Email not verified. A new verification code has been sent to your email.',
                 requiresVerification: true
             });
         }
-        
+
         // User authenticated successfully - role is determined from the database
         const token = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: "1h" });
-        
+
         res.json({
             token,
-            user: { 
-                id: user._id, 
+            user: {
+                id: user._id,
                 role: user.role,
-                email: user.email, 
+                email: user.email,
                 dept: user.dept,
                 name: user.name
             }
@@ -329,26 +331,26 @@ router.delete('/:id', async (req, res) => {
 // Forgot password endpoint
 router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
-    
+
     try {
         // Check if user exists
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        
+
         // Delete existing OTP if any
         await OTP.deleteMany({ email });
-        
+
         // Generate new OTP and save it
         const otp = generateOTP();
         const otpDoc = new OTP({ email, otp });
         await otpDoc.save();
-        
+
         // Send verification email
         await sendOTPEmail(email, otp, 'Password Reset');
-        
-        res.json({ 
+
+        res.json({
             message: 'Password reset verification code sent to your email',
             email
         });
@@ -361,21 +363,21 @@ router.post('/forgot-password', async (req, res) => {
 // Verify reset OTP
 router.post('/verify-reset-otp', async (req, res) => {
     const { email, otp } = req.body;
-    
+
     try {
         // Find the OTP document
         const otpDoc = await OTP.findOne({ email, otp });
-        
+
         if (!otpDoc) {
             return res.status(400).json({ message: 'Invalid or expired verification code' });
         }
-        
+
         // Generate temporary reset token
         const resetToken = jwt.sign({ email }, SECRET_KEY, { expiresIn: "15m" });
-        
+
         // Delete the OTP document
         await OTP.deleteOne({ _id: otpDoc._id });
-        
+
         res.json({
             message: 'Email verified. You can now reset your password.',
             email,
@@ -390,32 +392,32 @@ router.post('/verify-reset-otp', async (req, res) => {
 // Reset password
 router.post('/reset-password', async (req, res) => {
     const { email, resetToken, newPassword } = req.body;
-    
+
     try {
         // Verify reset token
         jwt.verify(resetToken, SECRET_KEY);
-        
+
         // Find user
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        
+
         // Hash new password
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        
+
         // Update user password
         user.password = hashedPassword;
         await user.save();
-        
+
         res.json({ message: 'Password reset successful. You can now login with your new password.' });
     } catch (err) {
         console.error('Reset password error:', err);
-        
+
         if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
             return res.status(401).json({ message: 'Invalid or expired reset token' });
         }
-        
+
         res.status(500).json({ error: err.message });
     }
 });
