@@ -7,61 +7,61 @@ async function loadAllIssuesFromBackend() {
     try {
         // Clear any existing issues first
         window.issues = [];
-        
+
         // Show loading indicators
         showLoadingIndicators();
-        
+
         // Get token from localStorage for authentication
         const token = localStorage.getItem('bup-token');
         const headers = {};
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
-        
-        const res = await fetch('http://localhost:3000/api/issues', {
+
+        const res = await fetch('/api/issues', {
             headers: headers
         });
-        
+
         if (!res.ok) {
             hideLoadingIndicators();
             showNotification(`Failed to load issues: ${res.status} ${res.statusText}`, 'error');
             return;
         }
-        
+
         const data = await res.json();
         if (!Array.isArray(data)) {
             hideLoadingIndicators();
             showNotification('Failed to load issues from server - invalid data format', 'error');
             return;
         }
-        
+
         console.log(`Loaded ${data.length} issues from database`);
         window.issues = data;
-        
+
         // Update UI with fetched issues
         updateHomeIssuesList();
-        
+
         // Update campus map with all issues
         if (typeof initializeCampusMap === 'function') {
             initializeCampusMap();
         } else if (typeof updateCampusMap === 'function') {
             updateCampusMap(window.issues);
         }
-        
+
         // Update filter options based on user role
         if (typeof updateFilterOptionsForRole === 'function') {
             updateFilterOptionsForRole();
         }
-        
+
         // Hide loading indicators
         hideLoadingIndicators();
-        
+
         // Ensure window.issues is accessible before dispatching event
         console.log(`Dispatching issuesLoaded event with ${window.issues.length} issues`);
-        
+
         // Dispatch event to notify other components that issues were loaded
-        window.dispatchEvent(new CustomEvent('issuesLoaded', { 
-            detail: { count: data.length } 
+        window.dispatchEvent(new CustomEvent('issuesLoaded', {
+            detail: { count: data.length }
         }));
     } catch (err) {
         hideLoadingIndicators();
@@ -91,13 +91,13 @@ function hideLoadingIndicators() {
 }
 
 // Initialize issue fetching when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Load issues from backend
     loadAllIssuesFromBackend();
-    
+
     // Set up auto-refresh every 5 minutes (300000 ms)
     setInterval(loadAllIssuesFromBackend, 300000);
-    
+
     // Set up filter event listeners
     setupFilterEventListeners();
 });
@@ -109,22 +109,22 @@ function setupFilterEventListeners() {
     if (searchInput) {
         searchInput.addEventListener('input', filterHomeIssues);
     }
-    
+
     // Add event listener for search button if it exists
     const searchButton = document.getElementById('homeSearchBtn');
     if (searchButton) {
         searchButton.addEventListener('click', filterHomeIssues);
     }
-    
+
     // Add event listener for Enter key in search input
     if (searchInput) {
-        searchInput.addEventListener('keypress', function(event) {
+        searchInput.addEventListener('keypress', function (event) {
             if (event.key === 'Enter') {
                 filterHomeIssues();
             }
         });
     }
-    
+
     // Set up filter dropdown listeners
     const filters = ['homeStatusFilter', 'homeCategoryFilter', 'homeLocationFilter'];
     filters.forEach(id => {

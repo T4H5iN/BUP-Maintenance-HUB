@@ -108,7 +108,7 @@ async function finalizeCompletion(taskId) {
     }
 
     try {
-        const res = await fetch(`http://localhost:3000/api/issues/${taskId}/status`, {
+        const res = await fetch(`/api/issues/${taskId}/status`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -157,7 +157,7 @@ async function startTask(taskId) {
     }
 
     try {
-        const res = await fetch(`http://localhost:3000/api/issues/${taskId}/status`, {
+        const res = await fetch(`/api/issues/${taskId}/status`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -250,7 +250,7 @@ async function submitReschedule(taskId) {
     }
 
     try {
-        const res = await fetch(`http://localhost:3000/api/issues/${taskId}/status`, {
+        const res = await fetch(`/api/issues/${taskId}/status`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -303,15 +303,15 @@ async function loadTechnicianAssignments() {
 
     try {
         console.log('Fetching technician assignments...');
-        
+
         // Fetch all assignments for the logged-in technician
-        const res = await fetch('http://localhost:3000/api/issues/assigned-to-me', {
+        const res = await fetch('/api/issues/assigned-to-me', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        
+
         // Log response status for debugging
         console.log('Assignment fetch response status:', res.status);
-        
+
         if (!res.ok) {
             const errorText = await res.text();
             console.error('Error response:', errorText);
@@ -321,28 +321,28 @@ async function loadTechnicianAssignments() {
             } catch (e) {
                 showNotification('Failed to load assignments: ' + res.status, 'error');
             }
-            
+
             if (container) {
                 container.innerHTML = `<div class="error-message"><i class="fas fa-exclamation-circle"></i> Failed to load assignments</div>`;
             }
             return;
         }
-        
+
         const data = await res.json();
         console.log('Assignments loaded:', data.issues ? data.issues.length : 0);
-        
+
         // Save all issues for filtering
         window.technicianAllIssues = data.issues || [];
-        
+
         // Dynamically update technician stats
         updateTechnicianStats(window.technicianAllIssues);
-        
+
         // Render with current filters
         renderTechnicianAssignments(filterTechnicianIssues(window.technicianAllIssues));
     } catch (err) {
         console.error('Error loading assignments:', err);
         showNotification('Failed to load assignments: ' + (err.message || 'Network error'), 'error');
-        
+
         if (container) {
             container.innerHTML = `<div class="error-message"><i class="fas fa-exclamation-circle"></i> Failed to load assignments: ${err.message || 'Network error'}</div>`;
         }
@@ -416,7 +416,7 @@ async function updateTaskProgressSlider(taskId, value) {
 
     try {
         // Use PATCH /api/issues/:id (not /status) for partial update
-        const res = await fetch(`http://localhost:3000/api/issues/${taskId}`, {
+        const res = await fetch(`/api/issues/${taskId}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -545,7 +545,7 @@ function setupTechnicianPanelFilters() {
     const statusFilter = document.getElementById('techStatusFilter');
     const priorityFilter = document.getElementById('techPriorityFilter');
     const dateFilter = document.getElementById('techDateFilter');
-    const handler = function() {
+    const handler = function () {
         if (!window.technicianAllIssues) return;
         renderTechnicianAssignments(filterTechnicianIssues(window.technicianAllIssues));
         updateTechnicianStats(filterTechnicianIssues(window.technicianAllIssues));
@@ -556,7 +556,7 @@ function setupTechnicianPanelFilters() {
 }
 
 // Load assignments when technician panel is shown
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const techTab = document.getElementById('technicianTab');
     if (techTab) {
         techTab.addEventListener('click', loadTechnicianAssignments);
@@ -578,11 +578,11 @@ function markAvailability() {
         showNotification('Error loading availability form', 'error');
         return;
     }
-    
+
     // Show the modal
     const modal = document.getElementById('availabilityModal');
     modal.style.display = 'block';
-    
+
     // Set current availability if available
     if (currentUser && currentUser.availability) {
         const statusSelect = document.getElementById('availabilityStatus');
@@ -596,19 +596,19 @@ function markAvailability() {
                 }
             }
         }
-        
+
         // Set notes if available
         if (currentUser.availabilityNote) {
             document.getElementById('availabilityNote').value = currentUser.availabilityNote;
         }
     }
-    
+
     // Add event handler for the availability period dropdown
     const availabilityUntil = document.getElementById('availabilityUntil');
     const specificDate = document.getElementById('specificDate');
-    
+
     if (availabilityUntil && specificDate) {
-        availabilityUntil.addEventListener('change', function() {
+        availabilityUntil.addEventListener('change', function () {
             if (this.value === 'specific') {
                 specificDate.style.display = 'block';
                 // Set default date to tomorrow
@@ -620,7 +620,7 @@ function markAvailability() {
             }
         });
     }
-    
+
     // Add event handler for form submission
     const form = document.getElementById('availabilityForm');
     if (form) {
@@ -635,11 +635,11 @@ function markAvailability() {
  */
 async function handleAvailabilityUpdate(e) {
     e.preventDefault();
-    
+
     const status = document.getElementById('availabilityStatus').value;
     const note = document.getElementById('availabilityNote').value;
     const untilType = document.getElementById('availabilityUntil').value;
-    
+
     // Calculate end date based on selection
     let validUntil = null;
     if (untilType === 'specific') {
@@ -660,23 +660,23 @@ async function handleAvailabilityUpdate(e) {
         endOfWeek.setHours(23, 59, 59, 999);
         validUntil = endOfWeek.toISOString();
     }
-    
+
     // Show loading indicator
     const submitButton = document.querySelector('#availabilityForm .btn-success');
     if (submitButton) {
         submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
         submitButton.disabled = true;
     }
-    
+
     try {
         // Get token from localStorage
         const token = localStorage.getItem('bup-token');
         if (!token) {
             throw new Error('Authentication token not found');
         }
-        
+
         // Send update to server
-        const response = await fetch('http://localhost:3000/api/users/availability', {
+        const response = await fetch('/api/users/availability', {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -688,37 +688,37 @@ async function handleAvailabilityUpdate(e) {
                 validUntil: validUntil
             })
         });
-        
+
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Failed to update availability');
         }
-        
+
         const data = await response.json();
-        
+
         // Update current user object
         if (currentUser) {
             currentUser.availability = status;
             currentUser.availabilityNote = note;
             currentUser.availabilityValidUntil = validUntil;
-            
+
             // Update in localStorage
             localStorage.setItem('bup-current-user', JSON.stringify(currentUser));
         }
-        
+
         // Show success notification
         showNotification('Availability status updated successfully', 'success');
-        
+
         // Update technician status indicator if exists
         updateTechnicianStatusIndicator();
-        
+
         // Close the modal
         closeAvailabilityModal();
-        
+
     } catch (error) {
         console.error('Error updating availability:', error);
         showNotification(error.message || 'Failed to update availability', 'error');
-        
+
         // Re-enable submit button
         if (submitButton) {
             submitButton.innerHTML = '<i class="fas fa-check-circle"></i> Update Status';
@@ -732,16 +732,16 @@ async function handleAvailabilityUpdate(e) {
  */
 function updateTechnicianStatusIndicator() {
     if (!currentUser || !currentUser.availability) return;
-    
+
     const statusIndicator = document.querySelector('.technician-status-indicator');
     if (!statusIndicator) return;
-    
+
     // Remove all status classes
     statusIndicator.classList.remove('available', 'busy', 'unavailable', 'on-leave', 'sick-leave');
-    
+
     // Add appropriate class
     statusIndicator.classList.add(currentUser.availability);
-    
+
     // Update text
     const statusText = statusIndicator.querySelector('.status-text');
     if (statusText) {

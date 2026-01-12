@@ -4,7 +4,6 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 
 // Load environment variables
 dotenv.config();
@@ -12,13 +11,16 @@ dotenv.config();
 // Fix Mongoose deprecation warning
 mongoose.set('strictQuery', true);
 
+// Import Cloudinary service
+const { uploadToCloudinary } = require('./services/cloudinary');
+
 const userRoutes = require('./routes/user.routes');
 const issueRoutes = require('./routes/issue.routes');
 const chatbotRoutes = require('./routes/chatbot.routes');
-const notificationRoutes = require('./routes/notification.routes'); // Add this line
+const notificationRoutes = require('./routes/notification.routes');
 
 const app = express();
-app.use(express.json()); 
+app.use(express.json());
 app.use(cors());
 
 // Serve static files from the root directory
@@ -37,62 +39,51 @@ app.get('/auth', (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/issues', issueRoutes);
 app.use('/api/chatbot', chatbotRoutes);
-app.use('/api/notifications', notificationRoutes); // Add this line
+app.use('/api/notifications', notificationRoutes);
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        const uploadDir = path.join(__dirname, 'image', 'issues');
-        // Create directory if it doesn't exist
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
-    },
-    filename: function(req, file, cb) {
-        // Create unique filename with original extension
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const ext = path.extname(file.originalname);
-        cb(null, 'issue-' + uniqueSuffix + ext);
-    }
-});
-
-const upload = multer({ 
-    storage: storage,
+// Configure multer for memory storage (for Cloudinary upload)
+const upload = multer({
+    storage: multer.memoryStorage(),
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-    fileFilter: function(req, file, cb) {
+    fileFilter: function (req, file, cb) {
         // Accept only image files
-        if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
             return cb(new Error('Only image files are allowed!'), false);
         }
         cb(null, true);
     }
 });
 
-// Serve static files from the image directory
-app.use('/image', express.static(path.join(__dirname, 'image')));
-
-// Image upload route - improved error handling
-app.post('/api/upload', upload.array('images', 5), (req, res) => {
+// Image upload route - uploads to Cloudinary
+app.post('/api/upload', upload.array('images', 5), async (req, res) => {
     try {
-        console.log('Files uploaded:', req.files ? req.files.length : 0);
-        
+        console.log('Files received:', req.files ? req.files.length : 0);
+
         if (!req.files || req.files.length === 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'No files were uploaded' 
+            return res.status(400).json({
+                success: false,
+                message: 'No files were uploaded'
             });
         }
-        
-        // Return the paths to the uploaded files
-        const filePaths = req.files.map(file => `/image/issues/${file.filename}`);
+
+        // Upload all files to Cloudinary
+        const uploadPromises = req.files.map(file =>
+            uploadToCloudinary(file.buffer, 'bup-issues')
+        );
+
+        const results = await Promise.all(uploadPromises);
+
+        // Return the Cloudinary URLs
+        const filePaths = results.map(result => result.secure_url);
+        console.log('Files uploaded to Cloudinary:', filePaths.length);
+
         res.json({ success: true, filePaths });
     } catch (error) {
         console.error('Error during file upload:', error);
-        res.status(500).json({ 
-            success: false, 
+        res.status(500).json({
+            success: false,
             message: 'Error uploading files',
-            error: error.message 
+            error: error.message
         });
     }
 });
@@ -109,12 +100,12 @@ const PORT = process.env.PORT || 5000;
 
 // Add error handling for MongoDB connection
 mongoose.connect(process.env.MONGODB_URI)
-.then(() => {
-    console.log('Connected to MongoDB');
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-})
-.catch(err => {
-    console.error('MongoDB connection error:', err);
-    // Exit process on failed connection to make error more visible
-    process.exit(1);
-});
+    .then(() => {
+        console.log('Connected to MongoDB');
+        app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    })
+    .catch(err => {
+        console.error('MongoDB connection error:', err);
+        // Exit process on failed connection to make error more visible
+        process.exit(1);
+    });

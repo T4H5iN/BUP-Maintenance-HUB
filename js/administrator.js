@@ -6,13 +6,13 @@
 // Initialize the administrator dashboard
 function initializeAdministratorPanel() {
     console.log("Initializing administrator panel...");
-    
+
     // Load admin dashboard statistics
     loadAdminDashboardStats();
-    
+
     // Load overdue issues
     loadOverdueIssues();
-    
+
     // Set up event listeners for admin actions
     setupAdminEventListeners();
 }
@@ -22,65 +22,65 @@ async function loadAdminDashboardStats() {
     try {
         // In a production environment, fetch this data from the server
         // For now, we'll use dummy data or calculate from existing issues
-        
+
         const allIssues = window.issues || [];
         if (!allIssues.length) {
             console.warn("No issues data available for admin stats");
             return;
         }
-        
+
         // Calculate statistics
         const totalIssues = allIssues.length;
-        
+
         // Calculate overdue issues (older than 7 days and not resolved)
         const overdueIssues = allIssues.filter(issue => {
             const submittedDate = new Date(issue.submittedDate);
             const currentDate = new Date();
             const daysDifference = Math.floor((currentDate - submittedDate) / (1000 * 60 * 60 * 24));
-            
+
             return daysDifference > 7 && issue.status !== 'resolved';
         });
-        
+
         // Calculate resolution rate
         const resolvedIssues = allIssues.filter(issue => issue.status === 'resolved');
         const resolutionRate = Math.round((resolvedIssues.length / totalIssues) * 100);
-        
+
         // Calculate average resolution time
         let totalResolutionDays = 0;
         let resolvedWithDates = 0;
-        
+
         resolvedIssues.forEach(issue => {
             if (issue.submittedDate && issue.resolvedDate) {
                 const submittedDate = new Date(issue.submittedDate);
                 const resolvedDate = new Date(issue.resolvedDate);
                 const daysDifference = Math.floor((resolvedDate - submittedDate) / (1000 * 60 * 60 * 24));
-                
+
                 totalResolutionDays += daysDifference;
                 resolvedWithDates++;
             }
         });
-        
-        const avgResolutionTime = resolvedWithDates > 0 
-            ? (totalResolutionDays / resolvedWithDates).toFixed(1) 
+
+        const avgResolutionTime = resolvedWithDates > 0
+            ? (totalResolutionDays / resolvedWithDates).toFixed(1)
             : "N/A";
-        
+
         // Weekly change calculations
         const lastWeekDate = new Date();
         lastWeekDate.setDate(lastWeekDate.getDate() - 7);
-        
+
         const newIssuesThisWeek = allIssues.filter(issue => {
             const submittedDate = new Date(issue.submittedDate);
             return submittedDate > lastWeekDate;
         }).length;
-        
+
         const newOverdueThisWeek = overdueIssues.filter(issue => {
             const submittedDate = new Date(issue.submittedDate);
             const sevenDaysAgo = new Date(submittedDate);
             sevenDaysAgo.setDate(sevenDaysAgo.getDate() + 7);
-            
+
             return sevenDaysAgo > lastWeekDate && sevenDaysAgo <= new Date();
         }).length;
-        
+
         // Update UI with calculated statistics
         updateAdminDashboardUI({
             totalIssues,
@@ -90,7 +90,7 @@ async function loadAdminDashboardStats() {
             newIssuesThisWeek,
             newOverdueThisWeek
         });
-        
+
     } catch (error) {
         console.error("Error loading admin dashboard stats:", error);
         showNotification("Failed to load administrator statistics", "error");
@@ -103,22 +103,22 @@ function updateAdminDashboardUI(stats) {
     const overdueIssuesElement = document.querySelector('.overview-card:nth-child(2) .overview-number');
     const resolutionRateElement = document.querySelector('.overview-card:nth-child(3) .overview-number');
     const avgResolutionTimeElement = document.querySelector('.overview-card:nth-child(4) .overview-number');
-    
+
     const totalIssuesChangeElement = document.querySelector('.overview-card:nth-child(1) .overview-change');
     const overdueIssuesChangeElement = document.querySelector('.overview-card:nth-child(2) .overview-change');
-    
+
     if (totalIssuesElement) totalIssuesElement.textContent = stats.totalIssues;
     if (overdueIssuesElement) overdueIssuesElement.textContent = stats.overdueCount;
     if (resolutionRateElement) resolutionRateElement.textContent = `${stats.resolutionRate}%`;
     if (avgResolutionTimeElement) avgResolutionTimeElement.textContent = `${stats.avgResolutionTime} days`;
-    
+
     // Update change indicators
     if (totalIssuesChangeElement) {
         totalIssuesChangeElement.textContent = `+${stats.newIssuesThisWeek} this week`;
         totalIssuesChangeElement.className = 'overview-change';
         totalIssuesChangeElement.classList.add(stats.newIssuesThisWeek > 0 ? 'positive' : 'neutral');
     }
-    
+
     if (overdueIssuesChangeElement) {
         overdueIssuesChangeElement.textContent = `+${stats.newOverdueThisWeek} this week`;
         overdueIssuesChangeElement.className = 'overview-change';
@@ -134,21 +134,21 @@ function loadOverdueIssues() {
             console.warn("No issues data available for overdue issues");
             return;
         }
-        
+
         // Find overdue issues (older than 7 days and not resolved)
         const overdueIssues = allIssues.filter(issue => {
             const submittedDate = new Date(issue.submittedDate);
             const currentDate = new Date();
             const daysDifference = Math.floor((currentDate - submittedDate) / (1000 * 60 * 60 * 24));
-            
+
             return daysDifference > 7 && issue.status !== 'resolved';
         })
-        // Sort by age (oldest first)
-        .sort((a, b) => new Date(a.submittedDate) - new Date(b.submittedDate));
-        
+            // Sort by age (oldest first)
+            .sort((a, b) => new Date(a.submittedDate) - new Date(b.submittedDate));
+
         // Display overdue issues in the UI
         displayOverdueIssues(overdueIssues);
-        
+
     } catch (error) {
         console.error("Error loading overdue issues:", error);
         showNotification("Failed to load overdue issues", "error");
@@ -158,18 +158,18 @@ function loadOverdueIssues() {
 // Helper function to get issue title, checking multiple possible title fields
 function getIssueTitle(issue) {
     // Check multiple possible title fields in order of priority
-    return issue.title || issue.subject || issue.name || 
-           (issue.description ? issue.description.substring(0, 30) + '...' : 'Untitled Issue');
+    return issue.title || issue.subject || issue.name ||
+        (issue.description ? issue.description.substring(0, 30) + '...' : 'Untitled Issue');
 }
 
 // Display overdue issues in the UI
 function displayOverdueIssues(overdueIssues) {
     const alertList = document.querySelector('.alert-list');
     if (!alertList) return;
-    
+
     // Clear existing content
     alertList.innerHTML = '';
-    
+
     if (overdueIssues.length === 0) {
         alertList.innerHTML = `
             <div class="no-alerts-message">
@@ -179,29 +179,29 @@ function displayOverdueIssues(overdueIssues) {
         `;
         return;
     }
-    
+
     // Display only the first 5 most critical issues
     const issuesToShow = overdueIssues.slice(0, 5);
-    
+
     issuesToShow.forEach(issue => {
         const submittedDate = new Date(issue.submittedDate);
         const currentDate = new Date();
         const daysDifference = Math.floor((currentDate - submittedDate) / (1000 * 60 * 60 * 24));
-        
+
         // Determine priority class
-        const priorityClass = issue.priority === 'urgent' || issue.priority === 'high' 
-            ? issue.priority 
+        const priorityClass = issue.priority === 'urgent' || issue.priority === 'high'
+            ? issue.priority
             : 'medium';
-        
+
         // Find last update date
         let lastUpdateText = "No updates recorded";
-        
+
         if (issue.updates && issue.updates.length > 0) {
             const lastUpdate = new Date(issue.updates[issue.updates.length - 1].date);
             const daysSinceUpdate = Math.floor((currentDate - lastUpdate) / (1000 * 60 * 60 * 24));
             lastUpdateText = `Last updated ${daysSinceUpdate} days ago`;
         }
-        
+
         const alertItem = document.createElement('div');
         alertItem.className = `alert-item ${priorityClass}`;
         alertItem.innerHTML = `
@@ -219,10 +219,10 @@ function displayOverdueIssues(overdueIssues) {
                 </button>
             </div>
         `;
-        
+
         alertList.appendChild(alertItem);
     });
-    
+
     // If there are more issues than we're showing, add a note
     if (overdueIssues.length > issuesToShow.length) {
         const moreIssuesNote = document.createElement('div');
@@ -240,7 +240,7 @@ function displayOverdueIssues(overdueIssues) {
 // Format status for display
 function formatStatus(status) {
     if (!status) return 'Unknown';
-    
+
     // Convert from kebab-case or snake_case to Title Case with spaces
     return status
         .replace(/[-_]/g, ' ')
@@ -254,7 +254,7 @@ function setupAdminEventListeners() {
     if (generateReportBtn) {
         generateReportBtn.addEventListener('click', generateReport);
     }
-    
+
     // Show overdue issues button
     const showOverdueBtn = document.querySelector('.authority-actions .btn-warning');
     if (showOverdueBtn) {
@@ -266,10 +266,10 @@ function setupAdminEventListeners() {
 function generateReport() {
     console.log("Generating administrative report...");
     showNotification("Preparing administrative report...", "info");
-    
+
     // Show a loading modal
     showReportGenerationModal();
-    
+
     // Simulate report generation delay (in real app, this would be an API call)
     setTimeout(() => {
         try {
@@ -289,7 +289,7 @@ function showReportGenerationModal() {
     // Remove any existing modal
     const existingModal = document.getElementById('reportGenerationModal');
     if (existingModal) existingModal.remove();
-    
+
     const modal = document.createElement('div');
     modal.id = 'reportGenerationModal';
     modal.className = 'modal';
@@ -304,7 +304,7 @@ function showReportGenerationModal() {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(modal);
     modal.style.display = 'block';
 }
@@ -322,10 +322,10 @@ function closeReportGenerationModal() {
 function generateAdminReport() {
     // Prepare report data
     const reportData = prepareAdminReportData();
-    
+
     // In a real application, this would send the data to a server endpoint
     // that generates a PDF or Excel file
-    
+
     // For this demo, we'll create and show a report preview modal
     showReportPreviewModal(reportData);
 }
@@ -333,20 +333,20 @@ function generateAdminReport() {
 // Prepare data for the admin report
 function prepareAdminReportData() {
     const allIssues = window.issues || [];
-    
+
     // Basic statistics
     const totalIssues = allIssues.length;
     const resolvedIssues = allIssues.filter(issue => issue.status === 'resolved').length;
     const pendingIssues = allIssues.filter(issue => issue.status !== 'resolved').length;
     const resolutionRate = totalIssues > 0 ? Math.round((resolvedIssues / totalIssues) * 100) : 0;
-    
+
     // Category breakdown
     const categoryCounts = {};
     allIssues.forEach(issue => {
         const category = issue.category || 'uncategorized';
         categoryCounts[category] = (categoryCounts[category] || 0) + 1;
     });
-    
+
     // Priority breakdown
     const priorityCounts = {
         urgent: 0,
@@ -354,17 +354,17 @@ function prepareAdminReportData() {
         medium: 0,
         low: 0
     };
-    
+
     allIssues.forEach(issue => {
         const priority = issue.priority || 'medium';
         if (priorityCounts[priority] !== undefined) {
             priorityCounts[priority]++;
         }
     });
-    
+
     // Technician performance (if applicable)
     const technicianPerformance = {};
-    
+
     allIssues.forEach(issue => {
         if (issue.assignedTo && issue.status === 'resolved') {
             const techId = issue.assignedTo;
@@ -376,16 +376,16 @@ function prepareAdminReportData() {
                     totalDays: 0
                 };
             }
-            
+
             technicianPerformance[techId].assigned++;
             technicianPerformance[techId].resolved++;
-            
+
             // Calculate resolution time if dates are available
             if (issue.assignedDate && issue.resolvedDate) {
                 const assignedDate = new Date(issue.assignedDate);
                 const resolvedDate = new Date(issue.resolvedDate);
                 const daysDiff = Math.floor((resolvedDate - assignedDate) / (1000 * 60 * 60 * 24));
-                
+
                 technicianPerformance[techId].totalDays += daysDiff;
             }
         } else if (issue.assignedTo) {
@@ -398,22 +398,22 @@ function prepareAdminReportData() {
                     totalDays: 0
                 };
             }
-            
+
             technicianPerformance[techId].assigned++;
         }
     });
-    
+
     // Calculate average resolution days for each technician
     Object.keys(technicianPerformance).forEach(techId => {
         const tech = technicianPerformance[techId];
-        tech.avgResolutionDays = tech.resolved > 0 
-            ? (tech.totalDays / tech.resolved).toFixed(1) 
+        tech.avgResolutionDays = tech.resolved > 0
+            ? (tech.totalDays / tech.resolved).toFixed(1)
             : 'N/A';
     });
-    
+
     // Current date for the report
     const reportDate = new Date().toLocaleDateString();
-    
+
     return {
         reportDate,
         totalIssues,
@@ -431,17 +431,17 @@ function showReportPreviewModal(reportData) {
     // Remove any existing modal
     const existingModal = document.getElementById('reportPreviewModal');
     if (existingModal) existingModal.remove();
-    
+
     const modal = document.createElement('div');
     modal.id = 'reportPreviewModal';
     modal.className = 'modal';
-    
+
     // Create technician performance table rows
     let technicianRows = '';
     Object.entries(reportData.technicianPerformance).forEach(([techId, data]) => {
         // Get technician name if available
         const technicianName = getTechnicianName(techId) || techId;
-        
+
         technicianRows += `
             <tr>
                 <td>${technicianName}</td>
@@ -452,7 +452,7 @@ function showReportPreviewModal(reportData) {
             </tr>
         `;
     });
-    
+
     // If no technician data, show a message
     if (technicianRows === '') {
         technicianRows = `
@@ -461,7 +461,7 @@ function showReportPreviewModal(reportData) {
             </tr>
         `;
     }
-    
+
     // Create category distribution rows
     let categoryRows = '';
     Object.entries(reportData.categoryCounts).forEach(([category, count]) => {
@@ -474,7 +474,7 @@ function showReportPreviewModal(reportData) {
             </tr>
         `;
     });
-    
+
     modal.innerHTML = `
         <div class="modal-content report-preview-modal" style="width: 90%; max-width: 1000px;">
             <span class="close" onclick="closeReportPreviewModal()">&times;</span>
@@ -573,7 +573,7 @@ function showReportPreviewModal(reportData) {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(modal);
     modal.style.display = 'block';
 }
@@ -587,7 +587,7 @@ function calculatePercentage(value, total) {
 // Format category name for display
 function formatCategoryName(category) {
     if (!category) return 'Unknown';
-    
+
     const categoryMap = {
         'furniture': 'Furniture',
         'electricity': 'Electricity',
@@ -598,7 +598,7 @@ function formatCategoryName(category) {
         'other': 'Other',
         'uncategorized': 'Uncategorized'
     };
-    
+
     return categoryMap[category] || category.replace(/-|_/g, ' ')
         .replace(/\b\w/g, l => l.toUpperCase());
 }
@@ -622,37 +622,37 @@ function closeReportPreviewModal() {
 // Download report (actual implementation)
 function downloadReport(format) {
     showNotification(`Preparing ${format.toUpperCase()} report...`, "info");
-    
+
     try {
         // Get the current report data
         const reportData = prepareAdminReportData();
-        
+
         if (format === 'pdf') {
             // Check if reportGenerator is available
             if (typeof window.reportGenerator === 'undefined') {
                 throw new Error('Report generator not available');
             }
-            
+
             // Generate PDF using the report generator
             const pdfDoc = window.reportGenerator.generatePDF(reportData);
-            
+
             if (!pdfDoc) {
                 throw new Error('Failed to generate PDF');
             }
-            
+
             // Create filename with timestamp
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
             const filename = `bup-maintenance-report-${timestamp}.pdf`;
-            
+
             // Save the PDF
             pdfDoc.save(filename);
-            
+
             // Show success notification
             showNotification(`PDF report downloaded successfully`, "success");
         } else if (format === 'excel') {
             // Excel export is not implemented yet
             showNotification('Excel export functionality is coming soon!', 'info');
-            
+
             // In a real application, we would implement Excel export here
             setTimeout(() => {
                 showNotification(`Excel report downloaded successfully`, "success");
@@ -667,24 +667,24 @@ function downloadReport(format) {
 // Show all overdue issues in a modal
 function showAllOverdueIssues() {
     console.log("Showing all overdue issues...");
-    
+
     const allIssues = window.issues || [];
     if (!allIssues.length) {
         showNotification("No issues data available", "warning");
         return;
     }
-    
+
     // Find all overdue issues
     const overdueIssues = allIssues.filter(issue => {
         const submittedDate = new Date(issue.submittedDate);
         const currentDate = new Date();
         const daysDifference = Math.floor((currentDate - submittedDate) / (1000 * 60 * 60 * 24));
-        
+
         return daysDifference > 7 && issue.status !== 'resolved';
     })
-    // Sort by age (oldest first)
-    .sort((a, b) => new Date(a.submittedDate) - new Date(b.submittedDate));
-    
+        // Sort by age (oldest first)
+        .sort((a, b) => new Date(a.submittedDate) - new Date(b.submittedDate));
+
     // Show modal with all overdue issues
     showOverdueIssuesModal(overdueIssues);
 }
@@ -694,13 +694,13 @@ function showOverdueIssuesModal(overdueIssues) {
     // Remove any existing modal
     const existingModal = document.getElementById('overdueIssuesModal');
     if (existingModal) existingModal.remove();
-    
+
     const modal = document.createElement('div');
     modal.id = 'overdueIssuesModal';
     modal.className = 'modal';
-    
+
     let issuesList = '';
-    
+
     if (overdueIssues.length === 0) {
         issuesList = `
             <div class="no-issues-message">
@@ -713,19 +713,19 @@ function showOverdueIssuesModal(overdueIssues) {
             const submittedDate = new Date(issue.submittedDate);
             const currentDate = new Date();
             const daysDifference = Math.floor((currentDate - submittedDate) / (1000 * 60 * 60 * 24));
-            
-            const priorityClass = issue.priority === 'urgent' || issue.priority === 'high' 
-                ? issue.priority 
+
+            const priorityClass = issue.priority === 'urgent' || issue.priority === 'high'
+                ? issue.priority
                 : 'medium';
-            
+
             let lastUpdateText = "No updates recorded";
-            
+
             if (issue.updates && issue.updates.length > 0) {
                 const lastUpdate = new Date(issue.updates[issue.updates.length - 1].date);
                 const daysSinceUpdate = Math.floor((currentDate - lastUpdate) / (1000 * 60 * 60 * 24));
                 lastUpdateText = `Last updated ${daysSinceUpdate} days ago`;
             }
-            
+
             issuesList += `
                 <div class="overdue-issue-item ${priorityClass}">
                     <div class="overdue-issue-header">
@@ -751,7 +751,7 @@ function showOverdueIssuesModal(overdueIssues) {
             `;
         });
     }
-    
+
     modal.innerHTML = `
         <div class="modal-content overdue-issues-modal" style="width: 80%; max-width: 800px;">
             <span class="close" onclick="closeOverdueIssuesModal()">&times;</span>
@@ -789,7 +789,7 @@ function showOverdueIssuesModal(overdueIssues) {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(modal);
     modal.style.display = 'block';
 }
@@ -808,27 +808,27 @@ function filterOverdueIssues() {
     const statusFilter = document.getElementById('overdueStatusFilter').value;
     const priorityFilter = document.getElementById('overduePriorityFilter').value;
     const sortFilter = document.getElementById('overdueSortFilter').value;
-    
+
     const issueItems = document.querySelectorAll('.overdue-issue-item');
     if (!issueItems.length) return;
-    
+
     // Apply filters
     issueItems.forEach(item => {
         const statusText = item.querySelector('.issue-status').textContent.toLowerCase();
-        const priorityClass = Array.from(item.classList).find(cls => 
+        const priorityClass = Array.from(item.classList).find(cls =>
             ['urgent', 'high', 'medium', 'low'].includes(cls)
         ) || 'medium';
-        
+
         const statusMatch = statusFilter === 'all' || statusText.includes(statusFilter.toLowerCase());
         const priorityMatch = priorityFilter === 'all' || priorityClass === priorityFilter;
-        
+
         item.style.display = statusMatch && priorityMatch ? 'block' : 'none';
     });
-    
+
     // Apply sorting (this is simplified - in a real app we'd resort the actual data)
     const issuesList = document.querySelector('.overdue-issues-list');
     const items = Array.from(issueItems).filter(item => item.style.display !== 'none');
-    
+
     if (sortFilter === 'newest') {
         items.sort((a, b) => {
             const aDays = parseInt(a.querySelector('.issue-age').textContent) || 0;
@@ -843,20 +843,20 @@ function filterOverdueIssues() {
         });
     } else if (sortFilter === 'priority') {
         const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
-        
+
         items.sort((a, b) => {
-            const aClass = Array.from(a.classList).find(cls => 
+            const aClass = Array.from(a.classList).find(cls =>
                 ['urgent', 'high', 'medium', 'low'].includes(cls)
             ) || 'medium';
-            
-            const bClass = Array.from(b.classList).find(cls => 
+
+            const bClass = Array.from(b.classList).find(cls =>
                 ['urgent', 'high', 'medium', 'low'].includes(cls)
             ) || 'medium';
-            
+
             return priorityOrder[aClass] - priorityOrder[bClass];
         });
     }
-    
+
     // Reappend items in new order
     items.forEach(item => {
         issuesList.appendChild(item);
@@ -866,7 +866,7 @@ function filterOverdueIssues() {
 // Escalate an issue (notify higher management)
 function escalateIssue(issueId) {
     console.log(`Escalating issue ${issueId}`);
-    
+
     // Show escalation modal
     showEscalationModal(issueId);
 }
@@ -879,15 +879,15 @@ function showEscalationModal(issueId) {
         showNotification("Issue not found", "error");
         return;
     }
-    
+
     // Remove any existing modal
     const existingModal = document.getElementById('escalationModal');
     if (existingModal) existingModal.remove();
-    
+
     const modal = document.createElement('div');
     modal.id = 'escalationModal';
     modal.className = 'modal';
-    
+
     modal.innerHTML = `
         <div class="modal-content escalation-modal">
             <span class="close" onclick="closeEscalationModal()">&times;</span>
@@ -946,17 +946,17 @@ function showEscalationModal(issueId) {
             </form>
         </div>
     `;
-    
+
     document.body.appendChild(modal);
     modal.style.display = 'block';
-    
+
     // Set minimum date for deadline (today)
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('escalationDeadline').min = today;
     document.getElementById('escalationDeadline').value = today;
-    
+
     // Add form submit handler
-    document.getElementById('escalationForm').addEventListener('submit', function(e) {
+    document.getElementById('escalationForm').addEventListener('submit', function (e) {
         e.preventDefault();
         handleEscalationSubmit();
     });
@@ -979,16 +979,16 @@ function handleEscalationSubmit() {
     const priority = document.getElementById('escalationPriority').value;
     const deadline = document.getElementById('escalationDeadline').value;
     const notifySubmitter = document.getElementById('notifySubmitter').checked;
-    
+
     console.log(`Escalating issue ${issueId} to ${level}`);
     console.log(`Reason: ${reason}`);
     console.log(`Priority: ${priority}`);
     console.log(`Deadline: ${deadline}`);
     console.log(`Notify submitter: ${notifySubmitter}`);
-    
+
     // In a real application, this would send the data to the server
     // For this demo, we'll just show a notification and close the modal
-    
+
     // Update the issue in the local data
     const issue = window.issues.find(i => (i.issueId || i.id) === issueId);
     if (issue) {
@@ -996,12 +996,12 @@ function handleEscalationSubmit() {
         if (priority !== issue.priority) {
             issue.priority = priority;
         }
-        
+
         // Add escalation information to issue
         if (!issue.escalations) {
             issue.escalations = [];
         }
-        
+
         issue.escalations.push({
             date: new Date().toISOString(),
             level,
@@ -1009,15 +1009,15 @@ function handleEscalationSubmit() {
             by: currentUser?.name || currentUser?.email || 'Administrator',
             deadline
         });
-        
+
         // Flag the issue as escalated
         issue.isEscalated = true;
-        
+
         // If we have an 'updates' array, add an entry
         if (!issue.updates) {
             issue.updates = [];
         }
-        
+
         issue.updates.push({
             date: new Date().toISOString(),
             type: 'escalation',
@@ -1025,16 +1025,16 @@ function handleEscalationSubmit() {
             by: currentUser?.id || 'admin'
         });
     }
-    
+
     // Show success notification
     showNotification(`Issue #${issueId} escalated successfully`, "success");
-    
+
     // Close the modal
     closeEscalationModal();
-    
+
     // Refresh the admin panel
     loadOverdueIssues();
-    
+
     // Close any overdue issues modal that might be open
     closeOverdueIssuesModal();
 }
@@ -1042,7 +1042,7 @@ function handleEscalationSubmit() {
 // Assign an issue urgently
 function assignUrgent(issueId) {
     console.log(`Assigning issue ${issueId} urgently`);
-    
+
     // Show urgent assignment modal
     showUrgentAssignmentModal(issueId);
 }
@@ -1055,15 +1055,15 @@ async function showUrgentAssignmentModal(issueId) {
         showNotification("Issue not found", "error");
         return;
     }
-    
+
     // Remove any existing modal
     const existingModal = document.getElementById('urgentAssignmentModal');
     if (existingModal) existingModal.remove();
-    
+
     const modal = document.createElement('div');
     modal.id = 'urgentAssignmentModal';
     modal.className = 'modal';
-    
+
     // Create initial modal with loading state
     modal.innerHTML = `
         <div class="modal-content urgent-assignment-modal">
@@ -1081,23 +1081,23 @@ async function showUrgentAssignmentModal(issueId) {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(modal);
     modal.style.display = 'block';
-    
+
     // Fetch technicians from the database
     try {
         const token = localStorage.getItem('bup-token');
-        const res = await fetch('http://localhost:3000/api/users?role=technician', {
+        const res = await fetch('/api/users?role=technician', {
             headers: token ? { 'Authorization': `Bearer ${token}` } : {}
         });
-        
+
         if (!res.ok) {
             throw new Error('Failed to fetch technicians');
         }
-        
+
         const data = await res.json();
-        
+
         // Parse technicians data from response
         let technicians = [];
         if (Array.isArray(data.users)) {
@@ -1105,25 +1105,25 @@ async function showUrgentAssignmentModal(issueId) {
         } else if (Array.isArray(data)) {
             technicians = data;
         }
-        
+
         // Filter available technicians if availability status is present
         let availableTechs = technicians;
         if (technicians.some(tech => tech.availability)) {
-            availableTechs = technicians.filter(tech => 
+            availableTechs = technicians.filter(tech =>
                 tech.availability && tech.availability.toLowerCase().includes('available')
             );
         }
-        
+
         let technicianOptions = '';
-        
+
         if (availableTechs.length === 0) {
             technicianOptions = '<option value="">No technicians currently available</option>';
         } else {
-            technicianOptions = availableTechs.map(tech => 
+            technicianOptions = availableTechs.map(tech =>
                 `<option value="${tech.id || tech._id}">${tech.name || tech.email} ${tech.expertise ? `(${tech.expertise})` : ''} ${tech.availability ? `- ${tech.availability}` : ''}</option>`
             ).join('');
         }
-        
+
         // Update modal with technician options
         const modalContent = modal.querySelector('.modal-content');
         if (modalContent) {
@@ -1189,9 +1189,9 @@ async function showUrgentAssignmentModal(issueId) {
                     </div>
                 </form>
             `;
-            
+
             // Add form submit handler
-            document.getElementById('urgentAssignmentForm').addEventListener('submit', function(e) {
+            document.getElementById('urgentAssignmentForm').addEventListener('submit', function (e) {
                 e.preventDefault();
                 handleUrgentAssignmentSubmit();
             });
@@ -1199,7 +1199,7 @@ async function showUrgentAssignmentModal(issueId) {
     } catch (error) {
         console.error("Error fetching technicians:", error);
         showNotification("Failed to load technicians. Please try again.", "error");
-        
+
         // Update modal with error message
         const modalContent = modal.querySelector('.modal-content');
         if (modalContent) {
@@ -1230,28 +1230,28 @@ async function handleUrgentAssignmentSubmit() {
     const instructions = document.getElementById('urgentInstructions').value;
     const deadline = document.getElementById('urgentDeadline').value;
     const sendSMS = document.getElementById('sendUrgentSMS').checked;
-    
+
     console.log(`Urgently assigning issue ${issueId} to technician ${technicianId}`);
     console.log(`Priority: ${priority}`);
     console.log(`Instructions: ${instructions}`);
     console.log(`Deadline: ${deadline}`);
     console.log(`Send SMS: ${sendSMS}`);
-    
+
     // Show loading indicator
     const submitButton = document.querySelector('#urgentAssignmentForm .btn-warning');
     if (submitButton) {
         submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Assigning...';
         submitButton.disabled = true;
     }
-    
+
     try {
         // Send assignment to the server
         const token = localStorage.getItem('bup-token');
         if (!token) {
             throw new Error('Authentication token not found');
         }
-        
-        const response = await fetch(`http://localhost:3000/api/issues/${issueId}/assign`, {
+
+        const response = await fetch(`/api/issues/${issueId}/assign`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -1266,14 +1266,14 @@ async function handleUrgentAssignmentSubmit() {
                 isUrgent: true
             })
         });
-        
+
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Failed to assign technician');
         }
-        
+
         const data = await response.json();
-        
+
         // Update the issue in the local data
         const issue = window.issues.find(i => (i.issueId || i.id) === issueId);
         if (issue) {
@@ -1281,12 +1281,12 @@ async function handleUrgentAssignmentSubmit() {
             issue.status = 'assigned';
             issue.assignedTo = technicianId;
             issue.assignedDate = new Date().toISOString();
-            
+
             // Update priority if needed
             if (priority !== issue.priority) {
                 issue.priority = priority;
             }
-            
+
             // Add assignment details
             issue.assignmentDetails = {
                 type: 'urgent',
@@ -1295,12 +1295,12 @@ async function handleUrgentAssignmentSubmit() {
                 assignedBy: currentUser?.name || currentUser?.email || 'Administrator',
                 assignedDate: new Date().toISOString()
             };
-            
+
             // If we have an 'updates' array, add an entry
             if (!issue.updates) {
                 issue.updates = [];
             }
-            
+
             issue.updates.push({
                 date: new Date().toISOString(),
                 type: 'assignment',
@@ -1308,28 +1308,28 @@ async function handleUrgentAssignmentSubmit() {
                 by: currentUser?.id || 'admin'
             });
         }
-        
+
         // Show success notification
         showNotification(`Issue #${issueId} urgently assigned to technician`, "success");
-        
+
         // Close the modal
         closeUrgentAssignmentModal();
-        
+
         // Refresh the admin panel
         loadOverdueIssues();
-        
+
         // Close any overdue issues modal that might be open
         closeOverdueIssuesModal();
-        
+
         // Reload all issues if the function exists
         if (typeof loadAllIssuesFromBackend === 'function') {
             loadAllIssuesFromBackend();
         }
-        
+
     } catch (error) {
         console.error("Error assigning technician:", error);
         showNotification(error.message || "Failed to assign technician", "error");
-        
+
         // Re-enable the submit button
         if (submitButton) {
             submitButton.innerHTML = '<i class="fas fa-bolt"></i> Assign Urgently';
@@ -1339,14 +1339,14 @@ async function handleUrgentAssignmentSubmit() {
 }
 
 // Listen for section changes to initialize the administrator panel when it becomes active
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Check if admin panel exists
     if (document.getElementById('administrator-panel')) {
         // Check if administrator tab is clicked
-        document.getElementById('administratorTab')?.addEventListener('click', function() {
+        document.getElementById('administratorTab')?.addEventListener('click', function () {
             initializeAdministratorPanel();
         });
-        
+
         // Also initialize if admin panel is already active
         if (document.getElementById('administrator-panel').classList.contains('active')) {
             initializeAdministratorPanel();
@@ -1380,9 +1380,9 @@ window.handleUrgentAssignmentSubmit = handleUrgentAssignmentSubmit;
 window.showAllOverdueIssues = showAllOverdueIssues;
 
 // Ensure these functions are available immediately regardless of when the script loads
-(function() {
+(function () {
     // Make a separate global declaration for critical modal functions
-    self.closeUrgentAssignmentModal = function() {
+    self.closeUrgentAssignmentModal = function () {
         const modal = document.getElementById('urgentAssignmentModal');
         if (modal) {
             modal.style.display = 'none';

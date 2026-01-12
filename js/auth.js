@@ -7,7 +7,7 @@ async function handleLogin(e) {
     const role = document.getElementById('userRole').value;
 
     try {
-        const res = await fetch('http://localhost:3000/api/users/login', {
+        const res = await fetch('/api/users/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -67,7 +67,7 @@ async function handleRegistration(e) {
  */
 function updateUIForLoggedInUser() {
     if (!currentUser) return;
-    
+
     // Update login button to show user info
     const loginBtn = document.querySelector('.login-btn');
     if (loginBtn) {
@@ -77,7 +77,7 @@ function updateUIForLoggedInUser() {
         `;
         loginBtn.onclick = showUserMenu;
     }
-    
+
     // Show role-specific tabs
     if (currentUser.role === 'moderator') {
         document.getElementById('moderatorTab').style.display = 'block';
@@ -86,10 +86,10 @@ function updateUIForLoggedInUser() {
     } else if (currentUser.role === 'technician') {
         document.getElementById('technicianTab').style.display = 'block';
     }
-    
+
     // Dispatch auth state changed event
-    window.dispatchEvent(new CustomEvent('authStateChanged', { 
-        detail: { user: currentUser } 
+    window.dispatchEvent(new CustomEvent('authStateChanged', {
+        detail: { user: currentUser }
     }));
 }
 
@@ -104,10 +104,10 @@ function showUserMenu() {
     // Create dropdown menu
     const dropdown = document.createElement('div');
     dropdown.className = 'user-dropdown';
-    
+
     // Get the name from user object, fallback to email if no name
     const displayName = currentUser.name || currentUser.email.split('@')[0];
-    
+
     dropdown.innerHTML = `
         <div class="user-dropdown-header">
             <div class="user-avatar">
@@ -163,7 +163,7 @@ function closeUserMenu() {
 function handleOutsideClick(event) {
     const dropdown = document.querySelector('.user-dropdown');
     const userMenu = document.querySelector('.user-menu');
-    
+
     if (dropdown && !userMenu.contains(event.target)) {
         closeUserMenu();
     }
@@ -171,7 +171,7 @@ function handleOutsideClick(event) {
 
 function showProfile() {
     if (!currentUser) return;
-    
+
     const profileModal = createProfileModal();
     document.body.appendChild(profileModal);
     profileModal.style.display = 'block';
@@ -181,10 +181,10 @@ function createProfileModal() {
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.id = 'profileModal';
-    
+
     // Get the name from user object, fallback to email if no name
     const displayName = currentUser.name || currentUser.email.split('@')[0];
-    
+
     modal.innerHTML = `
         <div class="modal-content profile-modal">
             <span class="close" onclick="closeProfileModal()">&times;</span>
@@ -238,7 +238,7 @@ function createProfileModal() {
 function toggleEdit(fieldId) {
     const field = document.getElementById(fieldId);
     const isReadonly = field.hasAttribute('readonly');
-    
+
     if (isReadonly) {
         field.removeAttribute('readonly');
         field.focus();
@@ -255,16 +255,16 @@ function saveProfile() {
         department: document.getElementById('profileDepartment').value,
         phone: document.getElementById('profilePhone').value
     };
-    
+
     // Update current user object
     Object.assign(currentUser, updatedData);
-    
+
     // Update localStorage
     localStorage.setItem('bup-current-user', JSON.stringify(currentUser));
-    
+
     // Update UI
     updateUIForLoggedInUser();
-    
+
     showNotification('Profile updated successfully!', 'success');
     closeProfileModal();
 }
@@ -348,13 +348,13 @@ function createSettingsModal() {
 
 function saveSettings() {
     const selectedTheme = document.querySelector('input[name="theme"]:checked').value;
-    
+
     if (selectedTheme === 'dark') {
         enableDarkMode();
     } else if (selectedTheme === 'light') {
         disableDarkMode();
     }
-    
+
     showNotification('Settings saved successfully!', 'success');
     closeSettingsModal();
 }
@@ -365,22 +365,22 @@ function logout() {
         // Clear user data
         currentUser = null;
         localStorage.removeItem('bup-current-user');
-        
+
         // Show notification if available
         if (typeof showNotification === 'function') {
             showNotification('Logged out successfully', 'success');
         } else {
             console.log('Logged out successfully');
         }
-        
+
         // Close user menu
         if (typeof closeUserMenu === 'function') {
             closeUserMenu();
         }
-        
+
         // Reset UI elements that depend on logged-in state
         resetUIAfterLogout();
-        
+
         // Redirect to login page after a short delay
         setTimeout(() => {
             window.location.href = 'auth.html';
@@ -399,15 +399,15 @@ function handleLogout() {
     currentUser = null;
     localStorage.removeItem('bup-current-user');
     localStorage.removeItem('bup-token');
-    
+
     // Show notification
     showNotification('You have been logged out successfully', 'success');
-    
+
     // Dispatch auth state changed event
-    window.dispatchEvent(new CustomEvent('authStateChanged', { 
-        detail: { user: null } 
+    window.dispatchEvent(new CustomEvent('authStateChanged', {
+        detail: { user: null }
     }));
-    
+
     // Redirect to login page after a short delay
     setTimeout(() => {
         window.location.href = 'auth.html';
@@ -422,7 +422,7 @@ function resetUIAfterLogout() {
         loginBtn.innerHTML = '<i class="fas fa-user"></i> Login';
         loginBtn.onclick = showLoginModal;
     }
-    
+
     // Hide role-specific tabs
     const roleTabs = ['moderatorTab', 'administratorTab', 'technicianTab'];
     roleTabs.forEach(tabId => {

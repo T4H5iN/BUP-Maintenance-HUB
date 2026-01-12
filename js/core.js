@@ -5,11 +5,17 @@ let currentSection = 'home';
 let issues = [];
 let isDarkMode = false;
 
+// Check if running on file protocol
+if (window.location.protocol === 'file:') {
+    alert('Warning: You are opening this file directly. Features like Login and API calls will NOT work. Please use "npm start" and access via http://localhost:5000');
+    console.warn('Running via file protocol - APIs will fail');
+}
+
 function initializeApp() {
     updateNavigation();
-    
+
     showSection('home');
-    
+
     const today = new Date().toISOString().split('T')[0];
     const dateInputs = document.querySelectorAll('input[type="date"]');
     dateInputs.forEach(input => {
@@ -27,7 +33,7 @@ function initializeApp() {
             input.min = today;
         }
     });
-    
+
     // Remove this line:
     // updateHomeIssuesList();
     // Instead, rely on issues.js to load issues from the backend
@@ -40,7 +46,7 @@ function setupEventListeners() {
     } else {
         // Fallback to the original approach
         document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', function(e) {
+            link.addEventListener('click', function (e) {
                 e.preventDefault();
                 const section = this.getAttribute('href').substring(1);
                 console.log(`Navigation link clicked (fallback): ${section}`);
@@ -90,33 +96,33 @@ function setupEventListeners() {
     const homeCategoryFilter = document.getElementById('homeCategoryFilter');
     const homeLocationFilter = document.getElementById('homeLocationFilter');
     const homeSearchInput = document.getElementById('homeSearchInput');
-    
+
     if (homeStatusFilter) {
-        homeStatusFilter.addEventListener('change', function() {
+        homeStatusFilter.addEventListener('change', function () {
             if (typeof filterHomeIssues === 'function') {
                 filterHomeIssues();
             }
         });
     }
-    
+
     if (homeCategoryFilter) {
-        homeCategoryFilter.addEventListener('change', function() {
+        homeCategoryFilter.addEventListener('change', function () {
             if (typeof filterHomeIssues === 'function') {
                 filterHomeIssues();
             }
         });
     }
-    
+
     if (homeLocationFilter) {
-        homeLocationFilter.addEventListener('change', function() {
+        homeLocationFilter.addEventListener('change', function () {
             if (typeof filterHomeIssues === 'function') {
                 filterHomeIssues();
             }
         });
     }
-    
+
     if (homeSearchInput) {
-        homeSearchInput.addEventListener('input', function() {
+        homeSearchInput.addEventListener('input', function () {
             if (typeof filterHomeIssues === 'function') {
                 filterHomeIssues();
             }
@@ -141,10 +147,10 @@ function filterUserIssues() {
 function filterMapIssues() {
     const filter = document.getElementById('mapFilter').value;
     console.log("Filter applied:", filter);  // Debug
-    
+
     // Filter issues based on the selected criteria - use window.issues
     let filteredIssues = [];
-    
+
     if (filter === 'all') {
         filteredIssues = window.issues || [];
     } else if (filter === 'urgent') {
@@ -152,20 +158,20 @@ function filterMapIssues() {
     } else if (filter === 'high') {
         filteredIssues = (window.issues || []).filter(issue => issue.priority === 'high');
     } else if (filter === 'pending') {
-        filteredIssues = (window.issues || []).filter(issue => 
+        filteredIssues = (window.issues || []).filter(issue =>
             issue.status === 'pending-review' || issue.status === 'assigned'
         );
     } else if (filter === 'resolved') {
         filteredIssues = (window.issues || []).filter(issue => issue.status === 'resolved');
     }
-    
+
     console.log("Filtered issues:", filteredIssues.length);  // Debug
-    
+
     // Update the campus map with filtered issues
     if (typeof updateCampusMap === 'function') {
         updateCampusMap(filteredIssues);
     }
-    
+
     // Show notification about the filter
     showNotification(`Showing ${filter} issues on the campus map`, 'info');
 }
@@ -174,12 +180,12 @@ function filterMapIssues() {
 function checkAuthentication() {
     const token = localStorage.getItem('bup-token');
     const savedUser = localStorage.getItem('bup-current-user');
-    
+
     if (token && savedUser) {
         try {
             // Parse the user data
             currentUser = JSON.parse(savedUser);
-            
+
             // Update UI based on user's role (which is now determined by the backend)
             updateUIForLoggedInUser();
             return true;
@@ -190,7 +196,7 @@ function checkAuthentication() {
             localStorage.removeItem('bup-current-user');
         }
     }
-    
+
     // Not authenticated
     return false;
 }
@@ -198,14 +204,14 @@ function checkAuthentication() {
 // Update UI elements based on logged in user
 function updateUIForLoggedInUser() {
     if (!currentUser) return;
-    
+
     // Update login button to show user info
     const loginBtn = document.querySelector('.login-btn');
     if (loginBtn) {
         loginBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.name || currentUser.email.split('@')[0]}`;
         loginBtn.onclick = showUserMenu;
     }
-    
+
     // Show role-specific tabs based on the role determined by the backend
     if (currentUser.role === 'moderator') {
         document.getElementById('moderatorTab').style.display = 'block';
@@ -214,23 +220,23 @@ function updateUIForLoggedInUser() {
     } else if (currentUser.role === 'technician') {
         document.getElementById('technicianTab').style.display = 'block';
     }
-    
+
     // Update filter options based on role
     if (typeof updateFilterOptionsForRole === 'function') {
         updateFilterOptionsForRole();
     }
-    
+
     // Update navigation options based on role
     updateNavigation();
-    
+
     // Dispatch auth state changed event
-    window.dispatchEvent(new CustomEvent('authStateChanged', { 
-        detail: { user: currentUser } 
+    window.dispatchEvent(new CustomEvent('authStateChanged', {
+        detail: { user: currentUser }
     }));
 }
 
 // Additional DOM listener for when all scripts are loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Re-add building click listeners to ensure they work
     document.querySelectorAll('.building').forEach(building => {
         // Remove any existing listeners first to avoid duplicates
@@ -238,25 +244,25 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add the click listener
         building.addEventListener('click', handleBuildingClick);
     });
-    
+
     // Ensure map filter works
     const mapFilter = document.getElementById('mapFilter');
     if (mapFilter) {
         mapFilter.removeEventListener('change', filterMapIssues);
         mapFilter.addEventListener('change', filterMapIssues);
     }
-    
+
     // Re-setup navigation event listeners
     if (typeof setupNavigationEvents === 'function') {
         setupNavigationEvents();
     }
-    
+
     // Explicitly setup the home issues filter event listeners again to ensure they work
     const filters = ['homeStatusFilter', 'homeCategoryFilter', 'homeLocationFilter'];
     filters.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
-            element.addEventListener('change', function() {
+            element.addEventListener('change', function () {
                 console.log('Filter changed:', id);
                 if (window.filterHomeIssues) {
                     window.filterHomeIssues();
@@ -264,11 +270,11 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
-    
+
     // Also setup search input
     const searchInput = document.getElementById('homeSearchInput');
     if (searchInput) {
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             console.log('Search input changed');
             if (window.filterHomeIssues) {
                 window.filterHomeIssues();

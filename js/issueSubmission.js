@@ -10,7 +10,7 @@ function generateIssueId() {
 // Handle issue form submission
 async function handleIssueSubmission(e) {
     e.preventDefault();
-    
+
     if (!currentUser) {
         showNotification('Please login to submit an issue', 'warning');
         showLoginModal();
@@ -19,12 +19,12 @@ async function handleIssueSubmission(e) {
 
     // Show loading state
     showNotification('Uploading images and submitting issue...', 'info');
-    
+
     try {
         // First, upload any images
         const imagePaths = await uploadImages();
         console.log('Uploaded image paths:', imagePaths); // Debug log
-        
+
         const issueData = {
             issueId: generateIssueId(),
             category: document.getElementById('category').value,
@@ -48,14 +48,14 @@ async function handleIssueSubmission(e) {
         // Get token from localStorage
         const token = localStorage.getItem('bup-token');
         const headers = { 'Content-Type': 'application/json' };
-        
+
         // Add authorization header if token exists
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
         // Send the issue to the server
-        const response = await fetch('http://localhost:3000/api/issues', {
+        const response = await fetch('/api/issues', {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(issueData)
@@ -69,19 +69,19 @@ async function handleIssueSubmission(e) {
         if (response.ok) {
             // Clear form
             document.getElementById('issueForm').reset();
-            
+
             // Clear image preview
             const imagePreview = document.getElementById('imagePreview');
             if (imagePreview) {
                 imagePreview.innerHTML = '';
             }
-            
+
             // Reset uploaded images array
             uploadedImages = [];
-            
+
             // Show success notification
             showNotification('Issue reported successfully! You can track its status in your dashboard.', 'success');
-            
+
             // Reload issues list if we're on the home page
             if (currentSection === 'home' && typeof loadAllIssuesFromBackend === 'function') {
                 loadAllIssuesFromBackend();
@@ -96,7 +96,7 @@ async function handleIssueSubmission(e) {
 }
 
 // Add event listener to issue form when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const issueForm = document.getElementById('issueForm');
     if (issueForm) {
         // Remove any existing event listeners

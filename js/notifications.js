@@ -26,7 +26,7 @@ const NotificationService = {
             throw new Error('Authentication token not found');
         }
 
-        const response = await fetch(`http://localhost:3000/api/notifications?filter=${filter}&page=${page}`, {
+        const response = await fetch(`/api/notifications?filter=${filter}&page=${page}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -51,7 +51,7 @@ const NotificationService = {
             throw new Error('Authentication token not found');
         }
 
-        const response = await fetch(`http://localhost:3000/api/notifications/${notificationId}/read`, {
+        const response = await fetch(`/api/notifications/${notificationId}/read`, {
             method: 'PATCH',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -76,7 +76,7 @@ const NotificationService = {
             throw new Error('Authentication token not found');
         }
 
-        const response = await fetch('http://localhost:3000/api/notifications/mark-all-read', {
+        const response = await fetch('/api/notifications/mark-all-read', {
             method: 'PATCH',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -102,7 +102,7 @@ const NotificationService = {
             throw new Error('Authentication token not found');
         }
 
-        const response = await fetch(`http://localhost:3000/api/notifications/${notificationId}`, {
+        const response = await fetch(`/api/notifications/${notificationId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -126,10 +126,10 @@ async function loadNotifications() {
         // Reset pagination
         currentNotificationsPage = 1;
         hasMoreNotifications = true;
-        
+
         const notificationsList = document.querySelector('.all-notifications-list');
         if (!notificationsList) return;
-        
+
         // Show loading indicator
         notificationsList.innerHTML = `
             <div class="notifications-loading">
@@ -137,7 +137,7 @@ async function loadNotifications() {
                 <p>Loading notifications...</p>
             </div>
         `;
-        
+
         // Check if user is logged in
         if (!currentUser) {
             notificationsList.innerHTML = `
@@ -147,28 +147,28 @@ async function loadNotifications() {
             `;
             return;
         }
-        
+
         // Fetch notifications using the service
         const data = await NotificationService.fetchNotifications(
-            currentNotificationsFilter, 
+            currentNotificationsFilter,
             currentNotificationsPage
         );
-        
+
         // Update pagination
         hasMoreNotifications = currentNotificationsPage < data.totalPages;
-        
+
         // Update badge count
         updateNotificationBadge(data.unreadCount);
-        
+
         // Render notifications
         renderNotifications(data.notifications, notificationsList);
-        
+
         // Update loaded flag
         notificationsLoaded = true;
-        
+
     } catch (error) {
         console.error('Error loading notifications:', error);
-        
+
         const notificationsList = document.querySelector('.all-notifications-list');
         if (notificationsList) {
             notificationsList.innerHTML = `
@@ -196,17 +196,17 @@ function renderNotifications(notifications, container) {
         `;
         return;
     }
-    
+
     let notificationsHTML = '';
-    
+
     notifications.forEach(notification => {
         // Format date as relative time (e.g. "2 hours ago")
         const formattedDate = formatRelativeTime(new Date(notification.createdAt));
-        
+
         // Determine CSS classes based on notification type and read status
         const typeClass = notification.type || 'info';
         const readClass = notification.isRead ? 'read' : 'unread';
-        
+
         // Create notification item HTML
         notificationsHTML += `
             <div class="notification-item ${typeClass} ${readClass}" data-id="${notification._id}">
@@ -218,8 +218,8 @@ function renderNotifications(notifications, container) {
                     <div class="notification-time">${formattedDate}</div>
                 </div>
                 <div class="notification-actions">
-                    ${!notification.isRead ? 
-                      `<button class="mark-read-btn" onclick="markNotificationAsRead('${notification._id}')">
+                    ${!notification.isRead ?
+                `<button class="mark-read-btn" onclick="markNotificationAsRead('${notification._id}')">
                           <i class="fas fa-check"></i>
                        </button>` : ''}
                     <button class="dismiss-btn" onclick="dismissNotification('${notification._id}')">
@@ -229,7 +229,7 @@ function renderNotifications(notifications, container) {
             </div>
         `;
     });
-    
+
     // Add "Load More" button if there are more notifications
     if (hasMoreNotifications) {
         notificationsHTML += `
@@ -240,18 +240,18 @@ function renderNotifications(notifications, container) {
             </div>
         `;
     }
-    
+
     // Update container with notifications HTML
     container.innerHTML = notificationsHTML;
-    
+
     // Add click event for notification items (mark as read when clicked)
     container.querySelectorAll('.notification-item.unread').forEach(item => {
-        item.addEventListener('click', function(e) {
+        item.addEventListener('click', function (e) {
             // Don't trigger if clicking on action buttons
             if (e.target.closest('.notification-actions')) {
                 return;
             }
-            
+
             const notificationId = this.dataset.id;
             markNotificationAsRead(notificationId);
         });
@@ -294,7 +294,7 @@ function formatRelativeTime(date) {
     const diffMin = Math.round(diffSec / 60);
     const diffHour = Math.round(diffMin / 60);
     const diffDay = Math.round(diffHour / 24);
-    
+
     if (diffSec < 60) {
         return 'just now';
     } else if (diffMin < 60) {
@@ -316,23 +316,23 @@ function formatRelativeTime(date) {
 async function markNotificationAsRead(notificationId) {
     try {
         await NotificationService.markAsRead(notificationId);
-        
+
         // Update UI to reflect the change
         const notificationItem = document.querySelector(`.notification-item[data-id="${notificationId}"]`);
         if (notificationItem) {
             notificationItem.classList.remove('unread');
             notificationItem.classList.add('read');
-            
+
             // Remove the mark as read button
             const markReadBtn = notificationItem.querySelector('.mark-read-btn');
             if (markReadBtn) {
                 markReadBtn.remove();
             }
         }
-        
+
         // Decrease unread count
         decreaseUnreadCount();
-        
+
     } catch (error) {
         console.error('Error marking notification as read:', error);
         showNotification('Failed to mark notification as read', 'error');
@@ -345,24 +345,24 @@ async function markNotificationAsRead(notificationId) {
 async function markAllNotificationsAsRead() {
     try {
         await NotificationService.markAllAsRead();
-        
+
         // Update UI to reflect the change
         document.querySelectorAll('.notification-item.unread').forEach(item => {
             item.classList.remove('unread');
             item.classList.add('read');
-            
+
             // Remove the mark as read button
             const markReadBtn = item.querySelector('.mark-read-btn');
             if (markReadBtn) {
                 markReadBtn.remove();
             }
         });
-        
+
         // Reset unread count
         updateNotificationBadge(0);
-        
+
         showNotification('All notifications marked as read', 'success');
-        
+
     } catch (error) {
         console.error('Error marking all notifications as read:', error);
         showNotification('Failed to mark all notifications as read', 'error');
@@ -378,18 +378,18 @@ async function dismissNotification(notificationId) {
         // Check if notification is unread before deletion
         const notificationItem = document.querySelector(`.notification-item[data-id="${notificationId}"]`);
         const isUnread = notificationItem && notificationItem.classList.contains('unread');
-        
+
         await NotificationService.deleteNotification(notificationId);
-        
+
         // Remove notification from UI with animation
         if (notificationItem) {
             notificationItem.style.height = notificationItem.offsetHeight + 'px';
             notificationItem.classList.add('removing');
-            
+
             // After animation completes, remove the element
             setTimeout(() => {
                 notificationItem.remove();
-                
+
                 // Check if no notifications left
                 const notificationsList = document.querySelector('.all-notifications-list');
                 if (notificationsList && !notificationsList.querySelector('.notification-item')) {
@@ -401,13 +401,13 @@ async function dismissNotification(notificationId) {
                     `;
                 }
             }, 300);
-            
+
             // If the notification was unread, decrease the counter
             if (isUnread) {
                 decreaseUnreadCount();
             }
         }
-        
+
     } catch (error) {
         console.error('Error dismissing notification:', error);
         showNotification('Failed to dismiss notification', 'error');
@@ -425,43 +425,43 @@ async function loadMoreNotifications() {
             loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
             loadMoreBtn.disabled = true;
         }
-        
+
         // Increment page number
         currentNotificationsPage++;
-        
+
         // Fetch next page of notifications
         const data = await NotificationService.fetchNotifications(
-            currentNotificationsFilter, 
+            currentNotificationsFilter,
             currentNotificationsPage
         );
-        
+
         // Update pagination status
         hasMoreNotifications = currentNotificationsPage < data.totalPages;
-        
+
         // Get container
         const notificationsList = document.querySelector('.all-notifications-list');
         if (!notificationsList) return;
-        
+
         // Remove existing load more button
         const loadMoreContainer = notificationsList.querySelector('.load-more-container');
         if (loadMoreContainer) {
             loadMoreContainer.remove();
         }
-        
+
         // Append new notifications
         data.notifications.forEach(notification => {
             // Format date as relative time
             const formattedDate = formatRelativeTime(new Date(notification.createdAt));
-            
+
             // Determine CSS classes based on notification type and read status
             const typeClass = notification.type || 'info';
             const readClass = notification.isRead ? 'read' : 'unread';
-            
+
             // Create notification item element
             const notificationItem = document.createElement('div');
             notificationItem.className = `notification-item ${typeClass} ${readClass}`;
             notificationItem.dataset.id = notification._id;
-            
+
             notificationItem.innerHTML = `
                 <div class="notification-icon">
                     ${getNotificationIcon(notification.type)}
@@ -471,8 +471,8 @@ async function loadMoreNotifications() {
                     <div class="notification-time">${formattedDate}</div>
                 </div>
                 <div class="notification-actions">
-                    ${!notification.isRead ? 
-                      `<button class="mark-read-btn" onclick="markNotificationAsRead('${notification._id}')">
+                    ${!notification.isRead ?
+                    `<button class="mark-read-btn" onclick="markNotificationAsRead('${notification._id}')">
                           <i class="fas fa-check"></i>
                        </button>` : ''}
                     <button class="dismiss-btn" onclick="dismissNotification('${notification._id}')">
@@ -480,24 +480,24 @@ async function loadMoreNotifications() {
                     </button>
                 </div>
             `;
-            
+
             // Add click event for notification items (mark as read when clicked)
             if (!notification.isRead) {
-                notificationItem.addEventListener('click', function(e) {
+                notificationItem.addEventListener('click', function (e) {
                     // Don't trigger if clicking on action buttons
                     if (e.target.closest('.notification-actions')) {
                         return;
                     }
-                    
+
                     const notificationId = this.dataset.id;
                     markNotificationAsRead(notificationId);
                 });
             }
-            
+
             // Append to list
             notificationsList.appendChild(notificationItem);
         });
-        
+
         // Add "Load More" button if there are more notifications
         if (hasMoreNotifications) {
             const loadMoreContainer = document.createElement('div');
@@ -509,17 +509,17 @@ async function loadMoreNotifications() {
             `;
             notificationsList.appendChild(loadMoreContainer);
         }
-        
+
     } catch (error) {
         console.error('Error loading more notifications:', error);
-        
+
         // Reset load more button
         const loadMoreBtn = document.querySelector('.load-more-btn');
         if (loadMoreBtn) {
             loadMoreBtn.innerHTML = '<i class="fas fa-spinner"></i> Load More';
             loadMoreBtn.disabled = false;
         }
-        
+
         showNotification('Failed to load more notifications', 'error');
     }
 }
@@ -530,7 +530,7 @@ async function loadMoreNotifications() {
  */
 function updateNotificationBadge(count) {
     unreadNotificationCount = count;
-    
+
     // Update all notification badges
     document.querySelectorAll('.notification-badge').forEach(badge => {
         if (count > 0) {
@@ -540,7 +540,7 @@ function updateNotificationBadge(count) {
             badge.style.display = 'none';
         }
     });
-    
+
     // Update any notification icons that might have a dot indicator
     document.querySelectorAll('.notification-icon-btn').forEach(icon => {
         if (count > 0) {
@@ -567,7 +567,7 @@ function decreaseUnreadCount() {
 function filterNotifications(filter) {
     // Update current filter
     currentNotificationsFilter = filter;
-    
+
     // Update active filter button
     document.querySelectorAll('.notification-filter-btn').forEach(btn => {
         if (btn.dataset.filter === filter) {
@@ -576,7 +576,7 @@ function filterNotifications(filter) {
             btn.classList.remove('active');
         }
     });
-    
+
     // Reload notifications with new filter
     loadNotifications();
 }
@@ -587,7 +587,7 @@ function filterNotifications(filter) {
 function toggleNotificationsPanel() {
     const panel = document.getElementById('notificationsPanel');
     if (!panel) return;
-    
+
     if (panel.classList.contains('show')) {
         hideNotificationsPanel();
     } else {
@@ -601,14 +601,14 @@ function toggleNotificationsPanel() {
 function showNotificationsPanel() {
     const panel = document.getElementById('notificationsPanel');
     if (!panel) return;
-    
+
     panel.classList.add('show');
-    
+
     // Load notifications if not already loaded
     if (!notificationsLoaded) {
         loadNotifications();
     }
-    
+
     // Close when clicking outside
     document.addEventListener('click', closeNotificationsPanelOnClickOutside);
 }
@@ -619,9 +619,9 @@ function showNotificationsPanel() {
 function hideNotificationsPanel() {
     const panel = document.getElementById('notificationsPanel');
     if (!panel) return;
-    
+
     panel.classList.remove('show');
-    
+
     // Remove outside click handler
     document.removeEventListener('click', closeNotificationsPanelOnClickOutside);
 }
@@ -633,8 +633,8 @@ function hideNotificationsPanel() {
 function closeNotificationsPanelOnClickOutside(event) {
     const panel = document.getElementById('notificationsPanel');
     const notificationBtn = document.querySelector('.notification-btn');
-    
-    if (panel && !panel.contains(event.target) && 
+
+    if (panel && !panel.contains(event.target) &&
         notificationBtn && !notificationBtn.contains(event.target)) {
         hideNotificationsPanel();
     }
@@ -646,12 +646,12 @@ function closeNotificationsPanelOnClickOutside(event) {
 function createNotificationsPanel() {
     // Check if panel already exists
     if (document.getElementById('notificationsPanel')) return;
-    
+
     // Create panel element
     const panel = document.createElement('div');
     panel.id = 'notificationsPanel';
     panel.className = 'notifications-panel';
-    
+
     panel.innerHTML = `
         <div class="notifications-header">
             <h3>Notifications</h3>
@@ -685,7 +685,7 @@ function createNotificationsPanel() {
             </div>
         </div>
     `;
-    
+
     // Add to document body
     document.body.appendChild(panel);
 }
@@ -696,23 +696,23 @@ function createNotificationsPanel() {
 function addNotificationButton() {
     // Check if button already exists
     if (document.querySelector('.notification-btn')) return;
-    
+
     // Find user menu where button should be added
     const userMenu = document.querySelector('.user-menu');
     if (!userMenu) return;
-    
+
     // Create button element
     const button = document.createElement('button');
     button.className = 'notification-btn notification-icon-btn';
     button.title = 'Notifications';
     button.setAttribute('aria-label', 'Notifications');
     button.onclick = toggleNotificationsPanel;
-    
+
     button.innerHTML = `
         <i class="fas fa-bell"></i>
         <span class="notification-badge" style="display: none;">0</span>
     `;
-    
+
     // Add button beside the theme icon
     userMenu.insertBefore(button, userMenu.firstChild);
 }
@@ -723,15 +723,15 @@ function addNotificationButton() {
 function initializeNotifications() {
     // Create notifications panel
     createNotificationsPanel();
-    
+
     // Add notification button
     addNotificationButton();
-    
+
     // Check for notifications if user is logged in
     if (currentUser) {
         // Initial check for unread notifications
         checkForUnreadNotifications();
-        
+
         // Set up polling for new notifications
         setInterval(checkForUnreadNotifications, 60000); // Check every minute
     }
@@ -745,20 +745,20 @@ async function checkForUnreadNotifications() {
         // Quick API call to get unread count only
         const token = localStorage.getItem('bup-token');
         if (!token) return;
-        
-        const response = await fetch('http://localhost:3000/api/notifications/unread-count', {
+
+        const response = await fetch('/api/notifications/unread-count', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
-        
+
         if (!response.ok) return;
-        
+
         const data = await response.json();
-        
+
         // Update badge with unread count
         updateNotificationBadge(data.unreadCount);
-        
+
         // Show notification for new notifications if count increased
         if (data.unreadCount > unreadNotificationCount && unreadNotificationCount > 0) {
             showNotification('You have new notifications', 'info');
@@ -769,12 +769,12 @@ async function checkForUnreadNotifications() {
 }
 
 // Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Initialize notifications system
     initializeNotifications();
-    
+
     // Listen for auth state changes
-    window.addEventListener('authStateChanged', function(e) {
+    window.addEventListener('authStateChanged', function (e) {
         if (e.detail && e.detail.user) {
             // User logged in, initialize notifications
             initializeNotifications();

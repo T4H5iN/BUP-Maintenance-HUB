@@ -18,7 +18,7 @@ async function loadTechnicianSchedule() {
 
     try {
         // Fetch all assignments for the logged-in technician
-        const res = await fetch('http://localhost:3000/api/issues/assigned-to-me', {
+        const res = await fetch('/api/issues/assigned-to-me', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
@@ -72,7 +72,7 @@ async function loadTechnicianSchedule() {
 }
 
 // Optional: Close modal on outside click
-window.addEventListener('click', function(event) {
+window.addEventListener('click', function (event) {
     const modal = document.getElementById('technicianScheduleModal');
     if (event.target === modal) {
         closeTechnicianScheduleModal();

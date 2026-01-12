@@ -1,7 +1,7 @@
 let currentUser = null;
 let pendingVerificationEmail = null;
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initializeAuth();
     setupAuthEventListeners();
 });
@@ -35,14 +35,14 @@ async function handleLogin(e) {
 
     try {
         // Change the URL to your backend server's address and port
-        const res = await fetch('http://localhost:3000/api/users/login', {
+        const res = await fetch('/api/users/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });
         const data = await res.json();
         hideLoading();
-        
+
         if (!res.ok) {
             // Check if email verification is required
             if (data.requiresVerification) {
@@ -50,7 +50,7 @@ async function handleLogin(e) {
                 initializeOtpVerification(email);
                 return;
             }
-            
+
             showNotification(data.message || 'Login failed', 'error');
             return;
         }
@@ -96,19 +96,19 @@ async function handleRegistration(e) {
 
     try {
         // Change the URL to your backend server's address and port
-        const res = await fetch('http://localhost:3000/api/users', {
+        const res = await fetch('/api/users', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password, role, dept })
         });
         const data = await res.json();
         hideLoading();
-        
+
         if (!res.ok) {
             showNotification(data.message || 'Registration failed', 'error');
             return;
         }
-        
+
         // Check if verification is required
         if (data.requiresVerification) {
             showNotification('Registration successful! Please check your email (including spam folder) for verification code.', 'success');
@@ -139,19 +139,19 @@ async function handleOtpVerification(e) {
 
     try {
         // Change the URL to your backend server's address and port
-        const res = await fetch('http://localhost:3000/api/users/verify-otp', {
+        const res = await fetch('/api/users/verify-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, otpCode })
         });
         const data = await res.json();
         hideLoading();
-        
+
         if (!res.ok) {
             showNotification(data.message || 'OTP verification failed', 'error');
             return;
         }
-        
+
         // Login the user automatically after successful OTP verification
         localStorage.setItem('bup-token', data.token);
         localStorage.setItem('bup-current-user', JSON.stringify(data.user));
@@ -178,7 +178,7 @@ function showResetPasswordForm(email, resetToken) {
     hideAllForms();
     // Then show only the reset password form
     document.getElementById('resetPasswordForm').classList.add('active');
-    
+
     // Store email and reset token in hidden fields
     document.getElementById('resetEmail').value = email;
     document.getElementById('resetToken').value = resetToken;
@@ -198,32 +198,32 @@ function hideAllForms() {
 async function handleForgotPassword(e) {
     e.preventDefault();
     const email = document.getElementById('forgotEmail').value;
-    
+
     // Validate email
     if (!validateBUPEmail(email)) {
         showNotification('Please enter a valid BUP email address', 'error');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
-        const res = await fetch('http://localhost:3000/api/users/forgot-password', {
+        const res = await fetch('/api/users/forgot-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })
         });
-        
+
         const data = await res.json();
         hideLoading();
-        
+
         if (!res.ok) {
             showNotification(data.message || 'Failed to process request', 'error');
             return;
         }
-        
+
         showNotification('Verification code sent to your email. Please check your inbox and spam folder.', 'success');
-        
+
         // Initialize OTP verification for password reset
         initializeOtpVerificationForReset(email);
     } catch (err) {
@@ -235,32 +235,32 @@ async function handleForgotPassword(e) {
 
 function initializeOtpVerificationForReset(email) {
     pendingVerificationEmail = email;
-    
+
     // Set the email in the form
     const userEmailInput = document.getElementById('userEmail');
     if (userEmailInput) {
         userEmailInput.value = email;
     }
-    
+
     // Show the verification form
     document.getElementById('loginForm').classList.remove('active');
     document.getElementById('registerForm').classList.remove('active');
     document.getElementById('forgotPasswordForm').classList.remove('active');
     document.getElementById('resetPasswordForm').classList.remove('active');
     document.getElementById('verificationForm').classList.add('active');
-    
+
     // Focus on the OTP input
     const otpInput = document.getElementById('otpCode');
     if (otpInput) {
         otpInput.focus();
     }
-    
+
     // Set up the resend OTP link
     const resendLink = document.getElementById('resendOtp');
     if (resendLink) {
         resendLink.onclick = handleResendOtpForReset;
     }
-    
+
     // Override the form submission handler
     const otpForm = document.getElementById('otpFormElement');
     if (otpForm) {
@@ -271,29 +271,29 @@ function initializeOtpVerificationForReset(email) {
 
 async function handleResendOtpForReset(e) {
     e.preventDefault();
-    
+
     if (!pendingVerificationEmail) {
         showNotification('No email address found for verification', 'error');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
-        const res = await fetch('http://localhost:3000/api/users/forgot-password', {
+        const res = await fetch('/api/users/forgot-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: pendingVerificationEmail })
         });
-        
+
         const data = await res.json();
         hideLoading();
-        
+
         if (!res.ok) {
             showNotification(data.message || 'Failed to resend verification code', 'error');
             return;
         }
-        
+
         showNotification('Verification code resent. Please check your email.', 'success');
     } catch (err) {
         hideLoading();
@@ -304,39 +304,39 @@ async function handleResendOtpForReset(e) {
 
 async function handleResetOtpVerification(e) {
     e.preventDefault();
-    
+
     const otp = document.getElementById('otpCode').value;
-    
+
     if (!otp || otp.length !== 6 || !/^\d+$/.test(otp)) {
         showNotification('Please enter a valid 6-digit verification code', 'error');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
-        const res = await fetch('http://localhost:3000/api/users/verify-reset-otp', {
+        const res = await fetch('/api/users/verify-reset-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 email: pendingVerificationEmail,
                 otp: otp
             })
         });
-        
+
         const data = await res.json();
         hideLoading();
-        
+
         if (!res.ok) {
             showNotification(data.message || 'Verification failed', 'error');
             return;
         }
-        
+
         showNotification('Email verified. You can now reset your password.', 'success');
-        
+
         // Show reset password form
         showResetPasswordForm(data.email, data.resetToken);
-        
+
         // Reset OTP form handler
         const otpForm = document.getElementById('otpFormElement');
         if (otpForm) {
@@ -352,47 +352,47 @@ async function handleResetOtpVerification(e) {
 
 async function handlePasswordReset(e) {
     e.preventDefault();
-    
+
     const email = document.getElementById('resetEmail').value;
     const resetToken = document.getElementById('resetToken').value;
     const newPassword = document.getElementById('newPassword').value;
     const confirmPassword = document.getElementById('confirmNewPassword').value;
-    
+
     // Validate passwords
     if (newPassword !== confirmPassword) {
         showNotification('Passwords do not match', 'error');
         return;
     }
-    
+
     // Validate password strength
     if (!validatePassword(newPassword)) {
         showNotification('Password does not meet the strength requirements', 'error');
         return;
     }
-    
+
     showLoading();
-    
+
     try {
-        const res = await fetch('http://localhost:3000/api/users/reset-password', {
+        const res = await fetch('/api/users/reset-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 email,
                 resetToken,
                 newPassword
             })
         });
-        
+
         const data = await res.json();
         hideLoading();
-        
+
         if (!res.ok) {
             showNotification(data.message || 'Password reset failed', 'error');
             return;
         }
-        
+
         showNotification('Password reset successful! You can now login with your new password.', 'success');
-        
+
         // Show login form
         showLoginForm();
     } catch (err) {
@@ -408,36 +408,36 @@ async function handlePasswordReset(e) {
 function checkPasswordStrength() {
     const password = document.getElementById('regPassword').value;
     const strengthBar = document.getElementById('strengthBar');
-    
+
     // Password requirement checks
     const lengthReq = document.getElementById('length-req');
     const uppercaseReq = document.getElementById('uppercase-req');
     const lowercaseReq = document.getElementById('lowercase-req');
     const numberReq = document.getElementById('number-req');
     const specialReq = document.getElementById('special-req');
-    
+
     // Define password requirement patterns
     const hasLength = password.length >= 8;
     const hasUppercase = /[A-Z]/.test(password);
     const hasLowercase = /[a-z]/.test(password);
     const hasNumber = /[0-9]/.test(password);
     const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-    
+
     // Update requirement indicators
     updateRequirement(lengthReq, hasLength);
     updateRequirement(uppercaseReq, hasUppercase);
     updateRequirement(lowercaseReq, hasLowercase);
     updateRequirement(numberReq, hasNumber);
     updateRequirement(specialReq, hasSpecial);
-    
+
     // Calculate strength percentage
     const criteria = [hasLength, hasUppercase, hasLowercase, hasNumber, hasSpecial];
     const fulfilledCriteria = criteria.filter(Boolean).length;
     const strengthPercentage = (fulfilledCriteria / criteria.length) * 100;
-    
+
     // Update strength bar
     strengthBar.style.width = `${strengthPercentage}%`;
-    
+
     // Update strength bar color
     if (strengthPercentage <= 20) {
         strengthBar.className = 'strength-bar-fill very-weak';
@@ -450,7 +450,7 @@ function checkPasswordStrength() {
     } else {
         strengthBar.className = 'strength-bar-fill very-strong';
     }
-    
+
     return fulfilledCriteria === criteria.length; // Return true if all criteria are met
 }
 
@@ -460,36 +460,36 @@ function checkPasswordStrength() {
 function checkResetPasswordStrength() {
     const password = document.getElementById('newPassword').value;
     const strengthBar = document.getElementById('resetStrengthBar');
-    
+
     // Password requirement checks
     const lengthReq = document.getElementById('reset-length-req');
     const uppercaseReq = document.getElementById('reset-uppercase-req');
     const lowercaseReq = document.getElementById('reset-lowercase-req');
     const numberReq = document.getElementById('reset-number-req');
     const specialReq = document.getElementById('reset-special-req');
-    
+
     // Define password requirement patterns
     const hasLength = password.length >= 8;
     const hasUppercase = /[A-Z]/.test(password);
     const hasLowercase = /[a-z]/.test(password);
     const hasNumber = /[0-9]/.test(password);
     const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-    
+
     // Update requirement indicators
     updateRequirement(lengthReq, hasLength);
     updateRequirement(uppercaseReq, hasUppercase);
     updateRequirement(lowercaseReq, hasLowercase);
     updateRequirement(numberReq, hasNumber);
     updateRequirement(specialReq, hasSpecial);
-    
+
     // Calculate strength percentage
     const criteria = [hasLength, hasUppercase, hasLowercase, hasNumber, hasSpecial];
     const fulfilledCriteria = criteria.filter(Boolean).length;
     const strengthPercentage = (fulfilledCriteria / criteria.length) * 100;
-    
+
     // Update strength bar
     strengthBar.style.width = `${strengthPercentage}%`;
-    
+
     // Update strength bar color
     if (strengthPercentage <= 20) {
         strengthBar.className = 'strength-bar-fill very-weak';
@@ -502,7 +502,7 @@ function checkResetPasswordStrength() {
     } else {
         strengthBar.className = 'strength-bar-fill very-strong';
     }
-    
+
     return fulfilledCriteria === criteria.length; // Return true if all criteria are met
 }
 
@@ -527,11 +527,11 @@ function updateRequirement(element, isFulfilled) {
  * @returns {boolean} - Whether the password is valid
  */
 function validatePassword(password) {
-    return password.length >= 8 && 
-           /[A-Z]/.test(password) && 
-           /[a-z]/.test(password) && 
-           /[0-9]/.test(password) && 
-           /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    return password.length >= 8 &&
+        /[A-Z]/.test(password) &&
+        /[a-z]/.test(password) &&
+        /[0-9]/.test(password) &&
+        /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
 }
 
 /**
@@ -561,7 +561,7 @@ function showRegisterForm() {
 function updateEmailPlaceholder() {
     const role = document.getElementById('regRole').value;
     const emailInput = document.getElementById('regEmail');
-    
+
     if (role === 'student') {
         emailInput.placeholder = 'yourname123456789@student.bup.edu.bd';
     } else {
@@ -574,7 +574,7 @@ function togglePassword(inputId) {
     const wrapper = input.closest('.input-wrapper');
     const button = wrapper.querySelector('.password-toggle');
     const icon = button.querySelector('i');
-    
+
     if (input.type === 'password') {
         input.type = 'text';
         icon.classList.remove('fa-eye');
@@ -597,11 +597,11 @@ function hideLoading() {
 function showNotification(message, type = 'info') {
     const notification = document.getElementById('notification');
     const messageElement = notification.querySelector('.notification-message');
-    
+
     messageElement.textContent = message;
     notification.className = `notification ${type}`;
-    notification.style.display = 'block';  
-    
+    notification.style.display = 'block';
+
     setTimeout(() => {
         notification.style.display = 'none';
     }, 3000);
@@ -623,7 +623,7 @@ function showPrivacy() {
 (function checkLoggedIn() {
     const token = localStorage.getItem('bup-token');
     const user = localStorage.getItem('bup-current-user');
-    
+
     if (token && user) {
         window.location.href = 'index.html';
     }

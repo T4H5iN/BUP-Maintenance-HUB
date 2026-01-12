@@ -17,25 +17,25 @@ const NotificationService = {
             if (!token) {
                 throw new Error('Authentication token not found');
             }
-            
-            const response = await fetch(`http://localhost:3000/api/notifications?filter=${filter}&page=${page}&limit=${limit}`, {
+
+            const response = await fetch(`/api/notifications?filter=${filter}&page=${page}&limit=${limit}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to fetch notifications');
             }
-            
+
             return await response.json();
         } catch (error) {
             console.error('Error fetching notifications:', error);
             throw error;
         }
     },
-    
+
     /**
      * Mark a notification as read
      * @param {string} notificationId - ID of the notification to mark as read
@@ -47,27 +47,27 @@ const NotificationService = {
             if (!token) {
                 throw new Error('Authentication token not found');
             }
-            
-            const response = await fetch(`http://localhost:3000/api/notifications/${notificationId}/read`, {
+
+            const response = await fetch(`/api/notifications/${notificationId}/read`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to mark notification as read');
             }
-            
+
             return await response.json();
         } catch (error) {
             console.error('Error marking notification as read:', error);
             throw error;
         }
     },
-    
+
     /**
      * Mark all notifications as read
      * @returns {Promise} - Resolves to success message
@@ -78,27 +78,27 @@ const NotificationService = {
             if (!token) {
                 throw new Error('Authentication token not found');
             }
-            
-            const response = await fetch('http://localhost:3000/api/notifications/read-all', {
+
+            const response = await fetch('/api/notifications/read-all', {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to mark all notifications as read');
             }
-            
+
             return await response.json();
         } catch (error) {
             console.error('Error marking all notifications as read:', error);
             throw error;
         }
     },
-    
+
     /**
      * Delete a notification
      * @param {string} notificationId - ID of the notification to delete
@@ -110,26 +110,26 @@ const NotificationService = {
             if (!token) {
                 throw new Error('Authentication token not found');
             }
-            
-            const response = await fetch(`http://localhost:3000/api/notifications/${notificationId}`, {
+
+            const response = await fetch(`/api/notifications/${notificationId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to delete notification');
             }
-            
+
             return await response.json();
         } catch (error) {
             console.error('Error deleting notification:', error);
             throw error;
         }
     },
-    
+
     /**
      * Get unread notification count
      * @returns {Promise<number>} - Number of unread notifications

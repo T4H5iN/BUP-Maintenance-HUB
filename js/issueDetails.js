@@ -8,30 +8,30 @@ function viewIssueDetails(issueId) {
         showNotification('Issue not found', 'error');
         return;
     }
-    
+
     // Create modal for issue details
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.id = 'issueDetailsModal';
-    
+
     // Format dates for display
-    const submittedDate = issue.submittedDate ? 
+    const submittedDate = issue.submittedDate ?
         new Date(issue.submittedDate).toLocaleDateString('en-US', {
             year: 'numeric', month: 'long', day: 'numeric'
         }) : 'Unknown';
-    
+
     // Format status for display
     const statusDisplay = formatStatus(issue.status);
-    
+
     // Get location name
     const locationName = getLocationName(issue.location);
-    
+
     // Determine if the current user submitted this issue
     const isSubmitter = currentUser && (
-        issue.submittedBy === currentUser.name || 
+        issue.submittedBy === currentUser.name ||
         issue.submittedBy === currentUser.email
     );
-    
+
     // Generate action buttons based on issue status and user role
     let actionButtons = '';
     let progressSliderHtml = '';
@@ -124,7 +124,7 @@ function viewIssueDetails(issueId) {
             `;
         }
     }
-    
+
     // Build image gallery if there are images
     let imageGallery = '';
     if (issue.images && issue.images.length > 0) {
@@ -132,7 +132,7 @@ function viewIssueDetails(issueId) {
         // Use encodeURIComponent to safely pass JSON in HTML attribute
         const imagesJson = encodeURIComponent(JSON.stringify(issue.images));
         issue.images.forEach((imgPath, index) => {
-            const imgUrl = imgPath.startsWith('http') ? imgPath : `http://localhost:3000${imgPath}`;
+            const imgUrl = imgPath.startsWith('http') ? imgPath : `${imgPath}`;
             imageHtml += `
                 <div class="image-container">
                     <img src="${imgUrl}" alt="Issue image" class="issue-detail-image">
@@ -150,7 +150,7 @@ function viewIssueDetails(issueId) {
             </div>
         `;
     }
-    
+
     // Build progress history if available
     let progressHistory = '';
     if (issue.progressUpdates && issue.progressUpdates.length > 0) {
@@ -175,7 +175,7 @@ function viewIssueDetails(issueId) {
             </div>
         `;
     }
-    
+
     // Add rejection reason if status is rejected
     let rejectionNotice = '';
     if (issue.status === 'rejected' && issue.rejectReason) {
@@ -279,18 +279,18 @@ function viewIssueDetails(issueId) {
             </div>
         </div>
     `;
-    
+
     // Add modal to document and display it
     document.body.appendChild(modal);
     modal.style.display = 'block';
-    
+
     // Add event listener to the modal background for closing
-    modal.addEventListener('click', function(e) {
+    modal.addEventListener('click', function (e) {
         if (e.target === modal) {
             closeIssueDetailsModal();
         }
     });
-    
+
     // Dispatch event that modal was opened
     document.dispatchEvent(new CustomEvent('issueDetailModalOpened', { detail: { issueId } }));
 }
@@ -319,16 +319,16 @@ function openFullImage(imageUrl, currentIndex, allImagesEncoded) {
         allImages = [imageUrl];
     }
     const processedImages = Array.isArray(allImages)
-        ? allImages.map(img => img.startsWith('http') ? img : `http://localhost:3000${img}`)
+        ? allImages.map(img => img.startsWith('http') ? img : `${img}`)
         : [imageUrl];
 
     // Create the modal
     const modal = document.createElement('div');
     modal.className = 'modal fullscreen-image-modal';
     modal.id = 'fullscreenImageModal';
-    
+
     const hasMultipleImages = processedImages.length > 1;
-    
+
     modal.innerHTML = `
         <div class="modal-content fullscreen-image-container">
             <span class="close" onclick="closeFullscreenImage()">&times;</span>
@@ -348,22 +348,22 @@ function openFullImage(imageUrl, currentIndex, allImagesEncoded) {
             </div>
         </div>
     `;
-    
+
     // Store image data for navigation
     document.body.appendChild(modal);
     modal.style.display = 'block';
-    
+
     // Save the image data to the modal for navigation
     modal.dataset.currentIndex = currentIndex;
     modal.dataset.allImages = JSON.stringify(processedImages);
-    
+
     // Close when clicking outside the image
-    modal.addEventListener('click', function(e) {
+    modal.addEventListener('click', function (e) {
         if (e.target === modal) {
             closeFullscreenImage();
         }
     });
-    
+
     // Add keyboard navigation
     document.addEventListener('keydown', handleImageKeyboardNavigation);
 }
@@ -380,30 +380,30 @@ function closeFullscreenImage() {
 function navigateImages(direction) {
     const modal = document.getElementById('fullscreenImageModal');
     if (!modal) return;
-    
+
     const currentIndex = parseInt(modal.dataset.currentIndex);
     const allImages = JSON.parse(modal.dataset.allImages);
     const totalImages = allImages.length;
-    
+
     let newIndex;
     if (direction === 'next') {
         newIndex = (currentIndex + 1) % totalImages;
     } else {
         newIndex = (currentIndex - 1 + totalImages) % totalImages;
     }
-    
+
     // Update the image
     const imageElement = document.getElementById('currentFullscreenImage');
     if (imageElement) {
         imageElement.src = allImages[newIndex];
     }
-    
+
     // Update the counter
     const counter = modal.querySelector('.image-counter');
     if (counter) {
         counter.textContent = `${newIndex + 1} / ${totalImages}`;
     }
-    
+
     // Update the current index
     modal.dataset.currentIndex = newIndex;
 }

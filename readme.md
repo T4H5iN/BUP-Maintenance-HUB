@@ -1,6 +1,6 @@
 ```
 npm init -y
-npm install express dotenv multer nodemailer mongoose bcryptjs cors jsonwebtoken @google/generative-ai
+npm install express dotenv multer nodemailer mongoose bcryptjs cors jsonwebtoken cloudinary @google/generative-ai
 node server.js
 
 .env

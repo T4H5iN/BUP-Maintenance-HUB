@@ -57,21 +57,21 @@ function updateImagePreview(images) {
     if (images && images.length > 0) {
         images.forEach((file, index) => {
             const reader = new FileReader();
-            
-            reader.onload = function(e) {
+
+            reader.onload = function (e) {
                 const previewItem = document.createElement('div');
                 previewItem.className = 'preview-item';
-                
+
                 previewItem.innerHTML = `
                     <img src="${e.target.result}" alt="Preview" class="preview-image">
                     <button type="button" class="remove-image" onclick="removeUploadedImage(${index})" aria-label="Remove image">
                         <i class="fas fa-times"></i>
                     </button>
                 `;
-                
+
                 previewContainer.appendChild(previewItem);
             };
-            
+
             reader.readAsDataURL(file);
         });
 
@@ -110,7 +110,7 @@ async function uploadImages() {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const res = await fetch('http://localhost:3000/api/upload', {
+        const res = await fetch('/api/upload', {
             method: 'POST',
             headers,
             body: formData

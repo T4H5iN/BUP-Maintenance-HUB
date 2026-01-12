@@ -2,7 +2,7 @@
 
 function showSection(sectionName) {
     console.log(`Showing section: ${sectionName}`);
-    
+
     // Validate section exists before trying to show it
     const targetSection = document.getElementById(sectionName);
     if (!targetSection) {
@@ -291,7 +291,7 @@ async function approveIssue(issueId) {
 
     try {
         const token = localStorage.getItem('bup-token');
-        const res = await fetch(`http://localhost:3000/api/issues/${issueId}/status`, {
+        const res = await fetch(`/api/issues/${issueId}/status`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -342,7 +342,7 @@ async function showTechnicianAssignModal(issueId) {
     let technicians = [];
     try {
         const token = localStorage.getItem('bup-token');
-        const res = await fetch('http://localhost:3000/api/users?role=technician', {
+        const res = await fetch('/api/users?role=technician', {
             headers: token ? { 'Authorization': `Bearer ${token}` } : {}
         });
         const data = await res.json();
@@ -383,7 +383,7 @@ async function showTechnicianAssignModal(issueId) {
         </form>
     `;
 
-    loadingModal.querySelector('#assignTechnicianForm').onsubmit = function(e) {
+    loadingModal.querySelector('#assignTechnicianForm').onsubmit = function (e) {
         e.preventDefault();
         const techId = loadingModal.querySelector('#technicianSelect').value;
         if (!techId) {
@@ -409,11 +409,11 @@ async function assignTechnicianToIssue(issueId, technicianId) {
     try {
         const token = localStorage.getItem('bup-token');
         console.log(`Assigning technician ${technicianId} to issue ${issueId}`);
-        
+
         // Use the issueId or id property - this should match what the backend expects
         const idToUse = issue.issueId || issue.id;
-        
-        const res = await fetch(`http://localhost:3000/api/issues/${idToUse}/assign`, {
+
+        const res = await fetch(`/api/issues/${idToUse}/assign`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -421,7 +421,7 @@ async function assignTechnicianToIssue(issueId, technicianId) {
             },
             body: JSON.stringify({ technicianId })
         });
-        
+
         if (!res.ok) {
             let errorMessage = 'Failed to assign technician';
             try {
@@ -434,10 +434,10 @@ async function assignTechnicianToIssue(issueId, technicianId) {
             showNotification(errorMessage, 'error');
             return;
         }
-        
+
         const data = await res.json();
         console.log('Assignment response:', data);
-        
+
         // Update local issue status and assignment data
         if (data.issue) {
             // Use the returned issue data
@@ -448,11 +448,11 @@ async function assignTechnicianToIssue(issueId, technicianId) {
             issue.assignedTo = technicianId;
             issue.assignedToName = data.assignedTo || 'Assigned Technician';
         }
-        
+
         showNotification(`Technician assigned to issue #${issueId}.`, 'success');
         closeAssignTechnicianModal();
         updateModeratorPanel();
-        
+
         // Reload all issues for UI consistency
         if (typeof loadAllIssuesFromBackend === 'function') {
             loadAllIssuesFromBackend();
@@ -503,7 +503,7 @@ function showRejectReasonModal(issueId) {
     // Make sure the form submission is properly handled
     const form = modal.querySelector('#rejectReasonForm');
     if (form) {
-        form.onsubmit = function(e) {
+        form.onsubmit = function (e) {
             e.preventDefault();
             const reason = modal.querySelector('#rejectReasonInput').value.trim();
             if (!reason) {
@@ -513,7 +513,7 @@ function showRejectReasonModal(issueId) {
             rejectIssue(issueId, reason);
         };
     }
-    
+
     // Add ESC key handler to close modal
     document.addEventListener('keydown', function escHandler(e) {
         if (e.key === 'Escape') {
@@ -543,7 +543,7 @@ async function rejectIssue(issueId, reason) {
 
     try {
         const token = localStorage.getItem('bup-token');
-        const res = await fetch(`http://localhost:3000/api/issues/${issueId}/status`, {
+        const res = await fetch(`/api/issues/${issueId}/status`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -689,7 +689,7 @@ function updateModeratorPanel() {
 }
 
 // Attach event listeners for moderator panel filters/search and auto-update on issues load
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const statusFilter = document.getElementById('adminStatusFilter');
     const priorityFilter = document.getElementById('adminPriorityFilter');
     const searchInput = document.getElementById('adminSearch');
@@ -707,7 +707,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Update moderator panel when issues are loaded/refreshed
-window.addEventListener('issuesLoaded', function() {
+window.addEventListener('issuesLoaded', function () {
     if (document.getElementById('moderator-panel')) {
         filterModeratorIssues();
     }
@@ -718,7 +718,7 @@ window.addEventListener('issuesLoaded', function() {
  */
 function setupNavigationEvents() {
     console.log('Setting up navigation event listeners');
-    
+
     document.querySelectorAll('.nav-link').forEach(link => {
         // Remove any existing listeners to avoid duplicates
         link.removeEventListener('click', handleNavLinkClick);
@@ -779,12 +779,12 @@ function showHelp() {
     // Remove any existing modal
     const existingModal = document.getElementById('helpModal');
     if (existingModal) existingModal.remove();
-    
+
     // Create modal element
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.id = 'helpModal';
-    
+
     modal.innerHTML = `
         <div class="modal-content help-modal">
             <span class="close" onclick="closeHelpModal()">&times;</span>
@@ -991,62 +991,62 @@ function showHelp() {
             </div>
         </div>
     `;
-    
+
     // Add to document body
     document.body.appendChild(modal);
-    
+
     // Show modal
     modal.style.display = 'block';
-    
+
     // Add event listeners for tabs
     const tabButtons = modal.querySelectorAll('.help-tab-btn');
     tabButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             // Remove active class from all buttons and contents
             tabButtons.forEach(btn => btn.classList.remove('active'));
-            modal.querySelectorAll('.help-tab-content').forEach(content => 
+            modal.querySelectorAll('.help-tab-content').forEach(content =>
                 content.classList.remove('active')
             );
-            
+
             // Add active class to clicked button and corresponding content
             this.classList.add('active');
             const tabName = this.getAttribute('data-tab');
             document.getElementById(`${tabName}-tab`).classList.add('active');
         });
     });
-    
+
     // Add event listeners for FAQ toggles
     const faqQuestions = modal.querySelectorAll('.faq-question');
     faqQuestions.forEach(question => {
-        question.addEventListener('click', function() {
+        question.addEventListener('click', function () {
             const answer = this.nextElementSibling;
             const isOpen = answer.style.display === 'block';
-            
+
             // Toggle the answer visibility
             answer.style.display = isOpen ? 'none' : 'block';
-            
+
             // Toggle the icon
             const icon = this.querySelector('.faq-toggle');
             icon.classList.toggle('fa-chevron-down', !isOpen);
             icon.classList.toggle('fa-chevron-up', isOpen);
         });
     });
-    
+
     // Handle support form submission
     const supportForm = document.getElementById('supportRequestForm');
     if (supportForm) {
-        supportForm.addEventListener('submit', function(e) {
+        supportForm.addEventListener('submit', function (e) {
             e.preventDefault();
             const subject = document.getElementById('supportSubject').value;
             const message = document.getElementById('supportMessage').value;
             const priority = document.getElementById('supportPriority').value;
-            
+
             // In a real application, send this data to the server
             console.log('Support request:', { subject, message, priority });
-            
+
             // Show success message
             showNotification('Your support request has been submitted. We will respond shortly.', 'success');
-            
+
             // Reset form
             this.reset();
         });
