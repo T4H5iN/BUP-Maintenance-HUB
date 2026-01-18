@@ -331,7 +331,7 @@ function openFullImage(imageUrl, currentIndex, allImagesEncoded) {
 
     modal.innerHTML = `
         <div class="modal-content fullscreen-image-container">
-            <span class="close" onclick="closeFullscreenImage()">&times;</span>
+            <span class="close">&times;</span>
             <div class="fullscreen-image-wrapper">
                 <img src="${imageUrl}" class="fullscreen-image" id="currentFullscreenImage">
                 ${hasMultipleImages ? `
@@ -352,6 +352,15 @@ function openFullImage(imageUrl, currentIndex, allImagesEncoded) {
     // Store image data for navigation
     document.body.appendChild(modal);
     modal.style.display = 'block';
+
+    // Add event listener to close button
+    const closeBtn = modal.querySelector('.close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function (e) {
+            e.stopPropagation(); // Prevent event bubbling
+            closeFullscreenImage();
+        });
+    }
 
     // Save the image data to the modal for navigation
     modal.dataset.currentIndex = currentIndex;

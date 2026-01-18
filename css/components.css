@@ -1085,6 +1085,10 @@
     position: relative;
 }
 
+.fullscreen-image-container .close {
+    z-index: 10;
+}
+
 .fullscreen-image-wrapper {
     position: relative;
     width: 100%;

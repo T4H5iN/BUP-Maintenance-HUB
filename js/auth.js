@@ -332,9 +332,6 @@ function createSettingsModal() {
                     <div class="setting-item">
                         <button class="btn-secondary" onclick="changePassword()">Change Password</button>
                     </div>
-                    <div class="setting-item">
-                        <button class="btn-secondary" onclick="downloadData()">Download My Data</button>
-                    </div>
                 </div>
             </div>
             <div class="settings-actions">
