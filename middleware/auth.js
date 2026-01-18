@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
 
-const SECRET_KEY = process.env.JWT_SECRET || 'your_jwt_secret';
+const SECRET_KEY = process.env.JWT_SECRET;
 
 /**
  * Authentication middleware to verify JWT tokens
@@ -18,8 +18,8 @@ const auth = async (req, res, next) => {
         }
 
         // Check if the authorization header has the right format (Bearer token)
-        const token = authHeader.startsWith('Bearer ') 
-            ? authHeader.substring(7) 
+        const token = authHeader.startsWith('Bearer ')
+            ? authHeader.substring(7)
             : authHeader;
 
         if (!token) {
@@ -28,7 +28,7 @@ const auth = async (req, res, next) => {
 
         // Verify the token
         const decoded = jwt.verify(token, SECRET_KEY);
-        
+
         // Find the user by ID
         const user = await User.findById(decoded.id).select('-password');
         if (!user) {
@@ -38,7 +38,7 @@ const auth = async (req, res, next) => {
         // Add user info to request object - ensure _id is accessible
         req.user = user;
         req.userId = user._id; // Specifically set userId for easy access
-        
+
         // Continue to the next middleware or route handler
         next();
     } catch (error) {
@@ -47,7 +47,7 @@ const auth = async (req, res, next) => {
         } else if (error.name === 'TokenExpiredError') {
             return res.status(401).json({ message: 'Token expired' });
         }
-        
+
         console.error('Auth middleware error:', error);
         res.status(500).json({ message: 'Server error' });
     }

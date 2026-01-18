@@ -356,18 +356,21 @@ function saveSettings() {
     closeSettingsModal();
 }
 
-// Add this function to fix logout functionality
+// Consolidated logout function
 function logout() {
     try {
         // Clear user data
-        currentUser = null;
-        localStorage.removeItem('bup-current-user');
+        window.currentUser = null;
+        if (localStorage.getItem('bup-current-user')) {
+            localStorage.removeItem('bup-current-user');
+        }
+        if (localStorage.getItem('bup-token')) {
+            localStorage.removeItem('bup-token');
+        }
 
         // Show notification if available
         if (typeof showNotification === 'function') {
             showNotification('Logged out successfully', 'success');
-        } else {
-
         }
 
         // Close user menu
@@ -376,40 +379,27 @@ function logout() {
         }
 
         // Reset UI elements that depend on logged-in state
-        resetUIAfterLogout();
+        if (typeof resetUIAfterLogout === 'function') {
+            resetUIAfterLogout();
+        }
 
-        // Redirect to login page after a short delay
+        // Dispatch auth state changed event
+        window.dispatchEvent(new CustomEvent('authStateChanged', {
+            detail: { user: null }
+        }));
+
+        // Redirect to auth page
         setTimeout(() => {
             window.location.href = 'auth.html';
         }, 1000);
     } catch (error) {
-        console.error('Error during logout:', error);
-        // Fallback redirect if there's an error
+        console.error('Logout error:', error);
         window.location.href = 'auth.html';
     }
 }
 
-/**
- * Handle logout
- */
-function handleLogout() {
-    currentUser = null;
-    localStorage.removeItem('bup-current-user');
-    localStorage.removeItem('bup-token');
-
-    // Show notification
-    showNotification('You have been logged out successfully', 'success');
-
-    // Dispatch auth state changed event
-    window.dispatchEvent(new CustomEvent('authStateChanged', {
-        detail: { user: null }
-    }));
-
-    // Redirect to login page after a short delay
-    setTimeout(() => {
-        window.location.href = 'auth.html';
-    }, 1000);
-}
+// Backward compatibility alias
+window.handleLogout = logout;
 
 // Helper function to reset UI elements after logout
 function resetUIAfterLogout() {

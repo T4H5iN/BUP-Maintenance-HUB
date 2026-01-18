@@ -41,6 +41,11 @@ function initChatbot() {
   sendButton = document.querySelector('.send-btn');
   chatbotToggle = document.querySelector('.chatbot-toggle');
 
+  if (!chatbotToggle || !chatbotContainer || !chatInput || !sendButton) {
+    console.warn('Chatbot elements not found, initializing postponed');
+    return;
+  }
+
   // Set up event listeners
   setupEventListeners();
 

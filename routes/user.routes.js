@@ -7,7 +7,10 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const BrevoTransport = require('nodemailer-brevo-transport');
 
-const SECRET_KEY = process.env.JWT_SECRET || 'your_jwt_secret';
+const SECRET_KEY = process.env.JWT_SECRET;
+if (!SECRET_KEY) {
+    console.warn('WARNING: JWT_SECRET is not defined in environment variables. Authentication may fail.');
+}
 
 // Helper to capitalize
 function capitalize(str) {
@@ -192,8 +195,6 @@ router.post('/verify-otp', async (req, res) => {
             const allOtps = await OTP.find({ email });
 
             return res.status(400).json({ message: 'Invalid or expired verification code' });
-
-            return res.status(400).json({ message: 'Invalid or expired verification code' });
         }
 
         // Update user to verified
@@ -204,7 +205,6 @@ router.post('/verify-otp', async (req, res) => {
         ).select('-password');
 
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
             return res.status(404).json({ message: 'User not found' });
         }
 

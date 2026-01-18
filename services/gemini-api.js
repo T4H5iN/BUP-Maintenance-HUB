@@ -1,227 +1,109 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-
 /**
- * Service class for interacting with Google's Gemini API
+ * Service class for Rule-Based Chatbot (No AI API usage)
  */
-class GeminiChatbotService {
+class RuleBasedChatbotService {
   constructor() {
-    // Initialize Gemini API client
-    this.apiKey = process.env.GEMINI_API_KEY;
-    // Updated to use the correct model name format for current API version
-    this.modelName = process.env.GEMINI_MODEL || 'gemini-2.5-pro';
-    this.maxOutputTokens = parseInt(process.env.GEMINI_MAX_TOKENS || '1024', 10);
-    this.temperature = parseFloat(process.env.GEMINI_TEMPERATURE || '0.7');
+    this.initialized = true;
 
-    // Initialize only if API key is available
-    if (this.apiKey) {
-      this.genAI = new GoogleGenerativeAI(this.apiKey);
-      try {
-        // Verify model exists and log more information
-        this.model = this.genAI.getGenerativeModel({
-          model: this.modelName,
-          generationConfig: {
-            maxOutputTokens: this.maxOutputTokens,
-            temperature: this.temperature,
-            topP: 0.9,
-            topK: 40
-          }
-        });
-        this.initialized = true;
-
-      } catch (error) {
-        console.error(`Failed to initialize Gemini model ${this.modelName}:`, error);
-        this.initialized = false;
+    // Knowledge base for the chatbot
+    this.knowledgeBase = [
+      {
+        keywords: ['hello', 'hi', 'hey', 'greetings', 'start'],
+        response: "Hello! I'm the BUP Maintenance Assistant. I can help you with reporting issues, checking status, or contact information. How can I assist you today?"
+      },
+      {
+        keywords: ['report', 'create', 'submit', 'new issue', 'complaint'],
+        response: "To report a new maintenance issue:\n1. Go to the 'Report Issue' page.\n2. Fill in the location and description.\n3. Select the category (Electrical, Plumbing, etc.).\n4. Upload a photo if possible.\n5. Click 'Submit'.\n\nYour issue will be tracked immediately!"
+      },
+      {
+        keywords: ['status', 'track', 'progress', 'update', 'check'],
+        response: "You can check the status of your reported issues in the 'My Issues' dashboard. The status will show as 'Pending', 'Assigned', 'In Progress', or 'Resolved'."
+      },
+      {
+        keywords: ['contact', 'call', 'email', 'admin', 'support', 'phone'],
+        response: "You can contact the Maintenance Department directly:\n\nEmail: maintenance@bup.edu.bd\nPhone: +880-1234-567890\nLocation: Administrative Building, Room 101."
+      },
+      {
+        keywords: ['electricity', 'light', 'fan', 'power', 'socket', 'bulb'],
+        response: "For electrical issues like faulty lights, fans, or power sockets, please select the 'Electricity' category when reporting. If it's a dangerous hazard (sparks, fire), please call the emergency line immediately."
+      },
+      {
+        keywords: ['water', 'plumbing', 'leak', 'tap', 'sink', 'toilet', 'bathroom'],
+        response: "For plumbing issues like water leaks, broken taps, or bathroom problems, please use the 'Sanitary' category. Our plumbers are available from 8 AM to 4 PM."
+      },
+      {
+        keywords: ['ac', 'air conditioner', 'cooling', 'warm'],
+        response: "AC maintenance requests are handled by the HVAC team. Please report it under 'Electricity' or 'Others' and specify 'AC' in the description. Mention the room number clearly."
+      },
+      {
+        keywords: ['internet', 'wifi', 'network', 'slow'],
+        response: "Internet and WiFi issues are handled by the ICT Cell, not the Maintenance Department. Please contact the ICT helpdesk at ict@bup.edu.bd."
+      },
+      {
+        keywords: ['bus', 'transport', 'schedule', 'ticket'],
+        response: "I focus on facility maintenance. For bus schedules and transport queries, please check the 'Transportation' section on the BUP website or contact the Transport Section."
+      },
+      {
+        keywords: ['furniture', 'chair', 'table', 'desk', 'bench', 'broken'],
+        response: "Broken furniture can be reported under the 'Furniture' category. Please attach a photo of the damage to help us bring the right tools."
+      },
+      {
+        keywords: ['clean', 'dust', 'garbage', 'trash', 'dirty'],
+        response: "Cleaning requests should be reported under 'Civil' or 'Others'. Our janitorial staff checks these requests daily."
+      },
+      {
+        keywords: ['emergency', 'fire', 'smoke', 'danger'],
+        response: "🔴 URGENT: If this is a life-threatening emergency (Fire, Gas Leak), call the BUP Emergency Hotline immediately: 333 or 999. Do not wait for the app."
+      },
+      {
+        keywords: ['thank', 'thanks', 'good', 'bye'],
+        response: "You're welcome! Happy to help. Have a great day at BUP!"
       }
-    } else {
-      console.warn('GEMINI_API_KEY not found. Chatbot will use fallback responses.');
-      this.initialized = false;
-    }
+    ];
 
-    // System prompt to define chatbot behavior
-    this.systemPrompt = this.buildSystemPrompt();
+    this.defaultResponse = "I'm not sure I understood that specific question. I can help you with:\n\n- Reporting Issues\n- Checking Status\n- Contacting Support\n- Specifics about Electrical, Plumbing, or Furniture problems.\n\nPlease try phrasing your question with one of these topics.";
   }
 
   /**
-   * Build the system prompt with instructions for the chatbot
-   */
-  buildSystemPrompt() {
-    return `
-You are a helpful AI assistant for the BUP (Bangladesh University of Professionals) Maintenance HUB. 
-Your name is "BUP Maintenance Assistant".
-
-ABOUT THE SYSTEM:
-- The BUP Maintenance HUB is a platform where students, faculty, and staff can report and track maintenance issues on campus.
-- Users can submit maintenance requests, check status, and get updates on their issues.
-- Issues are categorized by type (furniture, electricity, sanitary, lab, cafeteria, transportation, other).
-- Issues have priority levels (low, medium, high, urgent).
-- The workflow includes: submission → review → approval → assignment → resolution.
-
-YOUR ROLE:
-- Help users understand how to use the Maintenance HUB platform.
-- Answer questions about maintenance issues, processes, and workflows.
-- Provide guidance on reporting problems correctly.
-- Explain how to check status of existing issues.
-- Be polite, helpful, and concise.
-
-GUIDELINES:
-1. Always be professional and courteous.
-2. Keep your responses brief but informative.
-3. When you don't know the answer, admit it and suggest contacting human support.
-4. Never share personal data or confidential information.
-5. Only discuss topics related to campus maintenance and the platform.
-6. Don't provide technical support for issues outside the maintenance platform.
-7. Use a friendly, helpful tone.
-
-For very specific questions about particular issues, direct users to check their dashboard or contact support.
-    `;
-  }
-
-  /**
-   * Generate a response to user messages
-   * @param {Array} messages - Array of message objects with role and content
-   * @param {Object} userContext - Information about the current user
-   * @returns {Promise<string>} - The generated response
+   * generateResponse - Matches user input against keywords to find the best response.
+   * @param {Array} messages - Array of message objects (we only care about the last one)
+   * @param {Object} userContext - (Optional) User info, unused in simple rule-based but kept for signature compatibility
    */
   async generateResponse(messages, userContext) {
-    if (!this.initialized) {
-      return this.getFallbackResponse();
+    if (!messages || messages.length === 0) {
+      return this.defaultResponse;
     }
 
-    try {
-      // Format messages for Gemini API
-      const formattedMessages = this.formatMessagesForGemini(messages, userContext);
+    // Get the last message from the user
+    const lastMessage = messages[messages.length - 1];
+    const userText = (lastMessage.content || "").toLowerCase();
 
-      // Call Gemini API
-      const result = await this.model.generateContent({
-        contents: formattedMessages,
-        safetySettings: [
-          {
-            category: 'HARM_CATEGORY_HARASSMENT',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-          },
-          {
-            category: 'HARM_CATEGORY_HATE_SPEECH',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-          },
-          {
-            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-          },
-          {
-            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-          }
-        ]
-      });
-
-      // Extract and return the response text
-      const responseText = result.response.text();
-      return responseText.trim();
-    } catch (error) {
-      console.error('Gemini API error:', error);
-      // Check for specific error types to provide better error messages
-      if (error.status === 404) {
-        console.error('Model not found. Please check the model name and API version compatibility.');
-      } else if (error.status === 403) {
-        console.error('API access forbidden. Please check your API key permissions.');
-      } else if (error.status === 429) {
-        console.error('Rate limit exceeded. Please try again later.');
+    // 1. Direct Keyword Matching
+    for (const item of this.knowledgeBase) {
+      // Check if ANY keyword exists in the user text
+      const match = item.keywords.some(keyword => userText.includes(keyword));
+      if (match) {
+        return item.response;
       }
-      return this.getErrorResponse(error);
     }
+
+    // 2. Fallback
+    return this.defaultResponse;
   }
 
   /**
-   * Format messages for the Gemini API
-   */
-  formatMessagesForGemini(messages, userContext) {
-    // Start with system message
-    const formattedMessages = [
-      {
-        role: 'model',
-        parts: [{ text: this.systemPrompt }]
-      }
-    ];
-
-    // Add user context as a system message
-    formattedMessages.push({
-      role: 'model',
-      parts: [{ text: `Current user information: Role: ${userContext.role}, Department: ${userContext.department || 'Not specified'}` }]
-    });
-
-    // Add conversation history
-    messages.forEach(message => {
-      const role = message.role === 'user' ? 'user' : 'model';
-      formattedMessages.push({
-        role: role,
-        parts: [{ text: message.content }]
-      });
-    });
-
-    return formattedMessages;
-  }
-
-  /**
-   * Get a fallback response when API is not initialized
-   */
-  getFallbackResponse() {
-    const fallbackResponses = [
-      "I'm here to help with your maintenance questions. What would you like to know about the BUP Maintenance HUB?",
-      "I can help you understand how to report maintenance issues on campus. What information do you need?",
-      "The BUP Maintenance HUB makes it easy to report and track campus issues. How can I assist you today?",
-      "I'm your assistant for the maintenance platform. Ask me how to submit reports or check status updates."
-    ];
-
-    return fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-  }
-
-  /**
-   * Get an error response when API call fails
-   */
-  getErrorResponse(error) {
-    console.error('Error generating response:', error);
-
-    return "I'm sorry, I'm having trouble connecting to my knowledge base right now. Please try again in a moment or contact support if you need immediate assistance.";
-  }
-
-  /**
-   * Check if the Gemini service is healthy
+   * Health check
    */
   async checkHealth() {
-    if (!this.initialized) {
-      return false;
-    }
-
-    try {
-      // Simple test query to check if API is responsive
-      const result = await this.model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: 'Hello' }] }]
-      });
-
-      return result && result.response;
-    } catch (error) {
-      console.error('Gemini API health check error:', error);
-      return false;
-    }
+    return true; // Always healthy
   }
 
   /**
-   * Get available models from the API
-   * Useful for debugging model availability issues
+   * List available models (Legacy compatibility)
    */
   async listAvailableModels() {
-    if (!this.genAI) {
-      return ['No API client initialized'];
-    }
-
-    try {
-      const models = await this.genAI.listModels();
-      return models;
-    } catch (error) {
-      console.error('Error listing models:', error);
-      return [`Error listing models: ${error.message}`];
-    }
+    return ['rule-based-v1'];
   }
 }
 
-module.exports = { GeminiChatbotService };
+module.exports = { GeminiChatbotService: RuleBasedChatbotService };

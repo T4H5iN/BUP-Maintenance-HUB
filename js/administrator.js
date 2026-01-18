@@ -1365,7 +1365,7 @@ function closeUrgentAssignmentModal() {
 
 // Make functions available globally
 window.generateReport = generateReport;
-window.showOverdueIssues = showOverdueIssues;
+window.showOverdueIssues = showAllOverdueIssues;
 window.escalateIssue = escalateIssue;
 window.assignUrgent = assignUrgent;
 window.closeReportGenerationModal = closeReportGenerationModal;

@@ -244,8 +244,13 @@ router.patch('/:id/assign',
         try {
             const { id } = req.params;
             const { technicianId } = req.body;
+
             if (!technicianId) {
                 return res.status(400).json({ message: 'Technician ID is required' });
+            }
+
+            if (!isValidObjectId(technicianId)) {
+                return res.status(400).json({ message: 'Invalid Technician ID format' });
             }
 
             // Find the technician user

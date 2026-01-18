@@ -1198,30 +1198,7 @@
             }
         }
 
-        // Updated handleLogout function that includes showNotification
-        function handleLogout() {
-            try {
-                // Clear user data
-                window.currentUser = null;
-                localStorage.removeItem('bup-current-user');
 
-                // Show notification using our defined function
-                showNotification('Logged out successfully', 'success');
-
-                // Redirect to login page after a short delay
-                setTimeout(() => {
-                    window.location.href = 'auth.html';
-                }, 1000);
-            } catch (error) {
-                console.error('Error during logout:', error);
-                // Fallback redirect if there's an error
-                window.location.href = 'auth.html';
-            }
-        }
-
-        // Make sure logout and handleLogout both work
-        window.logout = handleLogout;
-        window.handleLogout = handleLogout;
     </script>
 
     <!-- Add right before closing body tag -->

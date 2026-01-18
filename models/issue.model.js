@@ -13,7 +13,7 @@ const issueSchema = new mongoose.Schema({
     submitterEmail: String, // Store email separately
     submitterId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Store reference to user model
     submittedDate: { type: Date, default: Date.now },
-    status: { type: String, default: 'pending-review' },
+    status: { type: String, default: 'pending-review', index: true },
     images: [String], // Store paths to uploaded images
     progress: { type: Number, default: 0 },
     progressUpdates: [{
@@ -22,9 +22,10 @@ const issueSchema = new mongoose.Schema({
         note: String
     }],
     // Update assignedTo to allow both ObjectId and String types for backward compatibility
-    assignedTo: { 
+    assignedTo: {
         type: mongoose.Schema.Types.Mixed, // Allow both ObjectId and String
-        ref: 'User' 
+        ref: 'User',
+        index: true
     },
     assignedToName: String, // Store technician name for display
     scheduledDate: Date,
@@ -40,7 +41,7 @@ const issueSchema = new mongoose.Schema({
 });
 
 // Ensure id is always set to issueId before saving
-issueSchema.pre('save', function(next) {
+issueSchema.pre('save', function (next) {
     this.id = this.issueId;
     next();
 });

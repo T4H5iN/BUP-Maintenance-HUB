@@ -96,9 +96,17 @@ app.get('*', (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 // Add error handling for MongoDB connection
+if (!process.env.MONGODB_URI) {
+    console.error('FATAL ERROR: MONGODB_URI is not defined in environment variables.');
+    process.exit(1);
+}
+
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => {
-        app.listen(PORT, () => { });
+        console.log('Connected to MongoDB');
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
     })
     .catch(err => {
         console.error('MongoDB connection error:', err);

@@ -11,7 +11,12 @@ const loadedModules = {
     auth: false,
     notifications: false,
     technician: false,
-    analytics: false  // Add analytics module tracking
+    analytics: false,
+    votes: false,
+    dashboard: false,
+    enhancedCharts: false,
+    reports: false,
+    statistics: false
 };
 
 // Function to check if all required modules are loaded
