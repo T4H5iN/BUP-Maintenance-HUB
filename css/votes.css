@@ -1,0 +1,135 @@
+/* Voting System Styles */
+
+.voting-container {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+/* Card specific voting styles - position it within the issue actions */
+.card-voting {
+    margin-left: auto;
+    border-left: 1px solid var(--gray-200);
+    padding-left: 15px;
+    margin-bottom: 0;
+}
+
+.dark-mode .card-voting {
+    border-left-color: var(--gray-600);
+}
+
+.vote-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 15px;
+}
+
+.vote-btn {
+    background: none;
+    border: none;
+    border-radius: 4px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.vote-btn:hover {
+    background-color: var(--gray-100);
+}
+
+.vote-btn.upvote:hover {
+    color: var(--success-color);
+}
+
+.vote-btn.downvote:hover {
+    color: var(--danger-color);
+}
+
+.vote-btn.voted.upvote {
+    color: var(--success-color);
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
+.vote-btn.voted.downvote {
+    color: var(--danger-color);
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.vote-count {
+    font-weight: 600;
+    min-width: 30px;
+    text-align: center;
+}
+
+.vote-count.positive {
+    color: var(--success-color);
+}
+
+.vote-count.negative {
+    color: var(--danger-color);
+}
+
+.vote-details {
+    display: flex;
+    gap: 15px;
+    color: var(--gray-500);
+    font-size: 0.8rem;
+}
+
+.upvote-count, .downvote-count {
+    display: flex;
+    align-items: center;
+}
+
+/* Modal specific voting styles */
+.modal-voting {
+    margin-left: auto;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-bottom: 15px;
+}
+
+.modal-voting .vote-buttons {
+    margin-bottom: 5px;
+}
+
+/* Dark mode styles */
+.dark-mode .vote-btn:hover {
+    background-color: var(--gray-700);
+}
+
+.dark-mode .vote-btn.voted.upvote {
+    background-color: rgba(16, 185, 129, 0.2);
+}
+
+.dark-mode .vote-btn.voted.downvote {
+    background-color: rgba(239, 68, 68, 0.2);
+}
+
+.dark-mode .vote-details {
+    color: var(--gray-400);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .modal-voting {
+        margin-left: 0;
+        margin-top: 10px;
+        align-items: flex-start;
+    }
+    
+    .card-voting {
+        margin-left: 10px;
+        padding-left: 10px;
+    }
+    
+    .issue-actions {
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+}

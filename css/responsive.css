@@ -1,0 +1,216 @@
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+    }
+
+    .nav-links.mobile-active {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        background: var(--white);
+        padding: 20px 0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    .nav-links.mobile-active .nav-link {
+        width: 100%;
+        text-align: center;
+        padding: 15px 0;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .nav-links.mobile-active .nav-controls {
+        flex-direction: row;
+        justify-content: center;
+        margin-top: 20px;
+        width: 100%;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .mobile-menu-toggle {
+        display: block;
+    }
+
+    .nav-controls {
+        gap: 10px;
+    }
+
+    .dark-mode-toggle,
+    .theme-toggle {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .hero-stats {
+        gap: 30px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .map-container {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-group,
+    .filter-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .issue-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .issue-details {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .issue-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .modal-content {
+        margin: 10% auto;
+        padding: 20px;
+        width: 95%;
+    }
+
+    .auth-wrapper {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .auth-hero {
+        text-align: center;
+    }
+
+    .auth-hero h1 {
+        font-size: 2rem;
+    }
+
+    .auth-form {
+        padding: 30px 20px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .nav-container {
+        padding: 0 15px;
+    }
+
+    .nav-links {
+        gap: 15px;
+    }
+
+    .nav-link {
+        font-size: 0.9rem;
+    }
+
+    .nav-title {
+        font-size: 1.2rem;
+    }
+
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    main {
+        padding: 10px;
+    }
+
+    .quick-report,
+    .issue-form {
+        padding: 20px;
+    }
+
+    .hero {
+        padding: 40px 20px;
+    }
+
+    .nav-container {
+        padding: 0 15px;
+    }
+
+    .input-icon {
+        left: 10px;
+        font-size: 0.9rem;
+    }
+
+    .password-toggle {
+        right: 8px;
+        padding: 6px;
+        font-size: 0.9rem;
+    }
+
+    .form-group input[type="password"],
+    .form-group input[type="text"][id*="Password"] {
+        padding-left: 35px;
+        padding-right: 35px;
+    }
+
+    .form-group input[type="email"]:not([id*="Password"]),
+    .form-group input[type="text"]:not([id*="Password"]) {
+        padding-right: 35px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .dark-mode-toggle,
+    .theme-toggle,
+    body,
+    .navbar,
+    .section,
+    .modal-content,
+    .notification,
+    .issue-card,
+    .stat-card,
+    .campus-map,
+    input,
+    select,
+    textarea,
+    button {
+        transition: none;
+    }
+}
+
+@media (prefers-contrast: high) {
+    .dark-mode {
+        --primary-color: #4a90e2;
+        --gray-300: #666;
+        --gray-600: #ccc;
+    }
+}

@@ -1,0 +1,90 @@
+.technician-schedule-modal {
+    max-width: 600px;
+    min-width: 320px;
+    padding: 30px 20px;
+}
+
+#technicianScheduleContainer {
+    margin-top: 20px;
+    min-height: 120px;
+}
+
+.schedule-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.schedule-item {
+    background: var(--white, #fff);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    padding: 16px 18px;
+    border-left: 5px solid var(--primary-color, #3498db);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.schedule-item.in-progress { border-left-color: #f39c12; }
+.schedule-item.assigned { border-left-color: #2980b9; }
+.schedule-item.resolved { border-left-color: #27ae60; }
+.schedule-item.urgent { border-left-color: #e74c3c; }
+
+.schedule-date {
+    font-size: 1rem;
+    color: var(--gray-700, #555);
+    margin-bottom: 2px;
+}
+
+.schedule-title {
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--primary-color, #3498db);
+}
+
+.schedule-location {
+    font-size: 0.95rem;
+    color: var(--gray-600, #666);
+}
+
+.schedule-status {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 2px;
+}
+
+.status-label {
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    text-transform: capitalize;
+    background: #f0f0f0;
+    color: #333;
+}
+
+.status-label.in-progress { background: #f9e79f; color: #b9770e; }
+.status-label.assigned { background: #d6eaf8; color: #2471a3; }
+.status-label.resolved { background: #d4efdf; color: #229954; }
+
+.priority-label {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    text-transform: capitalize;
+    background: #eee;
+    color: #555;
+}
+
+.priority-label.urgent { background: #f9c0c0; color: #c0392b; }
+.priority-label.high { background: #f7d7b4; color: #e67e22; }
+.priority-label.medium { background: #f9e79f; color: #b9770e; }
+.priority-label.low { background: #d4efdf; color: #229954; }
+
+.loading-indicator, .no-schedule-message, .error-message {
+    text-align: center;
+    color: #888;
+    margin: 30px 0;
+    font-size: 1.1rem;
+}

@@ -1,0 +1,463 @@
+.hero {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: var(--white);
+    padding: 60px 40px;
+    border-radius: var(--border-radius);
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+    opacity: 0.9;
+}
+
+.hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    flex-wrap: wrap;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.quick-report,
+.issue-form {
+    background: var(--white);
+    padding: 40px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 40px;
+}
+
+.quick-report h2 {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.dashboard-tabs {
+    display: flex;
+    gap: 10px;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    border: 2px solid var(--gray-200);
+    background: var(--white);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.tab-btn.active,
+.tab-btn:hover {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.issues-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.issue-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+}
+
+.issue-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.issue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.issue-id {
+    font-weight: 700;
+    color: var(--gray-600);
+}
+
+.issue-status,
+.issue-priority {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.issue-status i {
+    font-size: 1rem;
+}
+
+.issue-status.pending-review { 
+    background: #fef3c7; 
+    color: #92400e; 
+}
+
+.issue-status.assigned { 
+    background: #e0e7ff; 
+    color: #3730a3; 
+}
+
+.issue-status.in-progress { 
+    background: #dbeafe; 
+    color: #1e40af; 
+}
+
+.issue-status.resolved { 
+    background: #d1fae5; 
+    color: #065f46; 
+}
+
+.issue-status.rejected { 
+    background: #fee2e2; 
+    color: #991b1b; 
+}
+
+/* Dark mode status styles */
+.dark-mode .issue-status.pending-review {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+}
+
+.dark-mode .issue-status.assigned {
+    background: rgba(79, 70, 229, 0.2);
+    color: #818cf8;
+}
+
+.dark-mode .issue-status.in-progress {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+}
+
+.dark-mode .issue-status.resolved {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+}
+
+.dark-mode .issue-status.rejected {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+}
+
+.issue-priority.urgent { background: var(--danger-color); color: var(--white); }
+.issue-priority.high { background: var(--warning-color); color: var(--white); }
+.issue-priority.medium { background: var(--secondary-color); color: var(--white); }
+.issue-priority.low { background: var(--success-color); color: var(--white); }
+
+.issue-details {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+    color: var(--gray-600);
+}
+
+.issue-details span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.issue-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stars {
+    display: flex;
+    gap: 2px;
+}
+
+.stars i {
+    color: var(--warning-color);
+    cursor: pointer;
+}
+
+/* Styles for All Issues on Home page - more specific and with !important to override any conflicts */
+.all-issues-home {
+    background-color: #ffffff !important;
+    padding: 40px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 40px;
+    border: 1px solid #e5e7eb; /* Adding border for better visibility */
+}
+
+.all-issues-home h2 {
+    font-size: 2rem;
+    color: #1f2937 !important; /* Dark gray for better contrast on white */
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* Dark mode styles with higher specificity */
+body.dark-mode .all-issues-home {
+    background-color: #1f2937 !important; /* Dark background */
+    border-color: #374151;
+}
+
+body.dark-mode .all-issues-home h2 {
+    color: #f3f4f6 !important; /* Light text for dark background */
+}
+
+/* All issues list empty states */
+#home-issues-list .no-issues {
+    text-align: center;
+    padding: 40px;
+    background-color: #f9fafb;
+    border-radius: var(--border-radius);
+    color: #6b7280;
+    font-size: 1.1rem;
+    font-style: italic;
+}
+
+body.dark-mode #home-issues-list .no-issues {
+    background-color: #374151;
+    color: #d1d5db;
+}
+
+/* No Issues Message */
+.no-issues-message {
+    text-align: center;
+    padding: 40px 20px;
+    background: var(--gray-50);
+    border-radius: var(--border-radius);
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    min-height: 200px;
+    justify-content: center;
+}
+
+.dark-mode .no-issues-message {
+    background: var(--gray-750);
+}
+
+.no-issues-message i {
+    font-size: 3rem;
+    color: var(--gray-400);
+    margin-bottom: 15px;
+}
+
+.no-issues-message p {
+    color: var(--gray-600);
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    max-width: 400px;
+}
+
+.dark-mode .no-issues-message i {
+    color: var(--gray-500);
+}
+
+.dark-mode .no-issues-message p {
+    color: var(--gray-400);
+}
+
+.no-issues-message .btn-primary {
+    padding: 10px 20px;
+    font-size: 1rem;
+}
+
+/* Loading indicator */
+.loading-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 0;
+    color: var(--gray-600);
+    font-size: 1.1rem;
+    gap: 15px;
+}
+
+.loading-indicator i {
+    font-size: 2rem;
+    color: var(--primary-color);
+}
+
+.dark-mode .loading-indicator {
+    color: var(--gray-400);
+}
+
+.dark-mode .loading-indicator i {
+    color: var(--secondary-color);
+}
+
+/* Reports limited access notice */
+.reports-notice {
+    background-color: var(--gray-100);
+    border-left: 4px solid var(--info-color);
+    border-radius: var(--border-radius);
+    padding: 16px;
+    margin-bottom: 24px;
+}
+
+.dark-mode .reports-notice {
+    background-color: var(--gray-750);
+    border-left-color: var(--info-color);
+}
+
+.reports-notice .notice-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.reports-notice i {
+    font-size: 1.5rem;
+    color: var(--info-color);
+    margin-top: 2px;
+}
+
+.reports-notice p {
+    margin: 0;
+    color: var(--gray-700);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.dark-mode .reports-notice p {
+    color: var(--gray-300);
+}
+
+/* Technician stats grid layout */
+.technician-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+/* Responsive Improvements for Dashboard */
+@media (max-width: 768px) {
+    .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .issues-list .issue-card {
+        padding: 15px;
+    }
+    
+    .issue-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .issue-badges {
+        margin-top: 10px;
+    }
+    
+    .issue-details {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .issue-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .issue-actions button {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+    
+    .rating {
+        align-self: flex-start;
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Add animation for hero stat numbers */
+.number-animation {
+    animation: numberPulse 1s ease-in-out;
+}
+
+@keyframes numberPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); color: var(--primary-color); }
+    100% { transform: scale(1); }
+}

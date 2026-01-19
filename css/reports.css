@@ -1,0 +1,498 @@
+/* Report page specific styles */
+
+.reports-content {
+    margin: 20px 0;
+}
+
+/* Summary Statistics */
+.report-summary-stats {
+    margin-bottom: 30px;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    padding: 25px;
+}
+
+.report-summary-stats h3 {
+    font-size: 1.25rem;
+    color: var(--gray-700);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.summary-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.summary-stat {
+    text-align: center;
+    padding: 20px;
+    background-color: var(--gray-50);
+    border-radius: var(--border-radius);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.summary-stat:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-sm);
+}
+
+.summary-stat h4 {
+    font-size: 1rem;
+    color: var(--gray-600);
+    margin-bottom: 10px;
+    z-index: 2;
+}
+
+.summary-stat .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    display: block;
+    z-index: 2;
+}
+
+.summary-stat .stat-trend {
+    font-size: 0.9rem;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    z-index: 2;
+}
+
+.summary-stat .stat-trend.positive {
+    color: var(--success-color);
+}
+
+.summary-stat .stat-trend.negative {
+    color: var(--danger-color);
+}
+
+.summary-stat .sparkline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    opacity: 0.2;
+    z-index: 1;
+}
+
+/* Trends Chart */
+.chart-container {
+    position: relative;
+}
+
+.chart-actions {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+.chart-action-btn {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--border-radius);
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.chart-action-btn:hover {
+    background: var(--gray-100);
+    border-color: var(--primary-color);
+}
+
+/* Chart Control Panel */
+.chart-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+    background-color: var(--gray-50);
+    padding: 15px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.chart-control-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chart-control-group label {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+}
+
+.chart-type-toggle {
+    display: flex;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.chart-type-btn {
+    padding: 6px 12px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--gray-600);
+    transition: all 0.2s;
+}
+
+.chart-type-btn.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.chart-type-btn:hover:not(.active) {
+    background: var(--gray-100);
+}
+
+/* Multi-chart layout */
+.multi-chart-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.chart-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    padding: 20px;
+    position: relative;
+}
+
+.chart-card h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: var(--gray-700);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chart-card h4 i {
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+.chart-card .chart-area {
+    height: 250px;
+    position: relative;
+}
+
+/* Comparison toggle switch */
+.comparison-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--gray-300);
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+/* Fallback chart styles when Chart.js is not loaded */
+.chart-fallback {
+    background-color: var(--gray-100);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.dark-mode .chart-fallback {
+    background-color: var(--gray-750);
+}
+
+.fallback-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.fallback-message i {
+    font-size: 3rem;
+    color: var(--gray-400);
+}
+
+.fallback-message p {
+    font-size: 1.1rem;
+    color: var(--gray-600);
+    margin: 0;
+}
+
+.dark-mode .fallback-message i {
+    color: var(--gray-500);
+}
+
+.dark-mode .fallback-message p {
+    color: var(--gray-400);
+}
+
+.fallback-data {
+    text-align: left;
+}
+
+.fallback-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.fallback-table th, 
+.fallback-table td {
+    padding: 8px 12px;
+    border: 1px solid var(--gray-300);
+    text-align: left;
+}
+
+.fallback-table th {
+    background-color: var(--gray-200);
+    font-weight: 600;
+}
+
+.dark-mode .fallback-table th, 
+.dark-mode .fallback-table td {
+    border-color: var(--gray-600);
+}
+
+.dark-mode .fallback-table th {
+    background-color: var(--gray-700);
+}
+
+/* Loading state for report tables */
+.report-tables.loading {
+    position: relative;
+    min-height: 200px;
+}
+
+.report-tables.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.report-tables.loading::before {
+    content: 'Loading data...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 11;
+    font-weight: bold;
+    background: var(--white);
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+}
+
+.dark-mode .report-tables.loading::after {
+    background: rgba(30, 41, 59, 0.8);
+}
+
+.dark-mode .report-tables.loading::before {
+    background: var(--gray-700);
+    color: var(--white);
+}
+
+/* Empty table styling */
+.report-table .no-data {
+    text-align: center;
+    padding: 20px;
+    color: var(--gray-500);
+    font-style: italic;
+}
+
+.dark-mode .report-table .no-data {
+    color: var(--gray-400);
+}
+
+/* Responsive design for reports */
+@media (max-width: 768px) {
+    .summary-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .report-tables {
+        overflow-x: auto;
+    }
+    
+    .report-table {
+        min-width: 600px;
+    }
+}
+
+@media (max-width: 480px) {
+    .summary-stats-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+}
+
+/* Dark mode */
+body.dark-mode .report-summary-stats {
+    background: var(--white);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .report-summary-stats h3 {
+    color: white;
+}
+
+body.dark-mode .summary-stats-grid {
+    /* Ensure the grid styling is consistent in dark mode */
+    gap: 20px;
+}
+
+body.dark-mode .summary-stat {
+    background-color: #263344;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    color: white;
+    margin-bottom: 5px;
+}
+
+body.dark-mode .summary-stat:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .summary-stat h4 {
+    color: white;
+}
+
+body.dark-mode .summary-stat .stat-value {
+    color: #3b82f6;
+}
+
+body.dark-mode .chart-action-btn {
+    background: var(--gray-700);
+    border-color: var(--gray-600);
+    color: var(--gray-300);
+}
+
+body.dark-mode .chart-action-btn:hover {
+    background: var(--gray-600);
+    border-color: var(--primary-color-light);
+}
+
+body.dark-mode .chart-controls {
+    background-color: var(--gray-800);
+    border: 1px solid var(--gray-700);
+}
+
+body.dark-mode .chart-control-group label {
+    color: var(--gray-400);
+}
+
+body.dark-mode .chart-type-toggle {
+    background: var(--gray-700);
+    border-color: var(--gray-600);
+}
+
+body.dark-mode .chart-type-btn {
+    color: var(--gray-300);
+}
+
+body.dark-mode .chart-type-btn:hover:not(.active) {
+    background: var(--gray-650);
+}
+
+body.dark-mode .chart-card {
+    background: #1e293b;
+}
+
+body.dark-mode .chart-card h4 {
+    color: white;
+}
+
+body.dark-mode .chart-tooltip {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: var(--primary-color-light);
+}
+
+body.dark-mode .chart-tooltip h5 {
+    color: var(--gray-300);
+}
+
+body.dark-mode .chart-tooltip p {
+    color: var(--gray-400);
+}
+
+body.dark-mode .toggle-slider {
+    background-color: var(--gray-600);
+}

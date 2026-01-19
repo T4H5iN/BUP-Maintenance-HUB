@@ -1,0 +1,311 @@
+/* Administrator Panel Styles */
+
+.overdue-issue-item {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    border-left: 4px solid var(--gray-300);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin: 10px 0 10px 0;
+}
+
+.overdue-issue-item:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.overdue-issue-item.urgent {
+    border-left-color: var(--danger-color);
+}
+
+.overdue-issue-item.high {
+    border-left-color: var(--warning-color);
+}
+
+.overdue-issue-item.medium {
+    border-left-color: var(--secondary-color);
+}
+
+.overdue-issue-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.issue-id {
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+.issue-age {
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+.overdue-issue-item h4 {
+    margin-bottom: 10px;
+    color: var(--gray-800);
+}
+
+.issue-location {
+    color: var(--gray-600);
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.issue-status {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    color: var(--gray-700);
+}
+
+.issue-description {
+    background: var(--gray-50);
+    padding: 10px;
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    max-height: 80px;
+    overflow-y: auto;
+}
+
+.overdue-issue-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Escalation Modal */
+.escalation-modal {
+    max-width: 600px;
+}
+
+.escalation-issue-summary {
+    background: var(--gray-50);
+    padding: 15px;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+}
+
+.escalation-issue-summary p {
+    margin-bottom: 5px;
+}
+
+#escalationForm .form-group {
+    margin-bottom: 15px;
+}
+
+#escalationForm label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+#escalationForm select,
+#escalationForm textarea,
+#escalationForm input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--border-radius);
+}
+
+#escalationForm textarea {
+    resize: vertical;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox-group input {
+    margin: 0;
+}
+
+.checkbox-group label {
+    margin-bottom: 0;
+}
+
+.escalation-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Urgent Assignment Modal */
+.urgent-assignment-modal {
+    max-width: 600px;
+}
+
+.urgent-issue-details {
+    background: var(--gray-50);
+    padding: 15px;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+}
+
+.urgent-issue-details p {
+    margin-bottom: 5px;
+}
+
+.priority-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+}
+
+.priority-tag.urgent {
+    background-color: var(--danger-color);
+}
+
+.priority-tag.high {
+    background-color: var(--warning-color);
+}
+
+.priority-tag.medium {
+    background-color: var(--secondary-color);
+}
+
+.priority-tag.low {
+    background-color: var(--success-color);
+}
+
+.deadline-selector {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+#urgentAssignmentForm .form-group {
+    margin-bottom: 15px;
+}
+
+#urgentAssignmentForm label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+#urgentAssignmentForm select,
+#urgentAssignmentForm textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--border-radius);
+}
+
+#urgentAssignmentForm textarea {
+    resize: vertical;
+}
+
+.urgent-assignment-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Report Table Styles */
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.report-table th, 
+.report-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.report-table th {
+    background-color: var(--gray-50);
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+.report-table tr:last-child td {
+    border-bottom: none;
+}
+
+.report-table tr:nth-child(even) {
+    background-color: var(--gray-50);
+}
+
+.report-table tr:hover {
+    background-color: var(--gray-100);
+}
+
+.no-data-message {
+    text-align: center;
+    color: var(--gray-500);
+    padding: 20px;
+    font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .overview-stats {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+    }
+    
+    .overview-number {
+        font-size: 2rem;
+    }
+    
+    .alert-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .alert-actions {
+        margin-top: 15px;
+        align-self: flex-end;
+    }
+    
+    .summary-stats {
+        flex-direction: column;
+        align-items: center;
+        gap: 25px;
+    }
+    
+    .summary-stat {
+        width: 100%;
+    }
+    
+    .priority-bar {
+        height: 30px;
+    }
+    
+    .priority-label, .priority-count {
+        font-size: 0.7rem;
+    }
+    
+    .report-table {
+        font-size: 0.9rem;
+    }
+    
+    .report-table th, 
+    .report-table td {
+        padding: 8px 10px;
+    }
+    
+    .overdue-issue-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .overdue-issue-actions button {
+        width: 100%;
+    }
+}

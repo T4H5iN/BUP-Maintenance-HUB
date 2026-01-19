@@ -1,13 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BUP Maintenance HUB</title>
-    <link rel="stylesheet" href="styles.css">
+
+    <!-- Add loading screen styles -->
+    <style>
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+
+        #loading-screen.fade-out {
+            opacity: 0;
+        }
+
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .dark-mode #loading-screen {
+            background-color: #1a1a2e;
+            color: #ffffff;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
+    <!-- Import CSS files in proper order -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/forms.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/remaining-styles.css">
+    <link rel="stylesheet" href="css/votes.css">
+    <!-- Add the new CSS file specifically for building cards -->
+    <link rel="stylesheet" href="css/building-cards.css">
+    <!-- Add the missing reports CSS file -->
+    <link rel="stylesheet" href="css/reports.css">
+    <link rel="stylesheet" href="css/theme-dark.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/progress-slider.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Add chatbot CSS -->
+    <link rel="stylesheet" href="css/chatbot.css">
+    <!-- Add notifications CSS -->
+    <link rel="stylesheet" href="css/notifications.css">
 </head>
+
 <body>
+    <!-- Add loading screen -->
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <h2>Loading BUP Maintenance HUB...</h2>
+        <p>Please wait while we set things up for you.</p>
+    </div>
+
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
@@ -20,8 +96,15 @@
                 <a href="#dashboard" class="nav-link">Dashboard</a>
                 <a href="#reports" class="nav-link">Reports</a>
                 <div class="nav-controls">
-                    <button id="darkModeToggle" class="dark-mode-toggle" title="Switch to Dark Mode" aria-label="Switch to Dark Mode">
+                    <button id="darkModeToggle" class="dark-mode-toggle" title="Switch to Dark Mode"
+                        aria-label="Switch to Dark Mode">
                         <i class="fas fa-moon"></i>
+                    </button>
+                    <!-- Add notification button here -->
+                    <button id="notificationButton" class="notification-btn" title="Notifications"
+                        aria-label="View Notifications" onclick="toggleNotificationsPanel()">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
                     </button>
                     <div class="user-menu">
                         <button class="login-btn" onclick="showLoginModal()">
@@ -30,7 +113,7 @@
                     </div>
                 </div>
             </div>
-            <div class="mobile-menu-toggle">
+            <div class="mobile-menu-toggle" onclick="toggleMobileMenu()">
                 <i class="fas fa-bars"></i>
             </div>
         </div>
@@ -47,9 +130,10 @@
                         <option value="">Select Role</option>
                         <option value="student">Student</option>
                         <option value="faculty">Faculty</option>
-                        <option value="staff">Staff</option>
-                        <option value="admin">Admin</option>
-                        <option value="authority">Higher Authority</option>
+                        <!-- <option value="staff">Staff</option> -->
+                        <option value="technician">Technician</option>
+                        <option value="moderator">Moderator</option>
+                        <option value="administrator">Administrator</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -61,7 +145,8 @@
                     <input type="password" id="password" required>
                 </div>
                 <button type="submit" class="btn-primary">Login</button>
-                <p class="register-link">Don't have an account? <a href="#" onclick="showRegisterModal()">Register here</a></p>
+                <p class="register-link">Don't have an account? <a href="#" onclick="showRegisterModal()">Register
+                        here</a></p>
             </form>
         </div>
     </div>
@@ -80,7 +165,9 @@
                         <option value="">Select Role</option>
                         <option value="student">Student</option>
                         <option value="faculty">Faculty</option>
-                        <option value="staff">Staff</option>
+                        <!-- <option value="staff">Staff</option> -->
+                        <option value="moderator">Moderator</option>
+                        <option value="administrator">Administrator</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -101,14 +188,17 @@
                         <option value="business-general">Department of Business Administration - General</option>
                         <option value="environmental-science">Department of Environmental Science</option>
                         <option value="english">Department of English</option>
-                        <option value="business-ais">Department of Business Administration in Accounting & Information Systems</option>
+                        <option value="business-ais">Department of Business Administration in Accounting & Information
+                            Systems</option>
                         <option value="cse">Department of Computer Science and Engineering</option>
                         <option value="public-administration">Department of Public Administration</option>
-                        <option value="business-management">Department of Business Administration in Management Studies</option>
+                        <option value="business-management">Department of Business Administration in Management Studies
+                        </option>
                         <option value="development-studies">Department of Development Studies</option>
                         <option value="sociology">Department of Sociology</option>
                         <option value="mass-communication">Department of Mass Communication and Journalism</option>
-                        <option value="business-finance">Department of Business Administration in Finance & Banking</option>
+                        <option value="business-finance">Department of Business Administration in Finance & Banking
+                        </option>
                         <option value="business-marketing">Department of Business Administration in Marketing</option>
                         <option value="law">Department of Law</option>
                         <option value="disaster-management">Department of Disaster Management & Resilience</option>
@@ -127,7 +217,8 @@
                     <input type="password" id="confirmPassword" required>
                 </div>
                 <button type="submit" class="btn-primary">Register</button>
-                <p class="register-link">Already have an account? <a href="#" onclick="showLoginModal()">Login here</a></p>
+                <p class="register-link">Already have an account? <a href="#" onclick="showLoginModal()">Login here</a>
+                </p>
             </form>
         </div>
     </div>
@@ -137,21 +228,22 @@
             <div class="hero">
                 <div class="hero-content">
                     <h1>Welcome to BUP Maintenance HUB</h1>
-                    <p>Report campus maintenance issues quickly and efficiently. Help us maintain a better learning environment for everyone.</p>
-                    <div class="hero-stats">
+                    <p>Report campus maintenance issues quickly and efficiently. Help us maintain a better learning
+                        environment for everyone.</p>
+                    <!-- <div class="hero-stats">
                         <div class="stat">
-                            <span class="stat-number">245</span>
+                            <span class="stat-number" id="resolved-count">--</span>
                             <span class="stat-label">Issues Resolved</span>
                         </div>
                         <div class="stat">
-                            <span class="stat-number">12</span>
+                            <span class="stat-number" id="pending-count">--</span>
                             <span class="stat-label">Pending Issues</span>
                         </div>
                         <div class="stat">
-                            <span class="stat-number">4.8</span>
+                            <span class="stat-number" id="avg-rating">--</span>
                             <span class="stat-label">Avg Rating</span>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
 
@@ -188,41 +280,100 @@
                             <label>Location:</label>
                             <select id="location" required>
                                 <option value="">Select Location</option>
-                                <option value="academic-block-1">Academic Block 1</option>
-                                <option value="academic-block-2">Academic Block 2</option>
+                                <option value="academic-building">Academic Building</option>
+                                <option value="fbs-building">FBS Building</option>
                                 <option value="admin-building">Admin Building</option>
                                 <option value="library">Library</option>
-                                <option value="cafeteria">Cafeteria</option>
-                                <option value="auditorium">Auditorium</option>
-                                <option value="playground">Playground</option>
-                                <option value="parking">Parking Area</option>
+                                <option value="annex">Annex</option>
+                                <option value="vista-cafeteria">Vista Cafeteria</option>
+                                <option value="amitte-cafeteria">Amitte Cafeteria</option>
+                                <option value="third-place-cafeteria">Third Place Cafeteria</option>
+                                <option value="staff-canteen">Staff Canteen</option>
+                                <option value="day-care-center">Day Care Center</option>
+                                <option value="male-common-room">Male Common Room</option>
+                                <option value="female-common-room">Female Common Room</option>
+                                <option value="other">Other</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label>Room/Specific Location:</label>
-                            <input type="text" id="specificLocation" placeholder="e.g., Room 205, Washroom 2nd Floor">
+                            <input type="text" id="specificLocation" placeholder="e.g., Room 205, Washroom 2nd Floor"
+                                maxlength="50">
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Issue Description:</label>
-                        <textarea id="description" rows="4" required placeholder="Describe the issue in detail..."></textarea>
+                        <textarea id="description" rows="8" required placeholder="Describe the issue in detail..."
+                            maxlength="1000" style="text-align: justify;"></textarea>
                     </div>
                     <div class="form-group">
                         <label>Upload Image (Optional):</label>
                         <div class="file-upload">
-                            <input type="file" id="imageUpload" accept="image/*" multiple>
+                            <input type="file" id="imageUpload" accept="image/*" multiple
+                                onchange="handleImageUpload(event)">
                             <label for="imageUpload" class="file-upload-label">
                                 <i class="fas fa-camera"></i>
-                                Choose Images
+                                Choose a maximum of 5 Images
                             </label>
                         </div>
-                        <div id="imagePreview" class="image-preview"></div>
+                        <div id="imagePreview" class="image-preview">
+                            <!-- Images will be displayed here -->
+                        </div>
                     </div>
                     <button type="submit" class="btn-primary">
                         <i class="fas fa-paper-plane"></i>
                         Submit Issue Report
                     </button>
                 </form>
+            </div>
+
+            <!-- New All Issues Section -->
+            <div class="all-issues-home">
+                <h2>All Campus Issues</h2>
+                <div class="dashboard-filters">
+                    <div class="filter-group">
+                        <select id="homeStatusFilter">
+                            <option value="all">All Status</option>
+                            <option value="pending-review">Pending Review</option>
+                            <option value="approved">Approved</option>
+                            <option value="assigned">Assigned</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="resolved">Resolved</option>
+                        </select>
+                        <select id="homeCategoryFilter">
+                            <option value="all">All Categories</option>
+                            <option value="furniture">Furniture</option>
+                            <option value="electricity">Electricity</option>
+                            <option value="sanitary">Sanitary</option>
+                            <option value="lab">Laboratory</option>
+                            <option value="cafeteria">Cafeteria</option>
+                            <option value="transportation">Transportation</option>
+                        </select>
+                        <select id="homeLocationFilter">
+                            <option value="all">All Locations</option>
+                            <option value="academic">Academic Building</option>
+                            <option value="fbs">FBS Building</option>
+                            <option value="admin">Admin Building</option>
+                            <option value="library">Library</option>
+                            <option value="annex">Annex</option>
+                            <option value="vista">Vista Cafeteria</option>
+                            <option value="amitte">Amitte Cafeteria</option>
+                            <option value="third-place">Third Place Cafeteria</option>
+                            <option value="daycare">Day Care Center</option>
+                            <option value="staff-canteen">Staff Canteen</option>
+                        </select>
+                        <div class="search-container">
+                            <input type="text" id="homeSearchInput" placeholder="Search issues..." class="search-input"
+                                maxlength="50">
+                        </div>
+                    </div>
+                </div>
+                <div id="home-issues-list" class="issues-list">
+                    <!-- Issues will be populated dynamically -->
+                    <div class="loading-indicator">
+                        <i class="fas fa-spinner fa-spin"></i> Loading issues...
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -241,39 +392,75 @@
             </div>
             <div class="map-container">
                 <div class="campus-map">
-                    <div class="building" data-building="academic-1" style="top: 20%; left: 30%;">
+                    <div class="building" data-building="academic" style="top: 20%; left: 50%;">
+                        <div class="building-icon">
+                            <i class="fas fa-university"></i>
+                            <span class="issue-count urgent">5</span>
+                        </div>
+                        <span class="building-label">Academic Building</span>
+                    </div>
+                    <div class="building" data-building="fbs" style="top: 60%; left: 50%;">
                         <div class="building-icon">
                             <i class="fas fa-building"></i>
-                            <span class="issue-count urgent">3</span>
+                            <span class="issue-count medium">3</span>
                         </div>
-                        <span class="building-label">Academic Block 1</span>
+                        <span class="building-label">FBS Building</span>
                     </div>
-                    <div class="building" data-building="academic-2" style="top: 20%; left: 60%;">
+                    <div class="building" data-building="admin" style="top: 40%; left: 50%;">
+                        <div class="building-icon">
+                            <i class="fas fa-landmark"></i>
+                            <span class="issue-count high">4</span>
+                        </div>
+                        <span class="building-label">Admin Building</span>
+                    </div>
+                    <div class="building" data-building="annex" style="top: 80%; left: 88%;">
                         <div class="building-icon">
                             <i class="fas fa-building"></i>
-                            <span class="issue-count medium">2</span>
+                            <span class="issue-count low">2</span>
                         </div>
-                        <span class="building-label">Academic Block 2</span>
+                        <span class="building-label">Annex</span>
                     </div>
-                    <div class="building" data-building="library" style="top: 50%; left: 20%;">
+                    <div class="building" data-building="library" style="top: 37%; left: 37%;">
                         <div class="building-icon">
                             <i class="fas fa-book"></i>
-                            <span class="issue-count low">1</span>
+                            <span class="issue-count low">2</span>
                         </div>
                         <span class="building-label">Library</span>
                     </div>
-                    <div class="building" data-building="cafeteria" style="top: 70%; left: 45%;">
+                    <div class="building" data-building="vista" style="top: 66%; left: 38%;">
                         <div class="building-icon">
                             <i class="fas fa-utensils"></i>
-                            <span class="issue-count high">4</span>
+                            <span class="issue-count medium">2</span>
                         </div>
-                        <span class="building-label">Cafeteria</span>
+                        <span class="building-label">Vista Cafeteria</span>
                     </div>
-                    <div class="building" data-building="admin" style="top: 40%; left: 70%;">
+                    <div class="building" data-building="amitte" style="top: 14%; left: 37%;">
                         <div class="building-icon">
-                            <i class="fas fa-university"></i>
+                            <i class="fas fa-coffee"></i>
+                            <span class="issue-count low">1</span>
                         </div>
-                        <span class="building-label">Admin Building</span>
+                        <span class="building-label">Amitte Cafeteria</span>
+                    </div>
+                    <div class="building" data-building="third-place" style="top: 5%; left: 6%;">
+                        <div class="building-icon">
+                            <i class="fas fa-utensils"></i>
+                            <span class="issue-count medium">3</span>
+                        </div>
+                        <span class="building-label">Third Place Cafeteria</span>
+                    </div>
+                    <div class="building" data-building="daycare" style="top: 60%; left: 88%;">
+                        <div class="building-icon">
+                            <i class="fas fa-child"></i>
+                            <span class="issue-count low">1</span>
+                        </div>
+                        <span class="building-label">Day Care Center</span>
+                    </div>
+                    <div class="building" data-building="staff-canteen" style="top: 80%; left: 5%;">
+                        <div class="building-icon">
+                            <i class="fas fa-utensils"></i>
+                            <span class="issue-count low">1</span>
+                        </div>
+                        <span class="building-label">Staff Canteen</span>
                     </div>
                 </div>
                 <div class="map-legend">
@@ -303,8 +490,12 @@
                 <h2>Dashboard</h2>
                 <div class="dashboard-tabs">
                     <button class="tab-btn active" onclick="showTab('user-dashboard')">My Issues</button>
-                    <button class="tab-btn" onclick="showTab('admin-panel')" id="adminTab" style="display: none;">Admin Panel</button>
-                    <button class="tab-btn" onclick="showTab('authority-panel')" id="authorityTab" style="display: none;">Authority Panel</button>
+                    <button class="tab-btn" onclick="showTab('moderator-panel')" id="moderatorTab"
+                        style="display: none;">Moderator Panel</button>
+                    <button class="tab-btn" onclick="showTab('administrator-panel')" id="administratorTab"
+                        style="display: none;">Administrator Panel</button>
+                    <button class="tab-btn" onclick="showTab('technician-panel')" id="technicianTab"
+                        style="display: none;">Technician Panel</button>
                 </div>
             </div>
 
@@ -313,29 +504,22 @@
                     <div class="stat-card">
                         <i class="fas fa-exclamation-circle"></i>
                         <div>
-                            <span class="stat-number">8</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Total Submitted</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <i class="fas fa-clock"></i>
                         <div>
-                            <span class="stat-number">3</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Pending</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <i class="fas fa-check-circle"></i>
                         <div>
-                            <span class="stat-number">5</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Resolved</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-star"></i>
-                        <div>
-                            <span class="stat-number">4.6</span>
-                            <span class="stat-label">Avg Rating</span>
                         </div>
                     </div>
                 </div>
@@ -354,67 +538,28 @@
                             <option value="electricity">Electricity</option>
                             <option value="sanitary">Sanitary</option>
                             <option value="lab">Laboratory</option>
+                            <option value="cafeteria">Cafeteria</option>
+                            <option value="transportation">Transportation</option>
+                            <option value="other">Other</option>
                         </select>
                         <input type="date" id="dateFilter">
                     </div>
                 </div>
 
                 <div class="issues-list">
-                    <div class="issue-card">
-                        <div class="issue-header">
-                            <span class="issue-id">#BUP001</span>
-                            <span class="issue-status pending">Pending</span>
-                            <span class="issue-priority urgent">Urgent</span>
-                        </div>
-                        <h4>Broken Projector in Room 205</h4>
-                        <div class="issue-details">
-                            <span><i class="fas fa-map-marker-alt"></i> Academic Block 1, Room 205</span>
-                            <span><i class="fas fa-calendar"></i> Submitted: 2024-01-15</span>
-                            <span><i class="fas fa-tag"></i> Electricity</span>
-                        </div>
-                        <p>The projector in room 205 is not working. The screen remains black even after multiple attempts to restart.</p>
-                        <div class="issue-actions">
-                            <button class="btn-secondary" onclick="viewIssueDetails('BUP001')">View Details</button>
-                            <button class="btn-primary" onclick="provideFeedback('BUP001')">Provide Feedback</button>
-                        </div>
-                    </div>
-
-                    <div class="issue-card">
-                        <div class="issue-header">
-                            <span class="issue-id">#BUP002</span>
-                            <span class="issue-status resolved">Resolved</span>
-                            <span class="issue-priority medium">Medium</span>
-                        </div>
-                        <h4>Dirty Washroom - 2nd Floor</h4>
-                        <div class="issue-details">
-                            <span><i class="fas fa-map-marker-alt"></i> Academic Block 2, 2nd Floor</span>
-                            <span><i class="fas fa-calendar"></i> Submitted: 2024-01-10</span>
-                            <span><i class="fas fa-tag"></i> Sanitary</span>
-                        </div>
-                        <p>The washroom on the 2nd floor needs thorough cleaning. Multiple stalls are in poor condition.</p>
-                        <div class="issue-actions">
-                            <button class="btn-secondary" onclick="viewIssueDetails('BUP002')">View Details</button>
-                            <div class="rating">
-                                <span>Rate Resolution:</span>
-                                <div class="stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="far fa-star"></i>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- Remove hardcoded issue cards - will be populated dynamically -->
+                    <div class="loading-indicator">
+                        <i class="fas fa-spinner fa-spin"></i> Loading your issues...
                     </div>
                 </div>
             </div>
 
-            <div id="admin-panel" class="tab-content">
+            <div id="moderator-panel" class="tab-content">
                 <div class="admin-header">
-                    <h3>Admin Panel - Issue Management</h3>
-                    <button class="btn-primary" onclick="showAnalytics()">
+                    <h3>Moderator Panel - Issue Management</h3><br>
+                    <!-- <button class="btn-primary" onclick="showAnalytics()">
                         <i class="fas fa-chart-bar"></i> Analytics Dashboard
-                    </button>
+                    </button> -->
                 </div>
 
                 <div class="admin-filters">
@@ -422,6 +567,7 @@
                         <option value="all">All Status</option>
                         <option value="pending-review">Pending Review</option>
                         <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
                         <option value="assigned">Assigned</option>
                         <option value="in-progress">In Progress</option>
                         <option value="resolved">Resolved</option>
@@ -448,10 +594,12 @@
                             <h4>AC Not Working in Auditorium</h4>
                             <p><strong>Location:</strong> Auditorium, Main Hall</p>
                             <p><strong>Reported by:</strong> John Doe (Student)</p>
-                            <p><strong>Description:</strong> The main AC unit in the auditorium has stopped working. Temperature is extremely high.</p>
+                            <p><strong>Description:</strong> The main AC unit in the auditorium has stopped working.
+                                Temperature is extremely high.</p>
                             <div class="admin-actions">
                                 <button class="btn-success" onclick="approveIssue('BUP003')">Approve</button>
-                                <button class="btn-warning" onclick="assignTechnician('BUP003')">Assign Technician</button>
+                                <button class="btn-warning" onclick="assignTechnician('BUP003')">Assign
+                                    Technician</button>
                                 <button class="btn-danger" onclick="rejectIssue('BUP003')">Reject</button>
                                 <button class="btn-secondary" onclick="addNote('BUP003')">Add Note</button>
                             </div>
@@ -480,16 +628,16 @@
                 </div>
             </div>
 
-            <div id="authority-panel" class="tab-content">
+            <div id="administrator-panel" class="tab-content">
                 <div class="authority-header">
-                    <h3>Higher Authority Panel</h3>
+                    <h3>Administrator Panel</h3>
                     <div class="authority-actions">
                         <button class="btn-primary" onclick="generateReport()">
                             <i class="fas fa-file-pdf"></i> Generate Report
                         </button>
-                        <button class="btn-warning" onclick="showOverdueIssues()">
+                        <!-- <button class="btn-warning" onclick="showOverdueIssues()">
                             <i class="fas fa-exclamation-triangle"></i> Overdue Issues
-                        </button>
+                        </button> -->
                     </div>
                 </div>
 
@@ -540,21 +688,169 @@
                     </div>
                 </div>
             </div>
+
+            <div id="technician-panel" class="tab-content">
+                <div class="technician-header">
+                    <h3>Technician Dashboard - My Assignments</h3>
+                    <div class="technician-actions">
+                        <button class="btn-primary" onclick="showScheduleView()">
+                            <i class="fas fa-calendar-alt"></i> View Schedule
+                        </button>
+                        <!-- <button class="btn-success" onclick="markAvailability()">
+                            <i class="fas fa-check-circle"></i> Update Availability
+                        </button> -->
+                    </div>
+                </div>
+
+                <div class="technician-stats">
+                    <div class="stat-card">
+                        <i class="fas fa-tasks"></i>
+                        <div>
+                            <span class="stat-number">5</span>
+                            <span class="stat-label">Assigned Tasks</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-hourglass-half"></i>
+                        <div>
+                            <span class="stat-number">3</span>
+                            <span class="stat-label">In Progress</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-check-double"></i>
+                        <div>
+                            <span class="stat-number">12</span>
+                            <span class="stat-label">Completed This Week</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="technician-filter">
+                    <select id="techStatusFilter" class="filter-element">
+                        <option value="all">All Assignments</option>
+                        <option value="pending">Pending</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                    <select id="techPriorityFilter" class="filter-element">
+                        <option value="all">All Priorities</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                    <input type="date" id="techDateFilter" class="filter-element">
+                </div>
+
+                <div class="technician-tasks">
+                    <div class="tech-task-card">
+                        <div class="task-header">
+                            <div class="task-id-container">
+                                <span class="issue-id">#BUP008</span>
+                                <span class="issue-priority urgent">Urgent</span>
+                            </div>
+                            <div class="task-status">
+                                <select class="task-status-select" onchange="updateTaskStatus('BUP008', this.value)">
+                                    <option value="pending">Pending</option>
+                                    <option value="in-progress" selected>In Progress</option>
+                                    <option value="parts-needed">Parts Needed</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="task-content">
+                            <h4>Fix AC in Auditorium</h4>
+                            <p class="task-location"><i class="fas fa-map-marker-alt"></i> Auditorium, Main Hall</p>
+                            <p class="task-schedule"><i class="fas fa-calendar-day"></i> Scheduled: Today, 10:00 AM -
+                                12:00 PM</p>
+                            <p class="task-description">The main AC unit in the auditorium has stopped working.
+                                Temperature is extremely high. Initial diagnosis shows compressor issues.</p>
+
+                            <div class="task-progress">
+                                <div class="progress-label">
+                                    <span>Progress: 60%</span>
+                                    <span class="time-spent">Time spent: 1.5 hours</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 60%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="task-actions">
+                                <button class="btn-primary" onclick="updateTaskProgress('BUP008')">
+                                    <i class="fas fa-edit"></i> Update Progress
+                                </button>
+                                <button class="btn-secondary" onclick="addWorkNotes('BUP008')">
+                                    <i class="fas fa-clipboard"></i> Add Notes
+                                </button>
+                                <button class="btn-warning" onclick="requestParts('BUP008')">
+                                    <i class="fas fa-tools"></i> Request Parts
+                                </button>
+                                <button class="btn-success" onclick="completeTask('BUP008')">
+                                    <i class="fas fa-check-circle"></i> Mark Complete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tech-task-card">
+                        <div class="task-header">
+                            <div class="task-id-container">
+                                <span class="issue-id">#BUP012</span>
+                                <span class="issue-priority high">High</span>
+                            </div>
+                            <div class="task-status">
+                                <select class="task-status-select" onchange="updateTaskStatus('BUP012', this.value)">
+                                    <option value="pending" selected>Pending</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="parts-needed">Parts Needed</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="task-content">
+                            <h4>Replace Broken Chairs in Room 301</h4>
+                            <p class="task-location"><i class="fas fa-map-marker-alt"></i> Academic Block 1, Room 301
+                            </p>
+                            <p class="task-schedule"><i class="fas fa-calendar-day"></i> Scheduled: Tomorrow, 9:00 AM -
+                                11:00 AM</p>
+                            <p class="task-description">Five chairs in Room 301 have broken backrests and need
+                                replacement. New chairs are available in storage.</p>
+
+                            <div class="task-progress">
+                                <div class="progress-label">
+                                    <span>Progress: 0%</span>
+                                    <span class="time-spent">Time spent: 0 hours</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="task-actions">
+                                <button class="btn-primary" onclick="startTask('BUP012')">
+                                    <i class="fas fa-play"></i> Start Task
+                                </button>
+                                <button class="btn-secondary" onclick="viewTaskDetails('BUP012')">
+                                    <i class="fas fa-eye"></i> View Details
+                                </button>
+                                <button class="btn-warning" onclick="rescheduleTask('BUP012')">
+                                    <i class="fas fa-calendar-alt"></i> Reschedule
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <section id="reports" class="section">
             <div class="reports-header">
                 <h2>Reports & Analytics</h2>
-                <div class="report-actions">
-                    <button class="btn-primary" onclick="exportReport('pdf')">
-                        <i class="fas fa-file-pdf"></i> Export PDF
-                    </button>
-                    <button class="btn-success" onclick="exportReport('excel')">
-                        <i class="fas fa-file-excel"></i> Export Excel
-                    </button>
-                </div>
             </div>
 
+            <!-- Reports section filters row -->
             <div class="reports-filters">
                 <div class="filter-row">
                     <select id="reportType">
@@ -565,7 +861,9 @@
                     </select>
                     <input type="date" id="reportStartDate">
                     <input type="date" id="reportEndDate">
-                    <button class="btn-primary" onclick="generateCustomReport()">Generate Report</button>
+                    <button class="btn-primary" onclick="generateCustomReport(true)">
+                        <i class="fas fa-sync-alt"></i> Generate Report
+                    </button>
                 </div>
             </div>
 
@@ -591,34 +889,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>Electricity</td>
-                                    <td>45</td>
-                                    <td>38</td>
-                                    <td>7</td>
-                                    <td>2.3 days</td>
-                                </tr>
-                                <tr>
-                                    <td>Furniture</td>
-                                    <td>32</td>
-                                    <td>28</td>
-                                    <td>4</td>
-                                    <td>4.1 days</td>
-                                </tr>
-                                <tr>
-                                    <td>Sanitary</td>
-                                    <td>28</td>
-                                    <td>25</td>
-                                    <td>3</td>
-                                    <td>1.8 days</td>
-                                </tr>
-                                <tr>
-                                    <td>Laboratory</td>
-                                    <td>21</td>
-                                    <td>18</td>
-                                    <td>3</td>
-                                    <td>3.2 days</td>
-                                </tr>
+                                <!-- Dynamic data will be populated here -->
                             </tbody>
                         </table>
                     </div>
@@ -674,13 +945,460 @@
                 </div>
                 <div class="form-group">
                     <label>Notes:</label>
-                    <textarea id="scheduleNotes" rows="3" placeholder="Additional notes for the maintenance team..."></textarea>
+                    <textarea id="scheduleNotes" rows="3"
+                        placeholder="Additional notes for the maintenance team..."></textarea>
                 </div>
                 <button type="submit" class="btn-primary">Schedule Maintenance</button>
             </form>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Technician Schedule Modal -->
+    <div id="technicianScheduleModal" class="modal">
+        <div class="modal-content technician-schedule-modal">
+            <span class="close" onclick="closeTechnicianScheduleModal()">&times;</span>
+            <h2>My Schedule</h2>
+            <div id="technicianScheduleContainer">
+                <!-- Schedule will be rendered here -->
+                <div class="loading-indicator">
+                    <i class="fas fa-spinner fa-spin"></i> Loading schedule...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technician Availability Modal -->
+    <div id="availabilityModal" class="modal">
+        <div class="modal-content availability-modal">
+            <span class="close" onclick="closeAvailabilityModal()">&times;</span>
+            <h2>Update Availability Status</h2>
+            <form id="availabilityForm">
+                <div class="form-group">
+                    <label for="availabilityStatus">Current Availability:</label>
+                    <select id="availabilityStatus" required>
+                        <option value="available">Available</option>
+                        <option value="busy">Busy (Can take limited tasks)</option>
+                        <option value="unavailable">Unavailable</option>
+                        <option value="on-leave">On Leave</option>
+                        <option value="sick-leave">Sick Leave</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="availabilityNote">Additional Notes:</label>
+                    <textarea id="availabilityNote" rows="3"
+                        placeholder="Optional: Add details about your availability..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="availabilityUntil">Status Valid Until:</label>
+                    <div class="availability-period">
+                        <select id="availabilityUntil">
+                            <option value="today">End of Today</option>
+                            <option value="tomorrow">End of Tomorrow</option>
+                            <option value="week">End of Week</option>
+                            <option value="specific">Specific Date</option>
+                            <option value="indefinite">Until Changed</option>
+                        </select>
+                        <input type="date" id="specificDate" style="display: none;">
+                    </div>
+                </div>
+
+                <div class="availability-actions">
+                    <button type="submit" class="btn-success">
+                        <i class="fas fa-check-circle"></i> Update Status
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="closeAvailabilityModal()">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Load external libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Load the script loader first -->
+    <script src="js/loader.js"></script>
+
+    <!-- Load the utility functions -->
+    <script src="js/utils.js" onload="registerModuleLoaded('utils')"
+        onerror="handleScriptError('utils', event)"></script>
+
+    <!-- Load core functionality -->
+    <script src="js/core.js" onload="registerModuleLoaded('core')" onerror="handleScriptError('core', event)"></script>
+
+    <!-- Load UI management -->
+    <script src="js/ui.js" onload="registerModuleLoaded('ui')" onerror="handleScriptError('ui', event)"></script>
+
+    <!-- Load dark mode functionality -->
+    <script src="js/darkMode.js" onload="registerModuleLoaded('darkMode')"
+        onerror="handleScriptError('darkMode', event)"></script>
+
+    <!-- Load issue management -->
+    <script src="js/imageHandler.js" onload="registerModuleLoaded('issues')"
+        onerror="handleScriptError('issues', event)"></script>
+    <script src="js/issueSubmission.js" onerror="handleScriptError('issues', event)"></script>
+    <script src="js/issueFetching.js" onerror="handleScriptError('issues', event)"></script>
+    <script src="js/issueDisplay.js" onerror="handleScriptError('issues', event)"></script>
+    <script src="js/issueDetails.js" onerror="handleScriptError('issues', event)"></script>
+    <script src="js/issueManager.js" onerror="handleScriptError('issues', event)"></script>
+    <script src="js/voteSystem.js" onload="registerModuleLoaded('votes')"
+        onerror="handleScriptError('votes', event)"></script>
+
+    <!-- Load map functionality -->
+    <script src="js/map.js" onload="registerModuleLoaded('map')" onerror="handleScriptError('map', event)"></script>
+
+    <!-- Load dashboard functionality -->
+    <script src="js/dashboard.js" onload="registerModuleLoaded('dashboard')"
+        onerror="handleScriptError('dashboard', event)"></script>
+
+    <!-- Load authentication functionality -->
+    <script src="js/auth.js" onload="registerModuleLoaded('auth')" onerror="handleScriptError('auth', event)"></script>
+
+    <!-- Load notification system -->
+    <script src="js/notifications.js" onload="registerModuleLoaded('notifications')"
+        onerror="handleScriptError('notifications', event)"></script>
+
+    <!-- Load technician dashboard functionality -->
+    <script src="js/technician.js" onload="registerModuleLoaded('technician')"
+        onerror="handleScriptError('technician', event)"></script>
+
+    <!-- Load analytics functionality -->
+    <script src="js/analytics.js" onload="registerModuleLoaded('analytics')"
+        onerror="handleScriptError('analytics', event)"></script>
+
+    <!-- Load enhanced charts functionality -->
+    <script src="js/enhanced-charts.js" onload="registerModuleLoaded('enhancedCharts')"
+        onerror="handleScriptError('enhancedCharts', event)"></script>
+
+    <!-- Load reports functionality -->
+    <script src="js/reports.js" onload="registerModuleLoaded('reports')"
+        onerror="handleScriptError('reports', event)"></script>
+
+    <!-- Technician schedule CSS and JS -->
+    <link rel="stylesheet" href="css/technician-schedule.css">
+    <script src="js/technician-schedule.js"></script>
+
+    <!-- Admin Panel CSS and JS -->
+    <link rel="stylesheet" href="css/administrator.css">
+    <script src="js/administrator.js" defer></script>
+    <script src="js/reportGenerator.js"></script>
+
+    <!-- Load the main entry point last -->
+    <script src="js/index.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Apply theme first, before checking authentication
+            if (typeof initializeDarkMode === 'function') {
+                initializeDarkMode();
+            }
+
+            // Then check authentication
+            checkAuthentication();
+            initializeApp();
+
+            // Make sure theme toggle has a direct click handler
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            if (darkModeToggle) {
+                // Remove any existing event listeners and add a fresh one
+                darkModeToggle.removeEventListener('click', toggleDarkMode);
+                darkModeToggle.addEventListener('click', toggleDarkMode);
+            }
+
+            // Initialize analytics and charts
+            if (typeof analyticsManager !== 'undefined') {
+                analyticsManager.initializeAnalytics();
+                analyticsManager.initializeCharts();
+            }
+        });
+
+        function checkAuthentication() {
+            const savedUser = localStorage.getItem('bup-current-user');
+
+            if (!savedUser) {
+                // No user logged in, redirect to auth page
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            try {
+                currentUser = JSON.parse(savedUser);
+                updateUIForLoggedInUser();
+            } catch (e) {
+                // Invalid user data, clear and redirect
+                localStorage.removeItem('bup-current-user');
+                window.location.href = 'auth.html';
+            }
+        }
+
+        function logout() {
+            // Clear user data
+            currentUser = null;
+            localStorage.removeItem('bup-current-user');
+
+            // Show notification and redirect
+            showNotification('Logged out successfully', 'success');
+            setTimeout(() => {
+                window.location.href = 'auth.html';
+            }, 1000);
+        }
+    </script>
+
+    <script>
+        // Define a standalone notification function that doesn't rely on other code
+        function showNotification(message, type = 'info') {
+            // Try to use existing notification element if available
+            const notification = document.getElementById('notification');
+            if (notification) {
+                const messageElement = notification.querySelector('.notification-message');
+                const iconElement = notification.querySelector('.notification-icon');
+
+                // Set the message
+                if (messageElement) {
+                    messageElement.textContent = message;
+                }
+
+                // Set appropriate icon if element exists
+                if (iconElement) {
+                    iconElement.className = 'notification-icon';
+                    switch (type) {
+                        case 'success':
+                            iconElement.classList.add('fas', 'fa-check-circle');
+                            break;
+                        case 'error':
+                            iconElement.classList.add('fas', 'fa-times-circle');
+                            break;
+                        case 'warning':
+                            iconElement.classList.add('fas', 'fa-exclamation-circle');
+                            break;
+                        default:
+                            iconElement.classList.add('fas', 'fa-info-circle');
+                            break;
+                    }
+                }
+
+                // Apply the notification type
+                notification.className = `notification ${type}`;
+
+                // Show the notification
+                notification.style.display = 'flex';
+
+                // Hide after 3 seconds
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+            } else {
+                // Fallback to console if notification element doesn't exist
+
+            }
+        }
+
+
+    </script>
+
+    <!-- Add right before closing body tag -->
+    <script>
+        // Ensure filters work after page is fully loaded
+        window.addEventListener('load', function () {
+            // Setup filter event listeners one final time
+            ['homeStatusFilter', 'homeCategoryFilter', 'homeLocationFilter'].forEach(id => {
+                const filter = document.getElementById(id);
+                if (filter) {
+                    filter.addEventListener('change', function () {
+
+                        if (typeof window.filterHomeIssues === 'function') {
+                            window.filterHomeIssues();
+                        }
+                    });
+                }
+            });
+
+            // Also make sure search input works
+            const searchInput = document.getElementById('homeSearchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function () {
+                    if (typeof window.filterHomeIssues === 'function') {
+                        window.filterHomeIssues();
+                    }
+                });
+                searchInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter' && typeof window.filterHomeIssues === 'function') {
+                        window.filterHomeIssues();
+                    }
+                });
+            }
+        });
+    </script>
+
+    <!-- Add fallback functions for modals to prevent errors -->
+    <script>
+        // Ensure critical modal closing functions are always available
+        if (typeof closeUrgentAssignmentModal !== 'function') {
+            window.closeUrgentAssignmentModal = function () {
+                const modal = document.getElementById('urgentAssignmentModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    setTimeout(() => modal.remove(), 300);
+                }
+            };
+        }
+
+        // Add other modal closing functions as fallbacks
+        if (typeof closeEscalationModal !== 'function') {
+            window.closeEscalationModal = function () {
+                const modal = document.getElementById('escalationModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    setTimeout(() => modal.remove(), 300);
+                }
+            };
+        }
+
+        if (typeof closeReportGenerationModal !== 'function') {
+            window.closeReportGenerationModal = function () {
+                const modal = document.getElementById('reportGenerationModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    setTimeout(() => modal.remove(), 300);
+                }
+            };
+        }
+
+        if (typeof closeReportPreviewModal !== 'function') {
+            window.closeReportPreviewModal = function () {
+                const modal = document.getElementById('reportPreviewModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    setTimeout(() => modal.remove(), 300);
+                }
+            };
+        }
+
+        if (typeof closeOverdueIssuesModal !== 'function') {
+            window.closeOverdueIssuesModal = function () {
+                const modal = document.getElementById('overdueIssuesModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    setTimeout(() => modal.remove(), 300);
+                }
+            };
+        }
+    </script>
+
+    <!-- Load statistics functionality - add this before the closing body tag -->
+    <script src="js/statistics.js" onload="registerModuleLoaded('statistics')"
+        onerror="handleScriptError('statistics', event)"></script>
+
+    <!-- Add this right before closing body tag (inside existing script tags) -->
+    <script>
+        // Initialize statistics when issues are loaded
+        window.addEventListener('issuesLoaded', function () {
+            if (typeof initializeStatistics === 'function') {
+                initializeStatistics();
+            }
+        });
+    </script>
+
+    <!-- Add chatbot.js before the closing body tag -->
+    <script src="js/chatbot.js"></script>
+
+    <!-- Add right before closing body tag -->
+    <script>
+        // Ensure navigation works even if other scripts have issues
+        window.addEventListener('load', function () {
+
+
+            // Try both approaches to maximize chances of success
+            if (typeof setupNavigationEvents === 'function') {
+                setupNavigationEvents();
+            } else {
+                // Direct implementation as fallback
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const sectionId = this.getAttribute('href').substring(1);
+
+
+                        // Simple direct section switching
+                        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+
+                        const section = document.getElementById(sectionId);
+                        if (section) {
+                            section.classList.add('active');
+                            this.classList.add('active');
+                            window.currentSection = sectionId;
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+
+    <!-- Add rejection handling fallbacks -->
+    <script>
+        // Ensure critical modal functions are always available
+        if (typeof closeRejectReasonModal !== 'function') {
+            window.closeRejectReasonModal = function () {
+                const modal = document.getElementById('rejectReasonModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    setTimeout(() => modal.remove(), 300);
+                }
+            };
+        }
+
+        // Fallback for showRejectReasonModal if it doesn't exist
+        if (typeof showRejectReasonModal !== 'function') {
+            window.showRejectReasonModal = function (issueId) {
+
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.id = 'rejectReasonModal';
+                modal.innerHTML = `
+          <div class="modal-content">
+            <span class="close" onclick="closeRejectReasonModal()">&times;</span>
+            <h2>Reject Issue</h2>
+            <form id="rejectReasonForm">
+              <div class="form-group">
+                <label for="rejectReasonInput">Reason for rejection:</label>
+                <textarea id="rejectReasonInput" rows="3" required placeholder="Please provide a reason for rejecting this issue..."></textarea>
+              </div>
+              <div class="rejection-actions">
+                <button type="submit" class="btn-danger">Reject Issue</button>
+                <button type="button" class="btn-secondary" onclick="closeRejectReasonModal()">Cancel</button>
+              </div>
+            </form>
+          </div>
+        `;
+                document.body.appendChild(modal);
+                modal.style.display = 'block';
+
+                const form = modal.querySelector('#rejectReasonForm');
+                if (form) {
+                    form.onsubmit = function (e) {
+                        e.preventDefault();
+                        const reason = modal.querySelector('#rejectReasonInput').value.trim();
+                        if (!reason) {
+                            showNotification('Please provide a rejection reason.', 'warning');
+                            return;
+                        }
+                        if (typeof rejectIssue === 'function') {
+                            rejectIssue(issueId, reason);
+                        } else {
+                            showNotification('Issue rejection function not available', 'error');
+                            closeRejectReasonModal();
+                        }
+                    };
+                }
+            };
+        }
+    </script>
 </body>
+
 </html>
