@@ -131,5 +131,3 @@ toggleTestMode(false);
 window.generateTestOTP = generateTestOTP;
 window.verifyTestOTP = verifyTestOTP;
 window.toggleTestMode = toggleTestMode;
-
-

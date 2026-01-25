@@ -252,7 +252,7 @@ function viewIssueDetails(issueId) {
                     ${issue.assignedTo ? `
                     <div class="detail-row">
                         <div class="detail-label"><i class="fas fa-user-cog"></i> Assigned To:</div>
-                        <div class="detail-value">${issue.assignedTo}</div>
+                        <div class="detail-value">${issue.assignedToName || issue.assignedTo}</div>
                     </div>` : ''}
                     
                     ${issue.scheduledDate && issue.status !== 'in-progress' ? `
@@ -270,6 +270,42 @@ function viewIssueDetails(issueId) {
                     ${progressSliderHtml}
                     ${imageGallery}
                     ${progressHistory || ''}
+                    
+                    ${issue.status === 'resolved' ? `
+                    <div class="issue-feedback-section">
+                        <h4><i class="fas fa-star"></i> User Feedback</h4>
+                        ${issue.rating ? `
+                        <div class="feedback-display">
+                            <div class="feedback-rating">
+                                <div class="stars-display">
+                                    ${Array(issue.rating).fill('<i class="fas fa-star" style="color:#f59e0b;"></i>').join('')}
+                                    ${Array(5 - issue.rating).fill('<i class="far fa-star" style="color:#94a3b8;"></i>').join('')}
+                                </div>
+                                <span class="rating-value">${issue.rating}/5</span>
+                            </div>
+                            ${issue.feedbackComment ? `
+                            <div class="feedback-comment">
+                                <p>"${issue.feedbackComment}"</p>
+                            </div>
+                            ` : ''}
+                            <div class="feedback-meta">
+                                <span><i class="fas fa-user"></i> ${issue.feedbackBy || 'Anonymous'}</span>
+                                ${issue.feedbackDate ? `<span><i class="fas fa-calendar"></i> ${new Date(issue.feedbackDate).toLocaleDateString()}</span>` : ''}
+                            </div>
+                            ${issue.fullyResolved === false ? `<p class="partial-resolution"><i class="fas fa-exclamation-triangle"></i> Issue was partially resolved</p>` : ''}
+                        </div>
+                        ` : `
+                        <div class="no-feedback">
+                            <i class="far fa-star"></i>
+                            <i class="far fa-star"></i>
+                            <i class="far fa-star"></i>
+                            <i class="far fa-star"></i>
+                            <i class="far fa-star"></i>
+                            <p>No feedback provided yet</p>
+                        </div>
+                        `}
+                    </div>
+                    ` : ''}
                 </div>
             </div>
             

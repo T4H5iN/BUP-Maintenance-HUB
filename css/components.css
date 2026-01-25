@@ -74,7 +74,8 @@
 }
 
 /* Dark Mode Toggle */
-.dark-mode-toggle, .theme-toggle {
+.dark-mode-toggle,
+.theme-toggle {
     background: transparent;
     border: 2px solid var(--gray-300);
     color: var(--gray-600);
@@ -89,7 +90,8 @@
     font-size: 1rem;
 }
 
-.dark-mode-toggle:hover, .theme-toggle:hover {
+.dark-mode-toggle:hover,
+.theme-toggle:hover {
     background: var(--gray-100);
     border-color: var(--primary-color);
     color: var(--primary-color);
@@ -144,10 +146,21 @@
     animation: slideInRight 0.3s ease;
 }
 
-.notification.success { border-left: 4px solid var(--success-color); }
-.notification.error { border-left: 4px solid var(--danger-color); }
-.notification.warning { border-left: 4px solid var(--warning-color); }
-.notification.info { border-left: 4px solid var(--secondary-color); }
+.notification.success {
+    border-left: 4px solid var(--success-color);
+}
+
+.notification.error {
+    border-left: 4px solid var(--danger-color);
+}
+
+.notification.warning {
+    border-left: 4px solid var(--warning-color);
+}
+
+.notification.info {
+    border-left: 4px solid var(--secondary-color);
+}
 
 .notification-content {
     display: flex;
@@ -187,10 +200,12 @@
     border-radius: var(--border-radius);
     width: 90%;
     max-width: 500px;
-    max-height: 80vh; /* Limit height to 80% of viewport */
+    max-height: 80vh;
+    /* Limit height to 80% of viewport */
     position: relative;
     animation: slideIn 0.3s ease;
-    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-y: auto;
+    /* Enable vertical scrolling */
     box-sizing: border-box;
 }
 
@@ -437,7 +452,7 @@
 
 .checkbox-setting {
     display: flex;
-    align-items: flex-start; 
+    align-items: flex-start;
     gap: 10px;
     cursor: pointer;
     font-weight: normal !important;
@@ -447,9 +462,9 @@
 .checkbox-setting input[type="checkbox"] {
     width: auto;
     margin: 0;
-    margin-top: 0.3em; 
+    margin-top: 0.3em;
     position: relative;
-    flex-shrink: 0; 
+    flex-shrink: 0;
 }
 
 .settings-actions {
@@ -466,7 +481,8 @@
 
 .help-content {
     margin-bottom: 30px;
-    padding-right: 10px; /* Add padding for scrollbar */
+    padding-right: 10px;
+    /* Add padding for scrollbar */
 }
 
 .help-section {
@@ -700,7 +716,7 @@
         align-items: stretch;
         gap: 10px;
     }
-    
+
     .filter-row select,
     .filter-row input[type="date"],
     .filter-row button {
@@ -856,7 +872,7 @@
     margin-top: 5px;
 }
 
-.rejection-actions, 
+.rejection-actions,
 .note-actions {
     display: flex;
     justify-content: flex-end;
@@ -910,7 +926,10 @@
     flex: 1;
 }
 
-.priority-urgent, .priority-high, .priority-medium, .priority-low {
+.priority-urgent,
+.priority-high,
+.priority-medium,
+.priority-low {
     font-weight: 600;
 }
 
@@ -930,7 +949,11 @@
     color: var(--success-color);
 }
 
-.status-pending-review, .status-assigned, .status-in-progress, .status-resolved, .status-rejected {
+.status-pending-review,
+.status-assigned,
+.status-in-progress,
+.status-resolved,
+.status-rejected {
     font-weight: 600;
 }
 
@@ -1071,7 +1094,8 @@
 
 /* Fullscreen Image Modal */
 .fullscreen-image-modal {
-    z-index: 2100; /* Higher than regular modals */
+    z-index: 2100;
+    /* Higher than regular modals */
 }
 
 .fullscreen-image-container {
@@ -1161,11 +1185,11 @@
         width: 35px;
         height: 35px;
     }
-    
+
     .prev-arrow {
         left: 10px;
     }
-    
+
     .next-arrow {
         right: 10px;
     }
@@ -1173,329 +1197,336 @@
 
 /* Notification Panel Styles */
 .all-notifications-panel {
-  position: fixed;
-  top: 0;
-  right: -420px;
-  width: 400px;
-  height: 100vh;
-  background-color: var(--white);
-  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-  z-index: 9999;
-  transition: right 0.3s ease-in-out;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+    position: fixed;
+    top: 0;
+    right: -420px;
+    width: 400px;
+    height: 100vh;
+    background-color: var(--white);
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+    transition: right 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .dark-mode .all-notifications-panel {
-  background-color: var(--gray-800);
-  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+    background-color: var(--gray-800);
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
 }
 
 .all-notifications-panel.show {
-  right: 0;
+    right: 0;
 }
 
 .all-notifications-header {
-  padding: 15px 20px;
-  border-bottom: 1px solid var(--gray-200);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .dark-mode .all-notifications-header {
-  border-bottom-color: var(--gray-700);
+    border-bottom-color: var(--gray-700);
 }
 
 .all-notifications-header h2 {
-  margin: 0;
-  font-size: 1.25rem;
-  color: var(--gray-800);
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--gray-800);
 }
 
 .dark-mode .all-notifications-header h2 {
-  color: var(--gray-100);
+    color: var(--gray-100);
 }
 
 .close-all-notifications {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: var(--gray-500);
-  cursor: pointer;
-  transition: color 0.2s;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--gray-500);
+    cursor: pointer;
+    transition: color 0.2s;
 }
 
 .close-all-notifications:hover {
-  color: var(--gray-700);
+    color: var(--gray-700);
 }
 
 .dark-mode .close-all-notifications:hover {
-  color: var(--gray-300);
+    color: var(--gray-300);
 }
 
 .all-notifications-filters {
-  display: flex;
-  gap: 8px;
-  padding: 10px 20px;
-  border-bottom: 1px solid var(--gray-200);
-  background-color: var(--gray-50);
+    display: flex;
+    gap: 8px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--gray-200);
+    background-color: var(--gray-50);
 }
 
 .dark-mode .all-notifications-filters {
-  background-color: var(--gray-750);
-  border-bottom-color: var(--gray-700);
+    background-color: var(--gray-750);
+    border-bottom-color: var(--gray-700);
 }
 
 .notification-filter-btn {
-  background: none;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.875rem;
-  color: var(--gray-600);
-  cursor: pointer;
-  transition: all 0.2s;
+    background: none;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
 .notification-filter-btn:hover {
-  background-color: var(--gray-200);
+    background-color: var(--gray-200);
 }
 
 .notification-filter-btn.active {
-  background-color: var(--primary-color);
-  color: var(--white);
+    background-color: var(--primary-color);
+    color: var(--white);
 }
 
 .dark-mode .notification-filter-btn {
-  color: var(--gray-300);
+    color: var(--gray-300);
 }
 
 .dark-mode .notification-filter-btn:hover {
-  background-color: var(--gray-700);
+    background-color: var(--gray-700);
 }
 
 .dark-mode .notification-filter-btn.active {
-  background-color: var(--primary-color);
-  color: var(--white);
+    background-color: var(--primary-color);
+    color: var(--white);
 }
 
 .all-notifications-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px;
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
 }
 
 .notification-item {
-  display: flex;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  background-color: var(--white);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s;
-  position: relative;
-  border-left: 4px solid transparent;
+    display: flex;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background-color: var(--white);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s;
+    position: relative;
+    border-left: 4px solid transparent;
 }
 
 .dark-mode .notification-item {
-  background-color: var(--gray-750);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    background-color: var(--gray-750);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .notification-item.unread {
-  border-left-color: var(--primary-color);
-  background-color: var(--primary-color-lightest);
+    border-left-color: var(--primary-color);
+    background-color: var(--primary-color-lightest);
 }
 
 .dark-mode .notification-item.unread {
-  background-color: rgba(59, 130, 246, 0.1);
+    background-color: rgba(59, 130, 246, 0.1);
 }
 
 .notification-item:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
 }
 
 .notification-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 15px;
-  flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    flex-shrink: 0;
 }
 
 .notification-icon.info {
-  background-color: var(--blue-100);
-  color: var(--blue-600);
+    background-color: var(--blue-100);
+    color: var(--blue-600);
 }
 
 .notification-icon.success {
-  background-color: var(--green-100);
-  color: var(--green-600);
+    background-color: var(--green-100);
+    color: var(--green-600);
 }
 
 .notification-icon.warning {
-  background-color: var(--yellow-100);
-  color: var(--yellow-600);
+    background-color: var(--yellow-100);
+    color: var(--yellow-600);
 }
 
 .notification-icon.error {
-  background-color: var(--red-100);
-  color: var(--red-600);
+    background-color: var(--red-100);
+    color: var(--red-600);
 }
 
 .dark-mode .notification-icon.info {
-  background-color: rgba(59, 130, 246, 0.2);
-  color: var(--blue-400);
+    background-color: rgba(59, 130, 246, 0.2);
+    color: var(--blue-400);
 }
 
 .dark-mode .notification-icon.success {
-  background-color: rgba(16, 185, 129, 0.2);
-  color: var(--green-400);
+    background-color: rgba(16, 185, 129, 0.2);
+    color: var(--green-400);
 }
 
 .dark-mode .notification-icon.warning {
-  background-color: rgba(245, 158, 11, 0.2);
-  color: var(--yellow-400);
+    background-color: rgba(245, 158, 11, 0.2);
+    color: var(--yellow-400);
 }
 
 .dark-mode .notification-icon.error {
-  background-color: rgba(239, 68, 68, 0.2);
-  color: var(--red-400);
+    background-color: rgba(239, 68, 68, 0.2);
+    color: var(--red-400);
 }
 
 .notification-content {
-  flex: 1;
+    flex: 1;
 }
 
 .notification-text {
-  margin: 0 0 5px;
-  color: var(--gray-800);
-  font-size: 0.9375rem;
+    margin: 0 0 5px;
+    color: var(--gray-800);
+    font-size: 0.9375rem;
 }
 
 .dark-mode .notification-text {
-  color: var(--gray-200);
+    color: var(--gray-200);
 }
 
 .notification-time {
-  display: block;
-  font-size: 0.75rem;
-  color: var(--gray-500);
-  margin-bottom: 10px;
+    display: block;
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    margin-bottom: 10px;
 }
 
 .dark-mode .notification-time {
-  color: var(--gray-400);
+    color: var(--gray-400);
 }
 
 .notification-actions {
-  display: flex;
-  gap: 8px;
+    display: flex;
+    gap: 8px;
 }
 
 .notification-action-btn {
-  padding: 5px 10px;
-  font-size: 0.75rem;
-  border-radius: 4px;
-  border: 1px solid var(--gray-300);
-  background: none;
-  color: var(--gray-600);
-  cursor: pointer;
-  transition: all 0.2s;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    border: 1px solid var(--gray-300);
+    background: none;
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
 .notification-action-btn:hover {
-  background-color: var(--gray-100);
+    background-color: var(--gray-100);
 }
 
 .notification-action-btn.primary {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
 }
 
 .notification-action-btn.primary:hover {
-  background-color: var(--primary-color-lightest);
+    background-color: var(--primary-color-lightest);
 }
 
 .dark-mode .notification-action-btn {
-  border-color: var(--gray-600);
-  color: var(--gray-400);
+    border-color: var(--gray-600);
+    color: var(--gray-400);
 }
 
 .dark-mode .notification-action-btn:hover {
-  background-color: var(--gray-700);
+    background-color: var(--gray-700);
 }
 
 .dark-mode .notification-action-btn.primary {
-  border-color: var(--primary-color);
-  color: var(--primary-color-light);
+    border-color: var(--primary-color);
+    color: var(--primary-color-light);
 }
 
 .dark-mode .notification-action-btn.primary:hover {
-  background-color: rgba(59, 130, 246, 0.1);
+    background-color: rgba(59, 130, 246, 0.1);
 }
 
 .notification-mark-read {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: none;
-  border: none;
-  color: var(--gray-400);
-  cursor: pointer;
-  font-size: 0.75rem;
-  transition: color 0.2s;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: var(--gray-400);
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: color 0.2s;
 }
 
 .notification-mark-read:hover {
-  color: var(--primary-color);
+    color: var(--primary-color);
 }
 
 .dark-mode .notification-mark-read {
-  color: var(--gray-500);
+    color: var(--gray-500);
 }
 
 .dark-mode .notification-mark-read:hover {
-  color: var(--primary-color-light);
+    color: var(--primary-color-light);
 }
 
 .notification-item.unread .notification-mark-read {
-  color: var(--primary-color);
+    color: var(--primary-color);
 }
 
 .no-notifications {
-  text-align: center;
-  padding: 30px 0;
-  color: var(--gray-500);
-  font-style: italic;
+    text-align: center;
+    padding: 30px 0;
+    color: var(--gray-500);
+    font-style: italic;
 }
 
 .dark-mode .no-notifications {
-  color: var(--gray-400);
+    color: var(--gray-400);
 }
 
 /* Responsive design for notification panel */
 @media (max-width: 768px) {
-  .all-notifications-panel {
-    width: 100%;
-    right: -100%;
-  }
+    .all-notifications-panel {
+        width: 100%;
+        right: -100%;
+    }
 }
 
 /* Animation for notification items */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .notification-item {
-  animation: fadeIn 0.3s ease-out;
+    animation: fadeIn 0.3s ease-out;
 }
 
 /* Buttons */
@@ -1574,7 +1605,8 @@
 }
 
 /* Dark Mode Toggle */
-.dark-mode-toggle, .theme-toggle {
+.dark-mode-toggle,
+.theme-toggle {
     background: transparent;
     border: 2px solid var(--gray-300);
     color: var(--gray-600);
@@ -1589,7 +1621,8 @@
     font-size: 1rem;
 }
 
-.dark-mode-toggle:hover, .theme-toggle:hover {
+.dark-mode-toggle:hover,
+.theme-toggle:hover {
     background: var(--gray-100);
     border-color: var(--primary-color);
     color: var(--primary-color);
@@ -1644,10 +1677,21 @@
     animation: slideInRight 0.3s ease;
 }
 
-.notification.success { border-left: 4px solid var(--success-color); }
-.notification.error { border-left: 4px solid var(--danger-color); }
-.notification.warning { border-left: 4px solid var(--warning-color); }
-.notification.info { border-left: 4px solid var(--secondary-color); }
+.notification.success {
+    border-left: 4px solid var(--success-color);
+}
+
+.notification.error {
+    border-left: 4px solid var(--danger-color);
+}
+
+.notification.warning {
+    border-left: 4px solid var(--warning-color);
+}
+
+.notification.info {
+    border-left: 4px solid var(--secondary-color);
+}
 
 .notification-content {
     display: flex;
@@ -1687,10 +1731,12 @@
     border-radius: var(--border-radius);
     width: 90%;
     max-width: 500px;
-    max-height: 80vh; /* Limit height to 80% of viewport */
+    max-height: 80vh;
+    /* Limit height to 80% of viewport */
     position: relative;
     animation: slideIn 0.3s ease;
-    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-y: auto;
+    /* Enable vertical scrolling */
     box-sizing: border-box;
 }
 
@@ -1937,7 +1983,7 @@
 
 .checkbox-setting {
     display: flex;
-    align-items: flex-start; 
+    align-items: flex-start;
     gap: 10px;
     cursor: pointer;
     font-weight: normal !important;
@@ -1947,9 +1993,9 @@
 .checkbox-setting input[type="checkbox"] {
     width: auto;
     margin: 0;
-    margin-top: 0.3em; 
+    margin-top: 0.3em;
     position: relative;
-    flex-shrink: 0; 
+    flex-shrink: 0;
 }
 
 .settings-actions {
@@ -1966,7 +2012,8 @@
 
 .help-content {
     margin-bottom: 30px;
-    padding-right: 10px; /* Add padding for scrollbar */
+    padding-right: 10px;
+    /* Add padding for scrollbar */
 }
 
 .help-section {
@@ -2200,7 +2247,7 @@
         align-items: stretch;
         gap: 10px;
     }
-    
+
     .filter-row select,
     .filter-row input[type="date"],
     .filter-row button {
@@ -2356,7 +2403,7 @@
     margin-top: 5px;
 }
 
-.rejection-actions, 
+.rejection-actions,
 .note-actions {
     display: flex;
     justify-content: flex-end;
@@ -2410,7 +2457,10 @@
     flex: 1;
 }
 
-.priority-urgent, .priority-high, .priority-medium, .priority-low {
+.priority-urgent,
+.priority-high,
+.priority-medium,
+.priority-low {
     font-weight: 600;
 }
 
@@ -2430,7 +2480,11 @@
     color: var(--success-color);
 }
 
-.status-pending-review, .status-assigned, .status-in-progress, .status-resolved, .status-rejected {
+.status-pending-review,
+.status-assigned,
+.status-in-progress,
+.status-resolved,
+.status-rejected {
     font-weight: 600;
 }
 
@@ -2571,7 +2625,8 @@
 
 /* Fullscreen Image Modal */
 .fullscreen-image-modal {
-    z-index: 2100; /* Higher than regular modals */
+    z-index: 2100;
+    /* Higher than regular modals */
 }
 
 .fullscreen-image-container {
@@ -2657,11 +2712,11 @@
         width: 35px;
         height: 35px;
     }
-    
+
     .prev-arrow {
         left: 10px;
     }
-    
+
     .next-arrow {
         right: 10px;
     }
@@ -2755,4 +2810,265 @@
     background-color: var(--gray-600);
     border-color: var(--primary-color);
     color: var(--primary-color);
+}
+
+/* Feedback Modal Styles */
+.feedback-modal {
+    max-width: 500px;
+}
+
+.feedback-issue-info {
+    color: var(--gray-600);
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+#starRating {
+    display: flex;
+    gap: 8px;
+    font-size: 2rem;
+    margin: 15px 0 10px;
+}
+
+#starRating i {
+    cursor: pointer;
+    transition: transform 0.15s, color 0.15s;
+    color: #94a3b8;
+}
+
+#starRating i:hover {
+    transform: scale(1.2);
+}
+
+#starRating i.fas {
+    color: #f59e0b;
+}
+
+#ratingText {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.checkbox-group label {
+    cursor: pointer;
+    font-weight: normal;
+    margin: 0;
+}
+
+.feedback-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.feedback-actions button {
+    min-width: 120px;
+}
+
+/* No alerts message for admin panel */
+.no-alerts-message {
+    text-align: center;
+    padding: 30px;
+    color: var(--gray-500);
+}
+
+.no-alerts-message i {
+    font-size: 2.5rem;
+    color: var(--success-color);
+    margin-bottom: 15px;
+    display: block;
+}
+
+/* Dark mode feedback modal */
+.dark-mode .feedback-issue-info {
+    border-color: var(--gray-600);
+}
+
+.dark-mode #ratingText {
+    color: var(--gray-400);
+}
+
+/* Feedback Display in Issue Details Modal */
+.issue-feedback-section {
+    margin-top: 25px;
+    padding: 20px;
+    background: var(--gray-50);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--gray-200);
+}
+
+.issue-feedback-section h4 {
+    margin-bottom: 15px;
+    color: var(--gray-800);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.issue-feedback-section h4 i {
+    color: #f59e0b;
+}
+
+.feedback-display {
+    padding: 15px;
+    background: var(--white);
+    border-radius: var(--border-radius);
+}
+
+.feedback-rating {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.stars-display {
+    display: flex;
+    gap: 4px;
+    font-size: 1.2rem;
+}
+
+.rating-value {
+    font-weight: 600;
+    color: var(--gray-700);
+    font-size: 1.1rem;
+}
+
+.feedback-comment {
+    padding: 15px;
+    background: var(--gray-50);
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
+    border-left: 3px solid var(--primary-color);
+}
+
+.feedback-comment p {
+    font-style: italic;
+    color: var(--gray-700);
+    margin: 0;
+}
+
+.feedback-meta {
+    display: flex;
+    gap: 20px;
+    font-size: 0.9rem;
+    color: var(--gray-500);
+}
+
+.feedback-meta span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.partial-resolution {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #fef3c7;
+    color: #92400e;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.no-feedback {
+    text-align: center;
+    padding: 20px;
+    color: var(--gray-400);
+}
+
+.no-feedback i {
+    font-size: 1.5rem;
+    margin: 0 3px;
+}
+
+.no-feedback p {
+    margin-top: 10px;
+    color: var(--gray-500);
+}
+
+/* Dark mode feedback styles */
+.dark-mode .issue-feedback-section {
+    background: var(--gray-700);
+    border-color: var(--gray-600);
+}
+
+.dark-mode .issue-feedback-section h4 {
+    color: var(--gray-100);
+}
+
+.dark-mode .feedback-display {
+    background: var(--gray-600);
+}
+
+.dark-mode .feedback-comment {
+    background: var(--gray-700);
+}
+
+.dark-mode .feedback-comment p {
+    color: var(--gray-300);
+}
+
+.dark-mode .rating-value {
+    color: var(--gray-300);
+}
+
+.dark-mode .feedback-meta {
+    color: var(--gray-400);
+}
+
+.dark-mode .partial-resolution {
+    background: #78350f;
+    color: #fef3c7;
+}
+
+.dark-mode .no-feedback {
+    color: var(--gray-500);
+}
+
+.dark-mode .no-feedback p {
+    color: var(--gray-400);
+}
+
+/* Feedback Modal Dark Mode Fixes */
+.dark-mode .feedback-modal .feedback-issue-info {
+    color: var(--gray-300);
+}
+
+.dark-mode .feedback-modal label {
+    color: var(--gray-200);
+}
+
+.dark-mode .feedback-modal .rating-text {
+    color: var(--gray-400);
+}
+
+.dark-mode .star-rating i {
+    color: var(--gray-500);
+    /* Inactive stars */
+}
+
+.dark-mode .star-rating i.active,
+.dark-mode .star-rating i.hover {
+    color: var(--yellow-400);
 }

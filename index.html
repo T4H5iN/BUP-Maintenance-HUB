@@ -96,6 +96,13 @@
                 <a href="#dashboard" class="nav-link">Dashboard</a>
                 <a href="#reports" class="nav-link">Reports</a>
                 <div class="nav-controls">
+                    <!-- Manual Refresh Button -->
+
+                    <!-- Manual Refresh Button -->
+                    <button id="manualRefreshBtn" class="theme-toggle" title="Refresh Data" aria-label="Refresh Data"
+                        onclick="autoRefresher.refresh(true)">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
                     <button id="darkModeToggle" class="dark-mode-toggle" title="Switch to Dark Mode"
                         aria-label="Switch to Dark Mode">
                         <i class="fas fa-moon"></i>
@@ -403,98 +410,98 @@
                     <div class="building" data-building="academic" style="top: 20%; left: 70%;">
                         <div class="building-icon">
                             <i class="fas fa-university"></i>
-                            <span class="issue-count urgent">5</span>
+                            <span class="issue-count" data-location="academic">0</span>
                         </div>
                         <span class="building-label">Academic Building</span>
                     </div>
                     <div class="building" data-building="fbs" style="top: 60%; left: 70%;">
                         <div class="building-icon">
                             <i class="fas fa-building"></i>
-                            <span class="issue-count medium">3</span>
+                            <span class="issue-count" data-location="fbs">0</span>
                         </div>
                         <span class="building-label">FBS Building</span>
                     </div>
                     <div class="building" data-building="admin" style="top: 40%; left: 70%;">
                         <div class="building-icon">
                             <i class="fas fa-landmark"></i>
-                            <span class="issue-count high">4</span>
+                            <span class="issue-count" data-location="admin">0</span>
                         </div>
                         <span class="building-label">Admin Building</span>
                     </div>
                     <div class="building" data-building="annex" style="top: 80%; left: 88%;">
                         <div class="building-icon">
                             <i class="fas fa-building"></i>
-                            <span class="issue-count low">2</span>
+                            <span class="issue-count" data-location="annex">0</span>
                         </div>
                         <span class="building-label">Annex</span>
                     </div>
                     <div class="building" data-building="library" style="top: 50%; left: 50%;">
                         <div class="building-icon">
                             <i class="fas fa-book"></i>
-                            <span class="issue-count low">2</span>
+                            <span class="issue-count" data-location="library">0</span>
                         </div>
                         <span class="building-label">Library</span>
                     </div>
                     <div class="building" data-building="vista" style="top: 75%; left: 50%;">
                         <div class="building-icon">
                             <i class="fas fa-utensils"></i>
-                            <span class="issue-count medium">2</span>
+                            <span class="issue-count" data-location="vista">0</span>
                         </div>
                         <span class="building-label">Vista Cafeteria</span>
                     </div>
                     <div class="building" data-building="amitte" style="top: 25%; left: 50%;">
                         <div class="building-icon">
                             <i class="fas fa-coffee"></i>
-                            <span class="issue-count low">1</span>
+                            <span class="issue-count" data-location="amitte">0</span>
                         </div>
                         <span class="building-label">Amitte Cafeteria</span>
                     </div>
                     <div class="building" data-building="staff-canteen" style="top: 3%; left:60%;">
                         <div class="building-icon">
                             <i class="fas fa-coffee"></i>
-                            <span class="issue-count low">1</span>
+                            <span class="issue-count" data-location="staff-canteen">0</span>
                         </div>
                         <span class="building-label">Staff Canteen</span>
                     </div>
                     <div class="building" data-building="third-place" style="top: 5%; left: 30%;">
                         <div class="building-icon">
                             <i class="fas fa-utensils"></i>
-                            <span class="issue-count medium">3</span>
+                            <span class="issue-count" data-location="third-place">0</span>
                         </div>
                         <span class="building-label">Third Place Cafeteria</span>
                     </div>
                     <div class="building" data-building="daycare" style="top: 60%; left: 88%;">
                         <div class="building-icon">
                             <i class="fas fa-child"></i>
-                            <span class="issue-count low">1</span>
+                            <span class="issue-count" data-location="daycare">0</span>
                         </div>
                         <span class="building-label">Day Care Center</span>
                     </div>
                     <div class="building" data-building="fst-building" style="top: 30%; left: 5%;">
                         <div class="building-icon">
                             <i class="fas fa-building"></i>
-                            <span class="issue-count low">1</span>
+                            <span class="issue-count" data-location="fst-building">0</span>
                         </div>
                         <span class="building-label">FST Building</span>
                     </div>
                     <div class="building" data-building="library-building" style="top: 55%; left: 5%;">
                         <div class="building-icon">
                             <i class="fas fa-book"></i>
-                            <span class="issue-count low">1</span>
+                            <span class="issue-count" data-location="library-building">0</span>
                         </div>
                         <span class="building-label">Library Building</span>
                     </div>
                     <div class="building" data-building="fass-building" style="top: 80%; left: 5%;">
                         <div class="building-icon">
                             <i class="fas fa-building"></i>
-                            <span class="issue-count low">1</span>
+                            <span class="issue-count" data-location="fass-building">0</span>
                         </div>
                         <span class="building-label">FASS Building</span>
                     </div>
                     <div class="building" data-building="bup-hall" style="top: 5%; left: 5%;">
                         <div class="building-icon">
                             <i class="fas fa-building"></i>
-                            <span class="issue-count low">1</span>
+                            <span class="issue-count" data-location="bup-hall">0</span>
                         </div>
                         <span class="building-label">BUP Hall</span>
                     </div>
@@ -619,47 +626,9 @@
                 </div>
 
                 <div class="admin-issues-list">
-                    <div class="admin-issue-card">
-                        <div class="admin-issue-header">
-                            <span class="issue-id">#BUP003</span>
-                            <span class="issue-status pending-review">Pending Review</span>
-                            <span class="issue-priority urgent">Urgent</span>
-                            <span class="issue-date">Jan 16, 2024</span>
-                        </div>
-                        <div class="admin-issue-content">
-                            <h4>AC Not Working in Auditorium</h4>
-                            <p><strong>Location:</strong> Auditorium, Main Hall</p>
-                            <p><strong>Reported by:</strong> John Doe (Student)</p>
-                            <p><strong>Description:</strong> The main AC unit in the auditorium has stopped working.
-                                Temperature is extremely high.</p>
-                            <div class="admin-actions">
-                                <button class="btn-success" onclick="approveIssue('BUP003')">Approve</button>
-                                <button class="btn-warning" onclick="assignTechnician('BUP003')">Assign
-                                    Technician</button>
-                                <button class="btn-danger" onclick="rejectIssue('BUP003')">Reject</button>
-                                <button class="btn-secondary" onclick="addNote('BUP003')">Add Note</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="admin-issue-card">
-                        <div class="admin-issue-header">
-                            <span class="issue-id">#BUP004</span>
-                            <span class="issue-status assigned">Assigned</span>
-                            <span class="issue-priority high">High</span>
-                            <span class="issue-date">Jan 15, 2024</span>
-                        </div>
-                        <div class="admin-issue-content">
-                            <h4>Broken Chairs in Room 301</h4>
-                            <p><strong>Location:</strong> Academic Block 1, Room 301</p>
-                            <p><strong>Assigned to:</strong> Maintenance Team A</p>
-                            <p><strong>Scheduled:</strong> Jan 17, 2024 (9:00 AM - 11:00 AM)</p>
-                            <div class="admin-actions">
-                                <button class="btn-primary" onclick="updateSchedule('BUP004')">Update Schedule</button>
-                                <button class="btn-warning" onclick="changeStatus('BUP004')">Change Status</button>
-                                <button class="btn-secondary" onclick="viewHistory('BUP004')">View History</button>
-                            </div>
-                        </div>
+                    <!-- Issues will be populated dynamically -->
+                    <div class="loading-indicator">
+                        <i class="fas fa-spinner fa-spin"></i> Loading issues...
                     </div>
                 </div>
             </div>
@@ -669,57 +638,45 @@
                     <h3>Administrator Panel</h3>
                     <div class="authority-actions">
                         <button class="btn-primary" onclick="generateReport()">
-                            <i class="fas fa-file-pdf"></i> Generate Report
+                            <i class="fas fa-file-pdf"></i> Generate PDF Report
                         </button>
-                        <!-- <button class="btn-warning" onclick="showOverdueIssues()">
-                            <i class="fas fa-exclamation-triangle"></i> Overdue Issues
-                        </button> -->
+                        <button class="btn-success" onclick="downloadReport('excel')">
+                            <i class="fas fa-file-excel"></i> Export Excel
+                        </button>
                     </div>
                 </div>
 
                 <div class="authority-overview">
-                    <div class="overview-stats">
+                    <div class="overview-stats" id="admin-overview-stats">
                         <div class="overview-card">
                             <h4>Total Issues</h4>
-                            <span class="overview-number">156</span>
-                            <span class="overview-change positive">+12 this week</span>
+                            <span class="overview-number" id="admin-total-issues">-</span>
+                            <span class="overview-change" id="admin-total-change"></span>
                         </div>
                         <div class="overview-card">
                             <h4>Overdue Issues</h4>
-                            <span class="overview-number warning">8</span>
-                            <span class="overview-change negative">+3 this week</span>
+                            <span class="overview-number warning" id="admin-overdue-issues">-</span>
+                            <span class="overview-change" id="admin-overdue-change"></span>
                         </div>
                         <div class="overview-card">
                             <h4>Resolution Rate</h4>
-                            <span class="overview-number">87%</span>
-                            <span class="overview-change positive">+5% this month</span>
+                            <span class="overview-number" id="admin-resolution-rate">-</span>
+                            <span class="overview-change" id="admin-resolution-change"></span>
                         </div>
                         <div class="overview-card">
                             <h4>Avg Resolution Time</h4>
-                            <span class="overview-number">3.2 days</span>
-                            <span class="overview-change positive">-0.5 days</span>
+                            <span class="overview-number" id="admin-avg-time">-</span>
+                            <span class="overview-change" id="admin-time-change"></span>
                         </div>
                     </div>
                 </div>
 
                 <div class="overdue-alerts">
                     <h4>Issues Requiring Attention (>7 days)</h4>
-                    <div class="alert-list">
-                        <div class="alert-item urgent">
-                            <div class="alert-content">
-                                <h5>#BUP005 - Library WiFi Issues</h5>
-                                <p>Submitted: Jan 8, 2024 (8 days ago)</p>
-                                <p>Status: In Progress - No updates since Jan 12</p>
-                            </div>
-                            <button class="btn-danger" onclick="escalateIssue('BUP005')">Escalate</button>
-                        </div>
-                        <div class="alert-item high">
-                            <div class="alert-content">
-                                <h5>#BUP006 - Cafeteria Ventilation</h5>
-                                <p>Submitted: Jan 7, 2024 (9 days ago)</p>
-                                <p>Status: Approved - Awaiting technician assignment</p>
-                            </div>
-                            <button class="btn-warning" onclick="assignUrgent('BUP006')">Assign Urgently</button>
+                    <div class="alert-list" id="overdue-alerts-list">
+                        <!-- Overdue issues will be populated dynamically -->
+                        <div class="loading-indicator">
+                            <i class="fas fa-spinner fa-spin"></i> Loading overdue issues...
                         </div>
                     </div>
                 </div>
@@ -738,25 +695,25 @@
                     </div>
                 </div>
 
-                <div class="technician-stats">
+                <div class="technician-stats" id="technician-stats">
                     <div class="stat-card">
                         <i class="fas fa-tasks"></i>
                         <div>
-                            <span class="stat-number">5</span>
+                            <span class="stat-number" id="tech-assigned-count">0</span>
                             <span class="stat-label">Assigned Tasks</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <i class="fas fa-hourglass-half"></i>
                         <div>
-                            <span class="stat-number">3</span>
+                            <span class="stat-number" id="tech-progress-count">0</span>
                             <span class="stat-label">In Progress</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <i class="fas fa-check-double"></i>
                         <div>
-                            <span class="stat-number">12</span>
+                            <span class="stat-number" id="tech-completed-count">0</span>
                             <span class="stat-label">Completed This Week</span>
                         </div>
                     </div>
@@ -779,103 +736,10 @@
                     <input type="date" id="techDateFilter" class="filter-element">
                 </div>
 
-                <div class="technician-tasks">
-                    <div class="tech-task-card">
-                        <div class="task-header">
-                            <div class="task-id-container">
-                                <span class="issue-id">#BUP008</span>
-                                <span class="issue-priority urgent">Urgent</span>
-                            </div>
-                            <div class="task-status">
-                                <select class="task-status-select" onchange="updateTaskStatus('BUP008', this.value)">
-                                    <option value="pending">Pending</option>
-                                    <option value="in-progress" selected>In Progress</option>
-                                    <option value="parts-needed">Parts Needed</option>
-                                    <option value="completed">Completed</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="task-content">
-                            <h4>Fix AC in Auditorium</h4>
-                            <p class="task-location"><i class="fas fa-map-marker-alt"></i> Auditorium, Main Hall</p>
-                            <p class="task-schedule"><i class="fas fa-calendar-day"></i> Scheduled: Today, 10:00 AM -
-                                12:00 PM</p>
-                            <p class="task-description">The main AC unit in the auditorium has stopped working.
-                                Temperature is extremely high. Initial diagnosis shows compressor issues.</p>
-
-                            <div class="task-progress">
-                                <div class="progress-label">
-                                    <span>Progress: 60%</span>
-                                    <span class="time-spent">Time spent: 1.5 hours</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 60%;"></div>
-                                </div>
-                            </div>
-
-                            <div class="task-actions">
-                                <button class="btn-primary" onclick="updateTaskProgress('BUP008')">
-                                    <i class="fas fa-edit"></i> Update Progress
-                                </button>
-                                <button class="btn-secondary" onclick="addWorkNotes('BUP008')">
-                                    <i class="fas fa-clipboard"></i> Add Notes
-                                </button>
-                                <button class="btn-warning" onclick="requestParts('BUP008')">
-                                    <i class="fas fa-tools"></i> Request Parts
-                                </button>
-                                <button class="btn-success" onclick="completeTask('BUP008')">
-                                    <i class="fas fa-check-circle"></i> Mark Complete
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="tech-task-card">
-                        <div class="task-header">
-                            <div class="task-id-container">
-                                <span class="issue-id">#BUP012</span>
-                                <span class="issue-priority high">High</span>
-                            </div>
-                            <div class="task-status">
-                                <select class="task-status-select" onchange="updateTaskStatus('BUP012', this.value)">
-                                    <option value="pending" selected>Pending</option>
-                                    <option value="in-progress">In Progress</option>
-                                    <option value="parts-needed">Parts Needed</option>
-                                    <option value="completed">Completed</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="task-content">
-                            <h4>Replace Broken Chairs in Room 301</h4>
-                            <p class="task-location"><i class="fas fa-map-marker-alt"></i> Academic Block 1, Room 301
-                            </p>
-                            <p class="task-schedule"><i class="fas fa-calendar-day"></i> Scheduled: Tomorrow, 9:00 AM -
-                                11:00 AM</p>
-                            <p class="task-description">Five chairs in Room 301 have broken backrests and need
-                                replacement. New chairs are available in storage.</p>
-
-                            <div class="task-progress">
-                                <div class="progress-label">
-                                    <span>Progress: 0%</span>
-                                    <span class="time-spent">Time spent: 0 hours</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 0%;"></div>
-                                </div>
-                            </div>
-
-                            <div class="task-actions">
-                                <button class="btn-primary" onclick="startTask('BUP012')">
-                                    <i class="fas fa-play"></i> Start Task
-                                </button>
-                                <button class="btn-secondary" onclick="viewTaskDetails('BUP012')">
-                                    <i class="fas fa-eye"></i> View Details
-                                </button>
-                                <button class="btn-warning" onclick="rescheduleTask('BUP012')">
-                                    <i class="fas fa-calendar-alt"></i> Reschedule
-                                </button>
-                            </div>
-                        </div>
+                <div class="technician-tasks" id="technician-tasks-list">
+                    <!-- Technician tasks will be populated dynamically -->
+                    <div class="loading-indicator">
+                        <i class="fas fa-spinner fa-spin"></i> Loading your assignments...
                     </div>
                 </div>
             </div>
@@ -939,7 +803,7 @@
             <i class="notification-icon"></i>
             <span class="notification-message"></span>
         </div>
-        <button class="notification-close">&times;</button>
+        <button class="notification-close" onclick="closeNotification()">&times;</button>
     </div>
 
     <div id="scheduleModal" class="modal">
@@ -1343,6 +1207,12 @@
     <!-- Add chatbot.js before the closing body tag -->
     <script src="js/chatbot.js"></script>
 
+    <!-- Add feedback functionality -->
+    <script src="js/feedback.js"></script>
+
+    <!-- Add dynamic map and panel updates -->
+    <script src="js/mapUpdates.js"></script>
+
     <!-- Add right before closing body tag -->
     <script>
         // Ensure navigation works even if other scripts have issues
@@ -1435,6 +1305,9 @@
             };
         }
     </script>
+
+
+    <script src="js/autoRefresh.js"></script>
 </body>
 
 </html>

@@ -35,7 +35,14 @@ const issueSchema = new mongoose.Schema({
     downvotes: { type: Number, default: 0 },
     upvoters: [String], // Store email addresses of users who upvoted
     downvoters: [String], // Store email addresses of users who downvoted
-    rejectReason: { type: String } // Add this line
+    rejectReason: { type: String },
+    // Feedback fields
+    rating: { type: Number, min: 1, max: 5 },
+    feedbackComment: String,
+    feedbackDate: Date,
+    feedbackBy: String,
+    fullyResolved: { type: Boolean },
+    resolvedDate: Date
 }, {
     timestamps: true
 });

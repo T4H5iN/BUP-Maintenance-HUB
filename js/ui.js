@@ -588,24 +588,20 @@ function filterModeratorIssues() {
     const search = document.getElementById('adminSearch').value.trim().toLowerCase();
 
     let filtered = window.issues || [];
-    // Always show pending-review issues by default if no filter is applied
-    if ((!status || status === 'all') && (!priority || priority === 'all') && !search) {
-        filtered = filtered.filter(i => i.status === 'pending-review');
-    } else {
-        if (status && status !== 'all') {
-            filtered = filtered.filter(i => i.status === status);
-        }
-        if (priority && priority !== 'all') {
-            filtered = filtered.filter(i => i.priority === priority);
-        }
-        if (search) {
-            filtered = filtered.filter(i =>
-                (i.description && i.description.toLowerCase().includes(search)) ||
-                (i.specificLocation && i.specificLocation.toLowerCase().includes(search)) ||
-                (i.issueId && i.issueId.toLowerCase().includes(search)) ||
-                (i.id && i.id.toLowerCase().includes(search))
-            );
-        }
+    // Apply filters - when 'all' is selected, show all issues (no filtering)
+    if (status && status !== 'all') {
+        filtered = filtered.filter(i => i.status === status);
+    }
+    if (priority && priority !== 'all') {
+        filtered = filtered.filter(i => i.priority === priority);
+    }
+    if (search) {
+        filtered = filtered.filter(i =>
+            (i.description && i.description.toLowerCase().includes(search)) ||
+            (i.specificLocation && i.specificLocation.toLowerCase().includes(search)) ||
+            (i.issueId && i.issueId.toLowerCase().includes(search)) ||
+            (i.id && i.id.toLowerCase().includes(search))
+        );
     }
     renderModeratorIssues(filtered);
 }
@@ -876,7 +872,7 @@ function showHelp() {
                             <i class="fas fa-envelope"></i>
                             <div>
                                 <h4>Email Support</h4>
-                                <p>maintenance-support@bup.edu.bd</p>
+                                <p>tahsin8014@gmail.com</p>
                                 <p>Response time: Within 24 hours</p>
                             </div>
                         </div>
@@ -885,7 +881,7 @@ function showHelp() {
                             <i class="fas fa-phone-alt"></i>
                             <div>
                                 <h4>Phone Support</h4>
-                                <p>+880 2-XXX-XXXX (Ext. 1234)</p>
+                                <p>01234567890</p>
                                 <p>Available: Sun-Thu, 9:00 AM - 4:00 PM</p>
                             </div>
                         </div>
@@ -974,19 +970,7 @@ function showHelp() {
                         </div>
                     </div>
                     
-                    <div class="download-guides">
-                        <h4>Downloadable Guides</h4>
-                        <div class="guide-downloads">
-                            <a href="#" class="guide-download-btn" onclick="alert('User manual downloading will be available soon!')">
-                                <i class="fas fa-file-pdf"></i>
-                                <span>Complete User Manual</span>
-                            </a>
-                            <a href="#" class="guide-download-btn" onclick="alert('Quick start guide downloading will be available soon!')">
-                                <i class="fas fa-file-alt"></i>
-                                <span>Quick Start Guide</span>
-                            </a>
-                        </div>
-                    </div>
+                
                 </div>
             </div>
         </div>
@@ -1062,4 +1046,56 @@ function closeHelpModal() {
         modal.style.display = 'none';
         setTimeout(() => modal.remove(), 300);
     }
+
 }
+
+// --- SPA Routing Support ---
+
+/**
+ * Handle routing based on URL hash
+ */
+function handleRoute() {
+    const hash = window.location.hash.substring(1);
+
+    // Default to home if no hash but do not force it if we are already essentially at home
+    // logic handled by showSection/defaults
+    if (!hash) {
+        showSection('home');
+        return;
+    }
+
+    // Show the section corresponding to the hash
+    showSection(hash);
+}
+
+/**
+ * Setup navigation events for SPA routing
+ * This overrides the default behavior to update hash instead of calling showSection directly
+ */
+function setupNavigationEvents() {
+    document.querySelectorAll('.nav-link').forEach(link => {
+        // Use a new clean listener
+        link.addEventListener('click', function (e) {
+            // We do NOT prevent default here for section links.
+            // Letting the default happen updates the URL hash.
+            // The hashchange event will then trigger handleRoute.
+
+            const href = this.getAttribute('href');
+            if (href === '#' || href.startsWith('javascript:')) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    // Listen for hash changes
+    window.removeEventListener('hashchange', handleRoute); // verify no duplicate
+    window.addEventListener('hashchange', handleRoute);
+
+    // Handle initial load - check hash immediately
+    // ensuring we land on the right page on refresh
+    handleRoute();
+}
+
+// Ensure setupNavigationEvents is available globally
+window.setupNavigationEvents = setupNavigationEvents;
+window.handleRoute = handleRoute;

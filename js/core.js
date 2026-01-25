@@ -14,7 +14,12 @@ if (window.location.protocol === 'file:') {
 function initializeApp() {
     updateNavigation();
 
-    showSection('home');
+    // Use handleRoute to respect URL hash (SPA routing)
+    if (typeof handleRoute === 'function') {
+        handleRoute();
+    } else {
+        showSection('home');
+    }
 
     const today = new Date().toISOString().split('T')[0];
     const dateInputs = document.querySelectorAll('input[type="date"]');

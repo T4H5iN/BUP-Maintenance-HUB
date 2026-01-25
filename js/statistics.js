@@ -41,15 +41,15 @@ async function fetchSummaryStatistics() {
 function calculateStatisticsFromLocalData() {
 
 
-    // Generate sample data for demonstration if no issues are available
+    // Return zeros if no issues are available
     if (!window.issues || !Array.isArray(window.issues) || window.issues.length === 0) {
-        console.warn('No issues found in window.issues, using demo data');
+        console.warn('No issues found in window.issues');
 
-        // Demo statistics when no real data is available
+        // Return zeros when no real data is available
         return {
-            resolved: 24,
-            pending: 18,
-            avgRating: '4.2'
+            resolved: 0,
+            pending: 0,
+            avgRating: 'N/A'
         };
     }
 
@@ -74,8 +74,8 @@ function calculateStatisticsFromLocalData() {
         const totalRating = ratedIssues.reduce((sum, issue) => sum + (parseFloat(issue.rating) || 0), 0);
         avgRating = (totalRating / ratedIssues.length).toFixed(1);
     } else {
-        // Provide a reasonable fallback for average rating
-        avgRating = '4.0';
+        // No rated issues available
+        avgRating = 'N/A';
     }
 
     const stats = {

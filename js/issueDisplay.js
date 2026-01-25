@@ -7,7 +7,7 @@ let currentDisplayLimit = 10;
 function updateHomeIssuesList() {
     // Reset the display limit
     currentDisplayLimit = 10;
-    
+
     // Only show issues that are NOT pending-review or rejected for students/faculty/technicians
     let issuesToShow = window.issues || [];
     if (currentUser && (currentUser.role === 'student' || currentUser.role === 'faculty' || currentUser.role === 'technician')) {
@@ -45,27 +45,27 @@ function filterHomeIssues() {
         }
         // Filter by status if not "all"
         if (statusFilter !== 'all' && issue.status !== statusFilter) return false;
-        
+
         // Filter by category if not "all"
         if (categoryFilter !== 'all' && issue.category !== categoryFilter) return false;
-        
+
         // Filter by location if not "all"
         const mappedLocation = locationMap[issue.location] || issue.location;
         if (locationFilter !== 'all' && mappedLocation !== locationFilter) return false;
-        
+
         // Filter by search query if not empty
         if (searchQuery) {
             const issueId = (issue.issueId || issue.id || '').toString().toLowerCase();
             const description = (issue.description || '').toLowerCase();
             const specificLocation = (issue.specificLocation || '').toLowerCase();
             const submitter = (issue.submitterName || issue.submittedBy || issue.submitterEmail || '').toLowerCase();
-            
-            return issueId.includes(searchQuery) || 
-                   description.includes(searchQuery) || 
-                   specificLocation.includes(searchQuery) || 
-                   submitter.includes(searchQuery);
+
+            return issueId.includes(searchQuery) ||
+                description.includes(searchQuery) ||
+                specificLocation.includes(searchQuery) ||
+                submitter.includes(searchQuery);
         }
-        
+
         return true;
     });
 
@@ -124,11 +124,11 @@ function displayHomeIssues(issuesToDisplay) {
             <p>${shortDescription}</p>
             <div class="issue-actions">
             <button class="btn-secondary" onclick="viewIssueDetails('${issue.issueId || issue.id}')">View Details</button>
-            ${issue.status === 'resolved' ?
+            ${issue.status === 'resolved' && issue.rating ?
                 `<div class="rating">
-                <span>Avg Rating:</span>
+                <span>Rating:</span>
                 <div class="stars">
-                    ${generateStarRating(getRandomRating())}
+                    ${generateStarRating(issue.rating)}
                 </div>
                 </div>` : ''}
             </div>
@@ -141,18 +141,18 @@ function displayHomeIssues(issuesToDisplay) {
         const seeMoreButton = document.createElement('button');
         seeMoreButton.className = 'btn-primary see-more-btn';
         seeMoreButton.textContent = `See ${issuesToDisplay.length - displayLimit} More Issues`;
-        seeMoreButton.onclick = function() {
+        seeMoreButton.onclick = function () {
             // Call the loadMoreIssues function instead of redirecting to dashboard
             loadMoreIssues(issuesToDisplay);
         };
         issuesList.appendChild(seeMoreButton);
     }
-    
+
     // Initialize vote system after issues are displayed
     if (typeof initializeVoteSystem === 'function') {
         initializeVoteSystem(issuesList);
     }
-    
+
     // Dispatch event for other components that need to know issues were loaded
     window.dispatchEvent(new CustomEvent('issuesLoaded'));
 }
@@ -164,10 +164,10 @@ function displayHomeIssues(issuesToDisplay) {
 function loadMoreIssues(issues) {
     // Increase the display limit by 10 (or another reasonable number)
     currentDisplayLimit += 10;
-    
+
     // Re-display the issues with the new limit
     displayHomeIssues(issues);
-    
+
     // Scroll to where the new issues start
     const issueCards = document.querySelectorAll('.issue-card');
     if (issueCards.length > 10) {
@@ -249,16 +249,16 @@ function getStatusIcon(status) {
 function updateFilterOptionsForRole() {
     const homeStatusFilter = document.getElementById('homeStatusFilter');
     if (!homeStatusFilter) return;
-    
+
     // Get current user role
     const userRole = currentUser?.role || 'guest';
-    
+
     // Check if user is admin or moderator
     const isAdminOrMod = userRole === 'administrator' || userRole === 'moderator';
-    
+
     // Get all options in the status filter
     const options = homeStatusFilter.querySelectorAll('option');
-    
+
     // Find the pending-review option and hide/show based on role
     options.forEach(option => {
         if (option.value === 'pending-review') {
@@ -266,7 +266,7 @@ function updateFilterOptionsForRole() {
                 option.style.display = ''; // Show for admin/mod
             } else {
                 option.style.display = 'none'; // Hide for others (including technicians)
-                
+
                 // If the current selection is pending-review, change it to 'all'
                 if (homeStatusFilter.value === 'pending-review') {
                     homeStatusFilter.value = 'all';
@@ -293,7 +293,7 @@ window.loadMoreIssues = loadMoreIssues;
 window.updateFilterOptionsForRole = updateFilterOptionsForRole;
 
 // Listen for progress updates and update the progress bar for all users
-window.addEventListener('progressUpdated', function(e) {
+window.addEventListener('progressUpdated', function (e) {
     const { issueId, progress } = e.detail || {};
     if (!issueId) return;
     // Update progress bar or slider in the all issues section
@@ -323,12 +323,12 @@ window.addEventListener('progressUpdated', function(e) {
 });
 
 // When the DOM is loaded, set up event listeners for auth changes
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Update filter options when page loads
     updateFilterOptionsForRole();
-    
+
     // Listen for authentication state changes to update filters
-    window.addEventListener('authStateChanged', function() {
+    window.addEventListener('authStateChanged', function () {
         updateFilterOptionsForRole();
     });
 });

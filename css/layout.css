@@ -1,10 +1,14 @@
 .navbar {
     background: var(--white);
     box-shadow: var(--shadow-md);
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    width: 100%;
     z-index: 1000;
 }
+
+/* ... existing styles ... */
 
 .nav-container {
     max-width: 1200px;
@@ -71,6 +75,8 @@ main {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    padding-top: 90px;
+    /* 70px navbar + 20px spacing */
     box-sizing: border-box;
     overflow-x: hidden;
     width: 100%;
@@ -128,6 +134,6 @@ main {
     flex-wrap: wrap;
 }
 
-.authority-actions{
+.authority-actions {
     margin: 20px 0 20px 0;
 }

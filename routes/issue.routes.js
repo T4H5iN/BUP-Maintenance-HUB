@@ -388,4 +388,58 @@ router.patch('/:id', async (req, res) => {
     }
 });
 
+// Submit feedback for a resolved issue
+router.post('/:id/feedback', auth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { rating, comment, fullyResolved, submittedBy } = req.body;
+
+        if (!rating || rating < 1 || rating > 5) {
+            return res.status(400).json({ message: 'Valid rating (1-5) is required' });
+        }
+
+        // Find the issue
+        const orQuery = [{ issueId: id }, { id: id }];
+        if (/^[a-fA-F0-9]{24}$/.test(id)) {
+            orQuery.push({ _id: id });
+        }
+        const issue = await Issue.findOne({ $or: orQuery });
+
+        if (!issue) {
+            return res.status(404).json({ message: 'Issue not found' });
+        }
+
+        if (issue.status !== 'resolved') {
+            return res.status(400).json({ message: 'Feedback can only be provided for resolved issues' });
+        }
+
+        if (issue.rating) {
+            return res.status(400).json({ message: 'Feedback has already been provided for this issue' });
+        }
+
+        // Update issue with feedback
+        issue.rating = rating;
+        issue.feedbackComment = comment || '';
+        issue.feedbackDate = new Date();
+        issue.feedbackBy = submittedBy || req.user.email || req.user.name;
+        issue.fullyResolved = fullyResolved !== undefined ? fullyResolved : true;
+
+        await issue.save();
+
+        res.json({
+            message: 'Feedback submitted successfully',
+            issue: {
+                id: issue.id,
+                issueId: issue.issueId,
+                rating: issue.rating,
+                feedbackComment: issue.feedbackComment,
+                feedbackDate: issue.feedbackDate
+            }
+        });
+    } catch (err) {
+        console.error('Error submitting feedback:', err);
+        res.status(500).json({ message: 'Failed to submit feedback', error: err.message });
+    }
+});
+
 module.exports = router;

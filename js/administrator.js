@@ -650,13 +650,65 @@ function downloadReport(format) {
             // Show success notification
             showNotification(`PDF report downloaded successfully`, "success");
         } else if (format === 'excel') {
-            // Excel export is not implemented yet
-            showNotification('Excel export functionality is coming soon!', 'info');
+            // Generate CSV export (widely compatible Excel format)
+            const allIssues = window.issues || [];
+            if (allIssues.length === 0) {
+                showNotification('No issues data available to export', 'warning');
+                return;
+            }
 
-            // In a real application, we would implement Excel export here
-            setTimeout(() => {
-                showNotification(`Excel report downloaded successfully`, "success");
-            }, 1500);
+            // CSV Headers
+            const headers = [
+                'Issue ID',
+                'Category',
+                'Priority',
+                'Status',
+                'Location',
+                'Specific Location',
+                'Description',
+                'Submitted By',
+                'Submitted Date',
+                'Resolved Date',
+                'Assigned To',
+                'Rating'
+            ];
+
+            // Build CSV content
+            let csvContent = headers.join(',') + '\n';
+
+            allIssues.forEach(issue => {
+                const row = [
+                    issue.issueId || issue.id || '',
+                    issue.category || '',
+                    issue.priority || '',
+                    issue.status || '',
+                    (issue.location || '').replace(/,/g, ';'),
+                    (issue.specificLocation || '').replace(/,/g, ';'),
+                    `"${(issue.description || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+                    (issue.submittedBy || issue.submitterName || '').replace(/,/g, ';'),
+                    issue.submittedDate || '',
+                    issue.resolvedDate || '',
+                    (issue.assignedTo || '').replace(/,/g, ';'),
+                    issue.rating || ''
+                ];
+                csvContent += row.join(',') + '\n';
+            });
+
+            // Create and download the file
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+            const filename = `bup-maintenance-report-${timestamp}.csv`;
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+
+            showNotification(`Excel/CSV report downloaded successfully (${allIssues.length} issues)`, "success");
         }
     } catch (error) {
         console.error('Error downloading report:', error);
