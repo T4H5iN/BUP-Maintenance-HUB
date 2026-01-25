@@ -24,7 +24,8 @@
 }
 
 .building:hover {
-    transform: scale(1.1);
+    transform: translate(-50%, -50%) scale(1.1);
+    z-index: 10;
 }
 
 .building-icon {
@@ -58,10 +59,21 @@
     font-weight: 700;
 }
 
-.issue-count.urgent { background: var(--danger-color); }
-.issue-count.high { background: var(--warning-color); }
-.issue-count.medium { background: var(--secondary-color); }
-.issue-count.low { background: var(--success-color); }
+.issue-count.urgent {
+    background: var(--danger-color);
+}
+
+.issue-count.high {
+    background: var(--warning-color);
+}
+
+.issue-count.medium {
+    background: var(--secondary-color);
+}
+
+.issue-count.low {
+    background: var(--success-color);
+}
 
 .building-label {
     position: absolute;
@@ -101,10 +113,21 @@
     border-radius: 50%;
 }
 
-.legend-color.urgent { background: var(--danger-color); }
-.legend-color.high { background: var(--warning-color); }
-.legend-color.medium { background: var(--secondary-color); }
-.legend-color.low { background: var(--success-color); }
+.legend-color.urgent {
+    background: var(--danger-color);
+}
+
+.legend-color.high {
+    background: var(--warning-color);
+}
+
+.legend-color.medium {
+    background: var(--secondary-color);
+}
+
+.legend-color.low {
+    background: var(--success-color);
+}
 
 /* Filters */
 .dashboard-filters {
@@ -213,8 +236,13 @@
     border-left: 4px solid var(--gray-300);
 }
 
-.admin-issue-card.urgent { border-left-color: var(--danger-color); }
-.admin-issue-card.high { border-left-color: var(--warning-color); }
+.admin-issue-card.urgent {
+    border-left-color: var(--danger-color);
+}
+
+.admin-issue-card.high {
+    border-left-color: var(--warning-color);
+}
 
 .admin-actions {
     display: flex;
@@ -245,15 +273,22 @@
     margin-bottom: 10px;
 }
 
-.overview-number.warning { color: var(--warning-color); }
+.overview-number.warning {
+    color: var(--warning-color);
+}
 
 .overview-change {
     font-size: 0.9rem;
     font-weight: 500;
 }
 
-.overview-change.positive { color: var(--success-color); }
-.overview-change.negative { color: var(--danger-color); }
+.overview-change.positive {
+    color: var(--success-color);
+}
+
+.overview-change.negative {
+    color: var(--danger-color);
+}
 
 .alert-item {
     background: var(--white);
@@ -266,8 +301,13 @@
     box-shadow: var(--shadow-md);
 }
 
-.alert-item.urgent { border-left: 4px solid var(--danger-color); }
-.alert-item.high { border-left: 4px solid var(--warning-color); }
+.alert-item.urgent {
+    border-left: 4px solid var(--danger-color);
+}
+
+.alert-item.high {
+    border-left: 4px solid var(--warning-color);
+}
 
 .time-range {
     display: flex;

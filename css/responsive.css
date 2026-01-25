@@ -185,6 +185,103 @@
     .form-group input[type="text"]:not([id*="Password"]) {
         padding-right: 35px;
     }
+
+    /* Scaling down UI elements for mobile */
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger,
+    .btn-success,
+    .btn-warning,
+    .login-btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+
+    .issue-card {
+        padding: 15px;
+    }
+
+    .issue-badges span,
+    .capsule,
+    .badge {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+
+    /* Map Icons Fix for Mobile */
+    .building-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+
+    .building-icon i {
+        font-size: 14px;
+    }
+
+    .issue-count {
+        width: 16px;
+        height: 16px;
+        font-size: 0.6rem;
+        top: -6px;
+        right: -6px;
+    }
+
+    .building-label {
+        font-size: 0.7rem;
+        padding: 2px 5px;
+        white-space: nowrap;
+        top: 35px;
+        /* Closer to the smaller icon */
+    }
+
+    /* Prevent map icons from overlapping too much */
+    .campus-map {
+        min-height: 400px;
+        /* Ensure map has height */
+    }
+
+    /* Edge case adjustments for map items to prevent clipping */
+    /* Left side items */
+    .building[data-building="bup-hall"],
+    .building[data-building="fst-building"],
+    .building[data-building="library-building"],
+    .building[data-building="fass-building"] {
+        left: 15% !important;
+        /* Pull inward */
+    }
+
+    .building[data-building="bup-hall"] .building-label,
+    .building[data-building="fst-building"] .building-label,
+    .building[data-building="library-building"] .building-label,
+    .building[data-building="fass-building"] .building-label {
+        left: -10px;
+        transform: none;
+        text-align: left;
+    }
+
+    /* Right side items */
+    .building[data-building="annex"],
+    .building[data-building="daycare"] {
+        left: 85% !important;
+        /* Pull inward */
+    }
+
+    .building[data-building="annex"] .building-label,
+    .building[data-building="daycare"] .building-label {
+        left: auto;
+        right: -10px;
+        transform: none;
+        text-align: right;
+    }
+
+    /* Adjust notification position for mobile */
+    .notification {
+        width: 90%;
+        left: 5%;
+        right: auto;
+        top: 80px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

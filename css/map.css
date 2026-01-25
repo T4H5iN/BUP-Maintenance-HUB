@@ -1,0 +1,78 @@
+/* Map Building Positions */
+.building {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    /* Centering adjustment */
+}
+
+.building[data-building="academic"] {
+    top: 25%;
+    left: 75%;
+}
+
+.building[data-building="fbs"] {
+    top: 75%;
+    left: 75%;
+}
+
+.building[data-building="admin"] {
+    top: 50%;
+    left: 75%;
+}
+
+.building[data-building="annex"] {
+    top: 85%;
+    left: 90%;
+}
+
+.building[data-building="library"] {
+    top: 55%;
+    left: 50%;
+}
+
+.building[data-building="vista"] {
+    top: 80%;
+    left: 50%;
+}
+
+.building[data-building="amitte"] {
+    top: 30%;
+    left: 50%;
+}
+
+/* Adjusted to prevent clipping */
+.building[data-building="staff-canteen"] {
+    top: 10%;
+    left: 63%;
+}
+
+.building[data-building="third-place"] {
+    top: 12%;
+    left: 30%;
+}
+
+.building[data-building="daycare"] {
+    top: 60%;
+    left: 90%;
+}
+
+/* Left-side edge adjustment */
+.building[data-building="fst-building"] {
+    top: 35%;
+    left: 10%;
+}
+
+.building[data-building="library-building"] {
+    top: 60%;
+    left: 10%;
+}
+
+.building[data-building="fass-building"] {
+    top: 85%;
+    left: 10%;
+}
+
+.building[data-building="bup-hall"] {
+    top: 12%;
+    left: 10%;
+}
