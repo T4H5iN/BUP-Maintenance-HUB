@@ -15,10 +15,15 @@ function viewIssueDetails(issueId) {
     modal.id = 'issueDetailsModal';
 
     // Format dates for display
-    const submittedDate = issue.submittedDate ?
-        new Date(issue.submittedDate).toLocaleDateString('en-US', {
-            year: 'numeric', month: 'long', day: 'numeric'
-        }) : 'Unknown';
+    const formatDateFull = (dateStr) => {
+        if (!dateStr) return null;
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('en-US', {
+            year: 'numeric', month: 'long', day: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+    };
+    const submittedDate = formatDateFull(issue.submittedDate) || 'Unknown';
 
     // Format status for display
     const statusDisplay = formatStatus(issue.status);
@@ -63,11 +68,7 @@ function viewIssueDetails(issueId) {
 
     if (currentUser) {
         if (issue.status === 'resolved' && isSubmitter) {
-            actionButtons = `
-                <button class="btn-primary" onclick="provideFeedback('${issueId}')">
-                    <i class="fas fa-star"></i> Provide Feedback
-                </button>
-            `;
+            // Feedback feature removed
         } else if (currentUser.role === 'admin' || currentUser.role === 'authority') {
             if (issue.status === 'pending-review') {
                 actionButtons = `
@@ -239,6 +240,70 @@ function viewIssueDetails(issueId) {
                         <div class="detail-value status-${issue.status}">${statusDisplay}</div>
                     </div>
 
+                    <!-- #4: Issue Lifecycle Timeline -->
+                    <div class="issue-timeline">
+                        <h4><i class="fas fa-history"></i> Issue Timeline</h4>
+                        <div class="timeline-container">
+                            <div class="timeline-step completed">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-info">
+                                    <span class="timeline-label">Submitted</span>
+                                    <span class="timeline-date">${submittedDate}</span>
+                                </div>
+                            </div>
+                            ${issue.approvedDate ? `
+                            <div class="timeline-step completed">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-info">
+                                    <span class="timeline-label">Approved</span>
+                                    <span class="timeline-date">${formatDateFull(issue.approvedDate)}</span>
+                                </div>
+                            </div>` : (issue.status !== 'pending-review' && issue.status !== 'rejected' ? `
+                            <div class="timeline-step completed">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-info">
+                                    <span class="timeline-label">Approved</span>
+                                    <span class="timeline-date">—</span>
+                                </div>
+                            </div>` : '')}
+                            ${issue.assignedDate ? `
+                            <div class="timeline-step completed">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-info">
+                                    <span class="timeline-label">Assigned</span>
+                                    <span class="timeline-date">${formatDateFull(issue.assignedDate)}</span>
+                                </div>
+                            </div>` : (issue.assignedTo ? `
+                            <div class="timeline-step completed">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-info">
+                                    <span class="timeline-label">Assigned</span>
+                                    <span class="timeline-date">—</span>
+                                </div>
+                            </div>` : '')}
+                            ${issue.resolvedDate ? `
+                            <div class="timeline-step completed">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-info">
+                                    <span class="timeline-label">Resolved</span>
+                                    <span class="timeline-date">${formatDateFull(issue.resolvedDate)}</span>
+                                </div>
+                            </div>` : ''}
+                        </div>
+                        ${issue.resolvedDate && issue.submittedDate ? `
+                        <div class="timeline-elapsed">
+                            <i class="fas fa-clock"></i> Total time: ${(() => {
+                const ms = new Date(issue.resolvedDate) - new Date(issue.submittedDate);
+                const days = Math.floor(ms / 86400000);
+                const hours = Math.floor((ms % 86400000) / 3600000);
+                const minutes = Math.floor((ms % 3600000) / 60000);
+                if (days > 0) return days + 'd ' + hours + 'h ' + minutes + 'm';
+                if (hours > 0) return hours + 'h ' + minutes + 'm';
+                return minutes + 'm';
+            })()}
+                        </div>` : ''}
+                    </div>
+
                     ${(issue.status === 'in-progress' && (issue.scheduledDate || issue.scheduledTime)) ? `
                     <div class="detail-row">
                         <div class="detail-label"><i class="fas fa-clock"></i> Scheduled:</div>
@@ -270,42 +335,6 @@ function viewIssueDetails(issueId) {
                     ${progressSliderHtml}
                     ${imageGallery}
                     ${progressHistory || ''}
-                    
-                    ${issue.status === 'resolved' ? `
-                    <div class="issue-feedback-section">
-                        <h4><i class="fas fa-star"></i> User Feedback</h4>
-                        ${issue.rating ? `
-                        <div class="feedback-display">
-                            <div class="feedback-rating">
-                                <div class="stars-display">
-                                    ${Array(issue.rating).fill('<i class="fas fa-star" style="color:#f59e0b;"></i>').join('')}
-                                    ${Array(5 - issue.rating).fill('<i class="far fa-star" style="color:#94a3b8;"></i>').join('')}
-                                </div>
-                                <span class="rating-value">${issue.rating}/5</span>
-                            </div>
-                            ${issue.feedbackComment ? `
-                            <div class="feedback-comment">
-                                <p>"${issue.feedbackComment}"</p>
-                            </div>
-                            ` : ''}
-                            <div class="feedback-meta">
-                                <span><i class="fas fa-user"></i> ${issue.feedbackBy || 'Anonymous'}</span>
-                                ${issue.feedbackDate ? `<span><i class="fas fa-calendar"></i> ${new Date(issue.feedbackDate).toLocaleDateString()}</span>` : ''}
-                            </div>
-                            ${issue.fullyResolved === false ? `<p class="partial-resolution"><i class="fas fa-exclamation-triangle"></i> Issue was partially resolved</p>` : ''}
-                        </div>
-                        ` : `
-                        <div class="no-feedback">
-                            <i class="far fa-star"></i>
-                            <i class="far fa-star"></i>
-                            <i class="far fa-star"></i>
-                            <i class="far fa-star"></i>
-                            <i class="far fa-star"></i>
-                            <p>No feedback provided yet</p>
-                        </div>
-                        `}
-                    </div>
-                    ` : ''}
                 </div>
             </div>
             

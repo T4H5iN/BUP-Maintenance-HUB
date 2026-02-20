@@ -34,6 +34,37 @@ function showSection(sectionName) {
         if (typeof updateDashboardStats === 'function') {
             updateDashboardStats();
         }
+
+        // #11: Auto-activate the correct panel based on user role
+        if (currentUser) {
+            const roleTabMap = {
+                'moderator': 'moderator-panel',
+                'administrator': 'administrator-panel',
+                'technician': 'technician-panel'
+            };
+            const targetPanel = roleTabMap[currentUser.role];
+            if (targetPanel) {
+                // Activate the role-specific panel
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                const panel = document.getElementById(targetPanel);
+                if (panel) panel.classList.add('active');
+
+                // Also activate the corresponding tab button
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                const tabBtn = document.getElementById(currentUser.role + 'Tab');
+                if (tabBtn) tabBtn.classList.add('active');
+            } else {
+                // Student/faculty: show the default "user-dashboard" tab
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                const userDash = document.getElementById('user-dashboard');
+                if (userDash) userDash.classList.add('active');
+
+                // Also activate the "My Issues" tab button
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                const myIssuesBtn = document.querySelector('.tab-btn[onclick*="user-dashboard"]');
+                if (myIssuesBtn) myIssuesBtn.classList.add('active');
+            }
+        }
     } else if (sectionName === 'reports') {
         // Check if user has permission to view reports
         if (currentUser) {
@@ -94,13 +125,16 @@ function showTab(tabName) {
         tab.classList.remove('active');
     });
 
-    document.getElementById(tabName).classList.add('active');
+    const target = document.getElementById(tabName);
+    if (target) target.classList.add('active');
 
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('active');
+        // Match button by its onclick attribute or by checking if it triggers this tab
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tabName)) {
+            btn.classList.add('active');
+        }
     });
-
-    event.target.classList.add('active');
 }
 
 function showLoginModal() {
@@ -230,52 +264,83 @@ function updateNavigation() {
 }
 
 /**
- * Customize the reports section based on user role
+ * C2: Customize the reports section based on user role — show role-specific content
  */
 function customizeReportsForRole(hasFullAccess, hasTechnicianAccess) {
     const exportButtons = document.querySelectorAll('.report-actions button');
     const reportFilters = document.querySelector('.reports-filters');
     const reportTables = document.querySelector('.report-tables');
+    const reportsContent = document.querySelector('.reports-content');
+
+    // Remove any previously injected role-specific summary
+    const existingSummary = document.getElementById('role-report-summary');
+    if (existingSummary) existingSummary.remove();
 
     if (hasFullAccess) {
-        // Admin/Authority: Show everything
+        // Admin/Moderator: Show everything
         exportButtons.forEach(btn => btn.style.display = 'block');
         if (reportFilters) reportFilters.style.display = 'block';
         if (reportTables) reportTables.style.display = 'block';
     } else if (hasTechnicianAccess) {
-        // Technician: Show performance data but hide export buttons
-        exportButtons.forEach(btn => btn.style.display = 'none');
-        if (reportFilters) reportFilters.style.display = 'block';
-        if (reportTables) reportTables.style.display = 'block';
-    } else {
-        // Regular user: Limited view
+        // Technician: Show performance summary + charts, hide export & filters
         exportButtons.forEach(btn => btn.style.display = 'none');
         if (reportFilters) reportFilters.style.display = 'none';
+        if (reportTables) reportTables.style.display = 'none';
 
-        // Add a message for regular users
-        const reportsContent = document.querySelector('.reports-content');
         if (reportsContent) {
-            // Add a notice about limited access if it doesn't exist
-            if (!document.getElementById('reports-limited-access')) {
-                const limitedAccessNotice = document.createElement('div');
-                limitedAccessNotice.id = 'reports-limited-access';
-                limitedAccessNotice.className = 'reports-notice';
-                limitedAccessNotice.innerHTML = `
-                    <div class="notice-content">
-                        <i class="fas fa-info-circle"></i>
-                        <p>You are viewing a simplified reports dashboard. For detailed analytics and export options, please contact an administrator.</p>
+            const allIssues = window.issues || [];
+            const myAssigned = allIssues.filter(i => {
+                const assignedId = i.assignedTo?._id || i.assignedTo;
+                return assignedId === currentUser.id;
+            });
+            const myResolved = myAssigned.filter(i => i.status === 'resolved');
+            const myInProgress = myAssigned.filter(i => i.status === 'in-progress');
+
+            const summaryDiv = document.createElement('div');
+            summaryDiv.id = 'role-report-summary';
+            summaryDiv.innerHTML = `
+                <div class="role-report-card">
+                    <h3><i class="fas fa-hard-hat"></i> My Performance Summary</h3>
+                    <div class="role-report-stats">
+                        <div class="stat-card"><i class="fas fa-clipboard-list"></i><div><span class="stat-number">${myAssigned.length}</span><span class="stat-label">Total Assigned</span></div></div>
+                        <div class="stat-card"><i class="fas fa-tools"></i><div><span class="stat-number">${myInProgress.length}</span><span class="stat-label">In Progress</span></div></div>
+                        <div class="stat-card"><i class="fas fa-check-circle"></i><div><span class="stat-number">${myResolved.length}</span><span class="stat-label">Resolved</span></div></div>
+                        <div class="stat-card"><i class="fas fa-percentage"></i><div><span class="stat-number">${myAssigned.length > 0 ? Math.round(myResolved.length / myAssigned.length * 100) : 0}%</span><span class="stat-label">Completion Rate</span></div></div>
                     </div>
-                `;
-                reportsContent.insertBefore(limitedAccessNotice, reportsContent.firstChild);
-            } else {
-                // Update notice for regular users
-                limitedAccessNotice.innerHTML = `
-                    <div class="notice-content">
-                        <i class="fas fa-info-circle"></i>
-                        <p>You are viewing a simplified reports dashboard. For detailed analytics and export options, please contact an administrator.</p>
+                </div>
+            `;
+            reportsContent.insertBefore(summaryDiv, reportsContent.firstChild);
+        }
+    } else {
+        // Student/Faculty: Show their submitted issues summary
+        exportButtons.forEach(btn => btn.style.display = 'none');
+        if (reportFilters) reportFilters.style.display = 'none';
+        if (reportTables) reportTables.style.display = 'none';
+
+        if (reportsContent) {
+            const allIssues = window.issues || [];
+            const myIssues = allIssues.filter(i => {
+                const email = i.submitterEmail || i.submittedBy || '';
+                return email === currentUser.email;
+            });
+            const pending = myIssues.filter(i => i.status === 'pending-review').length;
+            const resolved = myIssues.filter(i => i.status === 'resolved').length;
+            const inProgress = myIssues.filter(i => i.status === 'in-progress' || i.status === 'assigned').length;
+
+            const summaryDiv = document.createElement('div');
+            summaryDiv.id = 'role-report-summary';
+            summaryDiv.innerHTML = `
+                <div class="role-report-card">
+                    <h3><i class="fas fa-chart-bar"></i> My Issue Summary</h3>
+                    <div class="role-report-stats">
+                        <div class="stat-card"><i class="fas fa-file-alt"></i><div><span class="stat-number">${myIssues.length}</span><span class="stat-label">Total Submitted</span></div></div>
+                        <div class="stat-card"><i class="fas fa-hourglass-half"></i><div><span class="stat-number">${pending}</span><span class="stat-label">Pending Review</span></div></div>
+                        <div class="stat-card"><i class="fas fa-tools"></i><div><span class="stat-number">${inProgress}</span><span class="stat-label">In Progress</span></div></div>
+                        <div class="stat-card"><i class="fas fa-check-circle"></i><div><span class="stat-number">${resolved}</span><span class="stat-label">Resolved</span></div></div>
                     </div>
-                `;
-            }
+                </div>
+            `;
+            reportsContent.insertBefore(summaryDiv, reportsContent.firstChild);
         }
     }
 }
@@ -634,6 +699,7 @@ function renderModeratorIssues(issues) {
             : '';
 
         // Moderator actions: show Approve/Reject for pending-review, Assign Technician for approved
+        // Also allow moderators to update progress and mark complete (#2)
         let moderatorActions = '';
         if (issue.status === 'pending-review') {
             moderatorActions = `
@@ -643,6 +709,24 @@ function renderModeratorIssues(issues) {
         } else if (issue.status === 'approved') {
             moderatorActions = `
                 <button class="btn-warning" onclick="assignTechnician('${issue.issueId || issue.id}')">Assign Technician</button>
+            `;
+        } else if (issue.status === 'assigned' || issue.status === 'in-progress') {
+            moderatorActions = `
+                <button class="btn-primary btn-sm" onclick="showModeratorProgressModal('${issue.issueId || issue.id}', ${issue.progress || 0})">Update Progress</button>
+                <button class="btn-success btn-sm" onclick="moderatorMarkComplete('${issue.issueId || issue.id}')">Mark Complete</button>
+            `;
+        }
+
+        // Priority selector for moderators (#2.1) — shown for all non-resolved issues
+        let prioritySelector = '';
+        if (issue.status !== 'resolved' && issue.status !== 'rejected') {
+            prioritySelector = `
+                <select class="priority-select" onchange="moderatorSetPriority('${issue.issueId || issue.id}', this.value)" title="Set priority">
+                    <option value="low" ${issue.priority === 'low' ? 'selected' : ''}>Low</option>
+                    <option value="medium" ${issue.priority === 'medium' ? 'selected' : ''}>Medium</option>
+                    <option value="high" ${issue.priority === 'high' ? 'selected' : ''}>High</option>
+                    <option value="urgent" ${issue.priority === 'urgent' ? 'selected' : ''}>Urgent</option>
+                </select>
             `;
         }
 
@@ -665,6 +749,7 @@ function renderModeratorIssues(issues) {
             <div class="issue-actions">
                 <button class="btn-secondary" onclick="viewIssueDetails('${issue.issueId || issue.id}')">View Details</button>
                 ${moderatorActions}
+                ${prioritySelector}
                 <!-- <button class="btn-secondary" onclick="addNote('${issue.issueId || issue.id}')">Add Note</button> -->
             </div>
         `;
@@ -767,6 +852,158 @@ window.filterModeratorIssues = filterModeratorIssues;
 window.updateModeratorPanel = updateModeratorPanel;
 window.renderModeratorIssues = renderModeratorIssues;
 window.setupNavigationEvents = setupNavigationEvents;
+
+/**
+ * #2: Show modal to update issue progress (Moderator)
+ */
+function showModeratorProgressModal(issueId, currentProgress) {
+    const existing = document.getElementById('modProgressModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'modProgressModal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('modProgressModal').remove()">&times;</span>
+            <h2>Update Progress</h2>
+            <p>Issue <strong>#${issueId}</strong></p>
+            <div class="form-group">
+                <label for="modProgressInput">Progress: <span id="modProgressValue">${currentProgress}</span>%</label>
+                <input type="range" id="modProgressInput" min="0" max="100" step="5" value="${currentProgress}" 
+                    oninput="document.getElementById('modProgressValue').textContent = this.value">
+            </div>
+            <button class="btn-primary" onclick="submitModeratorProgress('${issueId}')">Save Progress</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    modal.style.display = 'block';
+}
+
+/**
+ * #2: Submit progress update from moderator
+ */
+async function submitModeratorProgress(issueId) {
+    const progress = parseInt(document.getElementById('modProgressInput').value);
+    const token = localStorage.getItem('bup-token');
+    try {
+        const res = await fetch(`/api/issues/${issueId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({ progress, status: progress > 0 ? 'in-progress' : 'assigned' })
+        });
+        if (!res.ok) {
+            const data = await res.json();
+            showNotification(data.message || 'Failed to update progress', 'error');
+            return;
+        }
+        // Update local
+        const issue = (window.issues || []).find(i => (i.issueId || i.id) === issueId);
+        if (issue) {
+            issue.progress = progress;
+            if (progress > 0) issue.status = 'in-progress';
+        }
+        document.getElementById('modProgressModal').remove();
+        showNotification(`Progress updated to ${progress}% for issue #${issueId}`, 'success');
+        updateModeratorPanel();
+        if (typeof loadAllIssuesFromBackend === 'function') loadAllIssuesFromBackend();
+    } catch (err) {
+        showNotification('Failed to update progress', 'error');
+    }
+}
+
+/**
+ * #2: Mark issue as complete (Moderator) — with confirmation modal
+ */
+async function moderatorMarkComplete(issueId) {
+    // B2: Use a proper modal instead of confirm()
+    const existingModal = document.getElementById('confirmCompleteModal');
+    if (existingModal) existingModal.remove();
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'confirmCompleteModal';
+    modal.style.display = 'block';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 420px;">
+            <span class="close" onclick="document.getElementById('confirmCompleteModal').remove()">&times;</span>
+            <h3><i class="fas fa-check-circle" style="color: var(--success-color);"></i> Mark as Resolved</h3>
+            <p style="margin: 15px 0;">Are you sure you want to mark issue <strong>#${issueId}</strong> as resolved?</p>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button class="btn-secondary" onclick="document.getElementById('confirmCompleteModal').remove()">Cancel</button>
+                <button class="btn-primary" id="confirmCompleteBtn">
+                    <i class="fas fa-check"></i> Confirm Resolve
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    document.getElementById('confirmCompleteBtn').onclick = async () => {
+        modal.remove();
+        const token = localStorage.getItem('bup-token');
+        try {
+            const res = await fetch(`/api/issues/${issueId}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify({ status: 'resolved' })
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                showNotification(data.message || 'Failed to resolve issue', 'error');
+                return;
+            }
+            const issue = (window.issues || []).find(i => (i.issueId || i.id) === issueId);
+            if (issue) {
+                issue.status = 'resolved';
+                issue.resolvedDate = new Date().toISOString();
+            }
+            showNotification(`Issue #${issueId} marked as resolved.`, 'success');
+            updateModeratorPanel();
+            if (typeof loadAllIssuesFromBackend === 'function') loadAllIssuesFromBackend();
+        } catch (err) {
+            showNotification('Failed to resolve issue', 'error');
+        }
+    };
+}
+
+/**
+ * #2.1: Set issue priority (Moderator only)
+ */
+async function moderatorSetPriority(issueId, priority) {
+    const token = localStorage.getItem('bup-token');
+    try {
+        const res = await fetch(`/api/issues/${issueId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({ priority })
+        });
+        if (!res.ok) {
+            const data = await res.json();
+            showNotification(data.message || 'Failed to update priority', 'error');
+            return;
+        }
+        const issue = (window.issues || []).find(i => (i.issueId || i.id) === issueId);
+        if (issue) issue.priority = priority;
+        showNotification(`Priority set to ${priority} for issue #${issueId}`, 'success');
+    } catch (err) {
+        showNotification('Failed to update priority', 'error');
+    }
+}
+
+window.showModeratorProgressModal = showModeratorProgressModal;
+window.submitModeratorProgress = submitModeratorProgress;
+window.moderatorMarkComplete = moderatorMarkComplete;
+window.moderatorSetPriority = moderatorSetPriority;
 
 /**
  * Show help and support modal

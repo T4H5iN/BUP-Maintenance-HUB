@@ -5,17 +5,125 @@
 
 // Initialize the administrator dashboard
 function initializeAdministratorPanel() {
-
-
     // Load admin dashboard statistics
     loadAdminDashboardStats();
 
     // Load overdue issues
     loadOverdueIssues();
 
+    // D2: Load users into admin table
+    loadAdminUsers();
+
     // Set up event listeners for admin actions
     setupAdminEventListeners();
 }
+
+// Global variable to store fetched users
+window.allSystemUsers = [];
+
+// D2: Fetch and render users for the admin panel
+async function loadAdminUsers() {
+    const token = localStorage.getItem('bup-token');
+    if (!token) return;
+
+    try {
+        const res = await fetch('/api/users', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+
+        if (res.ok && data.users) {
+            window.allSystemUsers = data.users;
+            renderAdminUsers(data.users);
+        } else {
+            document.getElementById('adminUsersList').innerHTML =
+                '<tr><td colspan="5" class="text-center">Failed to load users.</td></tr>';
+        }
+    } catch (err) {
+        console.error('Error loading users:', err);
+        document.getElementById('adminUsersList').innerHTML =
+            '<tr><td colspan="5" class="text-center">Error loading users.</td></tr>';
+    }
+}
+
+// D2: Render users in the table
+function renderAdminUsers(users) {
+    const tbody = document.getElementById('adminUsersList');
+    if (!tbody) return;
+
+    if (users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center">No users found.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = users.map(user => {
+        const contact = user.phone || user.studentId || user.dept || 'N/A';
+        const isMe = currentUser && currentUser.id === user._id;
+
+        return `
+            <tr>
+                <td><strong>${user.name || 'Unknown'}</strong></td>
+                <td>${user.email}</td>
+                <td><span class="status-badge status-${user.role}">${user.role}</span></td>
+                <td>${contact}</td>
+                <td>
+                    <div class="action-buttons" style="display: flex; gap: 5px;">
+                        <button class="btn-sm btn-danger" onclick="deleteUser('${user._id}')" ${isMe ? 'disabled title="Cannot delete yourself"' : ''}>
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// D2: Filter users by role and search string
+window.filterAdminUsers = function () {
+    const roleFilter = document.getElementById('userRoleFilter').value;
+    const searchString = document.getElementById('userSearch').value.toLowerCase();
+
+    const filtered = window.allSystemUsers.filter(user => {
+        const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+        const matchesSearch = !searchString ||
+            (user.name && user.name.toLowerCase().includes(searchString)) ||
+            (user.email && user.email.toLowerCase().includes(searchString));
+
+        return matchesRole && matchesSearch;
+    });
+
+    renderAdminUsers(filtered);
+};
+
+// D2: Delete User action
+window.deleteUser = async function (userId) {
+    if (!confirm('Are you sure you want to completely delete this user? This action cannot be undone.')) {
+        return;
+    }
+
+    const token = localStorage.getItem('bup-token');
+    try {
+        const res = await fetch(`/api/users/${userId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+            showNotification('User deleted successfully', 'success');
+            loadAdminUsers(); // Refresh the table
+        } else {
+            const data = await res.json();
+            showNotification(data.message || 'Failed to delete user', 'error');
+        }
+    } catch (err) {
+        console.error('Delete user error:', err);
+        showNotification('An error occurred while deleting user', 'error');
+    }
+};
+
+window.showAddUserModal = function () {
+    showNotification('Registration logic handles normal users. Use the database directly for now to add roles.', 'info');
+};
 
 // Load and display administrator dashboard statistics
 async function loadAdminDashboardStats() {

@@ -1,12 +1,20 @@
 // Functionality for displaying and filtering issues
 
-// Add a variable to track current display limit
-let currentDisplayLimit = 10;
+// Add a variable to track current page
+let currentPage = 1;
 
 // Function to update the Home page issues list
 function updateHomeIssuesList() {
-    // Reset the display limit
-    currentDisplayLimit = 10;
+    // Reset the current page
+    currentPage = 1;
+
+    // A1: Enforce hiding of "All Campus Issues" section for non-admin/mod
+    const allIssuesSection = document.querySelector('.all-issues-home');
+    if (allIssuesSection && window.currentUser) {
+        const hasFullAccess = currentUser.role === 'administrator' || currentUser.role === 'moderator';
+        allIssuesSection.style.display = hasFullAccess ? '' : 'none';
+        if (!hasFullAccess) return; // Don't render issues for non-admin/mod
+    }
 
     // Only show issues that are NOT pending-review or rejected for students/faculty/technicians
     let issuesToShow = window.issues || [];
@@ -72,7 +80,7 @@ function filterHomeIssues() {
     displayHomeIssues(filteredIssues);
 }
 
-// Function to display home issues
+// Function to display home issues with pagination
 function displayHomeIssues(issuesToDisplay) {
     const issuesList = document.getElementById('home-issues-list');
     if (!issuesList) {
@@ -87,10 +95,17 @@ function displayHomeIssues(issuesToDisplay) {
     }
 
     issuesToDisplay.sort((a, b) => new Date(b.submittedDate) - new Date(a.submittedDate));
-    const displayLimit = currentDisplayLimit;
-    const displayedIssues = issuesToDisplay.slice(0, displayLimit);
 
-    displayedIssues.forEach(issue => {
+    const ISSUES_PER_PAGE = 6;
+    const totalPages = Math.ceil(issuesToDisplay.length / ISSUES_PER_PAGE);
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    const startIdx = (currentPage - 1) * ISSUES_PER_PAGE;
+    const endIdx = startIdx + ISSUES_PER_PAGE;
+    const pageIssues = issuesToDisplay.slice(startIdx, endIdx);
+
+    pageIssues.forEach(issue => {
         const issueCard = document.createElement('div');
         issueCard.className = 'issue-card';
         const locationName = getLocationName(issue.location);
@@ -137,15 +152,50 @@ function displayHomeIssues(issuesToDisplay) {
         issuesList.appendChild(issueCard);
     });
 
-    if (issuesToDisplay.length > displayLimit) {
-        const seeMoreButton = document.createElement('button');
-        seeMoreButton.className = 'btn-primary see-more-btn';
-        seeMoreButton.textContent = `See ${issuesToDisplay.length - displayLimit} More Issues`;
-        seeMoreButton.onclick = function () {
-            // Call the loadMoreIssues function instead of redirecting to dashboard
-            loadMoreIssues(issuesToDisplay);
-        };
-        issuesList.appendChild(seeMoreButton);
+    // B1: Render pagination controls
+    if (totalPages > 1) {
+        const paginationDiv = document.createElement('div');
+        paginationDiv.className = 'pagination-controls';
+
+        let paginationHTML = '';
+
+        // Previous button
+        paginationHTML += `<button class="pagination-btn ${currentPage === 1 ? 'disabled' : ''}" 
+            onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+            <i class="fas fa-chevron-left"></i> Prev
+        </button>`;
+
+        // Page numbers with ellipsis for large page counts
+        const maxVisible = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+        if (endPage - startPage < maxVisible - 1) {
+            startPage = Math.max(1, endPage - maxVisible + 1);
+        }
+
+        if (startPage > 1) {
+            paginationHTML += `<button class="pagination-btn" onclick="goToPage(1)">1</button>`;
+            if (startPage > 2) paginationHTML += `<span class="pagination-ellipsis">...</span>`;
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            paginationHTML += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" 
+                onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) paginationHTML += `<span class="pagination-ellipsis">...</span>`;
+            paginationHTML += `<button class="pagination-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+        }
+
+        // Next button
+        paginationHTML += `<button class="pagination-btn ${currentPage === totalPages ? 'disabled' : ''}" 
+            onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+            Next <i class="fas fa-chevron-right"></i>
+        </button>`;
+
+        paginationDiv.innerHTML = paginationHTML;
+        issuesList.appendChild(paginationDiv);
     }
 
     // Initialize vote system after issues are displayed
@@ -158,24 +208,21 @@ function displayHomeIssues(issuesToDisplay) {
 }
 
 /**
- * Load more issues by increasing the display limit
- * @param {Array} issues - The full array of issues to display
+ * Navigate to a specific page
+ * @param {number} page - The page number to navigate to
  */
-function loadMoreIssues(issues) {
-    // Increase the display limit by 10 (or another reasonable number)
-    currentDisplayLimit += 10;
-
-    // Re-display the issues with the new limit
-    displayHomeIssues(issues);
-
-    // Scroll to where the new issues start
-    const issueCards = document.querySelectorAll('.issue-card');
-    if (issueCards.length > 10) {
-        // Scroll to the 10th previous element (where new content starts)
-        const scrollTarget = issueCards[Math.max(0, issueCards.length - 10)];
-        if (scrollTarget) {
-            scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+function goToPage(page) {
+    currentPage = page;
+    // Re-filter and display
+    if (typeof filterHomeIssues === 'function') {
+        filterHomeIssues();
+    } else {
+        updateHomeIssuesList();
+    }
+    // Scroll to top of issues section
+    const allIssuesSection = document.querySelector('.all-issues-home');
+    if (allIssuesSection) {
+        allIssuesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
 
@@ -289,7 +336,7 @@ window.formatStatus = formatStatus;
 window.formatCategoryName = formatCategoryName;
 window.generateStarRating = generateStarRating;
 window.getRandomRating = getRandomRating;
-window.loadMoreIssues = loadMoreIssues;
+window.goToPage = goToPage;
 window.updateFilterOptionsForRole = updateFilterOptionsForRole;
 
 // Listen for progress updates and update the progress bar for all users

@@ -28,7 +28,7 @@ async function handleIssueSubmission(e) {
         const issueData = {
             issueId: generateIssueId(),
             category: document.getElementById('category').value,
-            priority: document.getElementById('priority').value,
+            priority: 'medium', // #2.1: default priority — moderators set urgency
             location: document.getElementById('location').value,
             specificLocation: document.getElementById('specificLocation').value,
             description: document.getElementById('description').value,

@@ -86,7 +86,26 @@ function filterMapIssues() {
  * @param {Array} filteredIssues - Array of issues to display on the map
  */
 function updateCampusMap(filteredIssues) {
-    // Filter out pending-review issues for non-admin/mod users (students, faculty, technicians)
+    // #1.1: Role-based issue filtering for campus map
+    if (currentUser) {
+        if (currentUser.role === 'student' || currentUser.role === 'faculty') {
+            // Students/faculty only see their own submitted issues
+            filteredIssues = filteredIssues.filter(issue =>
+                issue.submitterEmail === currentUser.email
+            );
+        } else if (currentUser.role === 'technician') {
+            // Technicians only see their assigned issues
+            filteredIssues = filteredIssues.filter(issue => {
+                const assignedId = issue.assignedTo && issue.assignedTo.toString();
+                return assignedId === currentUser.id ||
+                    issue.assignedToName === currentUser.name ||
+                    issue.assignedToName === currentUser.email;
+            });
+        }
+        // Admin/moderator: see all issues (no filtering)
+    }
+
+    // Filter out pending-review issues for non-admin/mod users
     if (currentUser &&
         (currentUser.role === 'student' ||
             currentUser.role === 'faculty' ||
@@ -224,7 +243,26 @@ function showBuildingDetails(buildingName, issueCount, buildingId) {
         locationValues.includes(issue.location)
     );
 
-    // Filter out pending-review issues for non-admin/mod users (students, faculty, technicians)
+    // #1.1: Role-based issue filtering for building details
+    if (currentUser) {
+        if (currentUser.role === 'student' || currentUser.role === 'faculty') {
+            // Students/faculty only see their own submitted issues
+            buildingIssues = buildingIssues.filter(issue =>
+                issue.submitterEmail === currentUser.email
+            );
+        } else if (currentUser.role === 'technician') {
+            // Technicians only see their assigned issues
+            buildingIssues = buildingIssues.filter(issue => {
+                const assignedId = issue.assignedTo && issue.assignedTo.toString();
+                return assignedId === currentUser.id ||
+                    issue.assignedToName === currentUser.name ||
+                    issue.assignedToName === currentUser.email;
+            });
+        }
+        // Admin/moderator: see all issues
+    }
+
+    // Filter out pending-review issues for non-admin/mod users
     if (currentUser &&
         (currentUser.role === 'student' ||
             currentUser.role === 'faculty' ||

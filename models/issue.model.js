@@ -42,7 +42,9 @@ const issueSchema = new mongoose.Schema({
     feedbackDate: Date,
     feedbackBy: String,
     fullyResolved: { type: Boolean },
-    resolvedDate: Date
+    resolvedDate: Date,
+    approvedDate: Date,    // #4: Timestamp when moderator approves the issue
+    assignedDate: Date     // #4: Timestamp when technician is assigned
 }, {
     timestamps: true
 });

@@ -273,18 +273,6 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Priority Level:</label>
-                            <select id="priority" required>
-                                <option value="">Select Priority</option>
-                                <option value="low" class="priority-low">Low</option>
-                                <option value="medium" class="priority-medium">Medium</option>
-                                <option value="high" class="priority-high">High</option>
-                                <option value="urgent" class="priority-urgent">Urgent</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
                             <label>Location:</label>
                             <select id="location" required>
                                 <option value="">Select Location</option>
@@ -307,11 +295,11 @@
                                 <option value="other">Other</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label>Room/Specific Location:</label>
-                            <input type="text" id="specificLocation" placeholder="e.g., Room 205, Washroom 2nd Floor"
-                                maxlength="50">
-                        </div>
+                    </div>
+                    <div class="form-group" style="width: 100%;">
+                        <label>Room/Specific Location:</label>
+                        <input type="text" id="specificLocation" placeholder="e.g., Room 205, Washroom 2nd Floor"
+                            maxlength="50">
                     </div>
                     <div class="form-group">
                         <label>Issue Description:</label>
@@ -340,7 +328,7 @@
             </div>
 
             <!-- New All Issues Section -->
-            <div class="all-issues-home">
+            <div class="all-issues-home" style="display: none;">
                 <h2>All Campus Issues</h2>
                 <div class="dashboard-filters">
                     <div class="filter-group">
@@ -679,6 +667,50 @@
                         <div class="loading-indicator">
                             <i class="fas fa-spinner fa-spin"></i> Loading overdue issues...
                         </div>
+                    </div>
+                </div>
+
+                <!-- D2: User Management Section -->
+                <div class="admin-user-management" style="margin-top: 40px;">
+                    <div class="section-header"
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h4>System Users & Technicians</h4>
+                        <button class="btn-primary" onclick="showAddUserModal()">
+                            <i class="fas fa-user-plus"></i> Add User / Technician
+                        </button>
+                    </div>
+
+                    <div class="admin-filters" style="margin-bottom: 20px;">
+                        <select id="userRoleFilter" onchange="filterAdminUsers()">
+                            <option value="all">All Roles</option>
+                            <option value="student">Students</option>
+                            <option value="faculty">Faculty</option>
+                            <option value="technician">Technicians</option>
+                            <option value="moderator">Moderators</option>
+                            <option value="administrator">Administrators</option>
+                        </select>
+                        <input type="text" placeholder="Search users by name or email..." id="userSearch"
+                            onkeyup="filterAdminUsers()">
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="report-table" id="adminUsersTable">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Contact/ID</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminUsersList">
+                                <tr>
+                                    <td colspan="5" style="text-align: center;"><i class="fas fa-spinner fa-spin"></i>
+                                        Loading users...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

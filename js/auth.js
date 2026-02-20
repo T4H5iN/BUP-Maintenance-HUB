@@ -87,6 +87,13 @@ function updateUIForLoggedInUser() {
         document.getElementById('technicianTab').style.display = 'block';
     }
 
+    // Show/hide "All Campus Issues" section based on role (admin & moderator only)
+    const allIssuesSection = document.querySelector('.all-issues-home');
+    if (allIssuesSection) {
+        const hasFullAccess = currentUser.role === 'administrator' || currentUser.role === 'moderator';
+        allIssuesSection.style.display = hasFullAccess ? '' : 'none';
+    }
+
     // Dispatch auth state changed event
     window.dispatchEvent(new CustomEvent('authStateChanged', {
         detail: { user: currentUser }
@@ -329,8 +336,23 @@ function createSettingsModal() {
                 
                 <div class="settings-section">
                     <h3>Privacy & Security</h3>
-                    <div class="setting-item">
-                        <button class="btn-secondary" onclick="changePassword()">Change Password</button>
+                    <div class="setting-item" id="changePasswordSection">
+                        <button class="btn-secondary" onclick="toggleChangePasswordForm()">Change Password</button>
+                        <form id="changePasswordForm" style="display:none; margin-top: 12px;" onsubmit="changePassword(event)">
+                            <div class="form-group" style="margin-bottom:10px;">
+                                <label for="currentPassword">Current Password:</label>
+                                <input type="password" id="currentPassword" required placeholder="Enter current password">
+                            </div>
+                            <div class="form-group" style="margin-bottom:10px;">
+                                <label for="newPassword">New Password:</label>
+                                <input type="password" id="newPassword" required minlength="6" placeholder="Min 6 characters">
+                            </div>
+                            <div class="form-group" style="margin-bottom:10px;">
+                                <label for="confirmNewPassword">Confirm New Password:</label>
+                                <input type="password" id="confirmNewPassword" required placeholder="Confirm new password">
+                            </div>
+                            <button type="submit" class="btn-primary btn-sm">Update Password</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -427,6 +449,12 @@ function resetUIAfterLogout() {
             tab.style.display = 'none';
         }
     });
+
+    // Hide "All Campus Issues" section (only visible to admin/moderator)
+    const allIssuesSection = document.querySelector('.all-issues-home');
+    if (allIssuesSection) {
+        allIssuesSection.style.display = 'none';
+    }
 }
 
 // Make these functions available globally
@@ -445,3 +473,63 @@ window.createSettingsModal = createSettingsModal;
 window.saveSettings = saveSettings;
 window.logout = logout;
 window.resetUIAfterLogout = resetUIAfterLogout;
+
+// #8: Toggle change password form visibility
+function toggleChangePasswordForm() {
+    const form = document.getElementById('changePasswordForm');
+    if (form) {
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+// #8: Change password handler
+async function changePassword(e) {
+    if (e) e.preventDefault();
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmNew = document.getElementById('confirmNewPassword').value;
+
+    if (newPassword !== confirmNew) {
+        showNotification('New passwords do not match', 'warning');
+        return;
+    }
+
+    // C3: Password strength validation
+    if (newPassword.length < 6) {
+        showNotification('Password must be at least 6 characters long', 'warning');
+        return;
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+        showNotification('Password must contain at least one uppercase letter', 'warning');
+        return;
+    }
+    if (!/[0-9]/.test(newPassword)) {
+        showNotification('Password must contain at least one number', 'warning');
+        return;
+    }
+
+    const token = localStorage.getItem('bup-token');
+    try {
+        const res = await fetch('/api/users/change-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({ currentPassword, newPassword })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            showNotification(data.message || 'Failed to change password', 'error');
+            return;
+        }
+        showNotification('Password changed successfully!', 'success');
+        document.getElementById('changePasswordForm').reset();
+        document.getElementById('changePasswordForm').style.display = 'none';
+    } catch (err) {
+        showNotification('Failed to change password', 'error');
+    }
+}
+
+window.toggleChangePasswordForm = toggleChangePasswordForm;
+window.changePassword = changePassword;

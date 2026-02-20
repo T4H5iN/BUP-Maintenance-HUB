@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const User = require('../models/user.model');
+const auth = require('../middleware/auth');
 const OTP = require('../models/otp.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -99,6 +100,26 @@ router.get('/:id', async (req, res) => {
         res.json(user);
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+});
+
+// Delete user by ID (Admin only)
+router.delete('/:id', auth, async (req, res) => {
+    try {
+        // Enforce admin role
+        if (req.user.role !== 'administrator') {
+            return res.status(403).json({ message: 'Access denied. Administrators only.' });
+        }
+
+        const user = await User.findByIdAndDelete(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json({ message: 'User deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting user:', err);
+        res.status(500).json({ message: 'Failed to delete user' });
     }
 });
 
@@ -535,6 +556,43 @@ router.post('/reset-password', async (req, res) => {
         }
 
         res.status(500).json({ error: err.message });
+    }
+});
+
+// #8: Change password (authenticated user)
+router.post('/change-password', auth, async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ message: 'Current password and new password are required' });
+        }
+        if (newPassword.length < 6) {
+            return res.status(400).json({ message: 'New password must be at least 6 characters' });
+        }
+        if (!/[A-Z]/.test(newPassword)) {
+            return res.status(400).json({ message: 'Password must contain at least one uppercase letter' });
+        }
+        if (!/[0-9]/.test(newPassword)) {
+            return res.status(400).json({ message: 'Password must contain at least one number' });
+        }
+
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Current password is incorrect' });
+        }
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+
+        res.json({ message: 'Password changed successfully' });
+    } catch (err) {
+        console.error('Change password error:', err);
+        res.status(500).json({ message: 'Failed to change password' });
     }
 });
 

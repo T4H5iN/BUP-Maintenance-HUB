@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema({
     dept: String,
     password: String,
     name: String, // Add name field
+    phone: String, // Add phone field for SMS notifications
     studentId: { type: String, index: true }, // Add studentId field to store IDs separately
     verified: { type: Boolean, default: false }, // Add verified field
     refreshTokens: [{

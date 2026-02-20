@@ -218,7 +218,10 @@ router.patch('/:issueId/status', auth, notificationMiddleware.issueStatusChange,
         // Update the status
         issue.status = status;
 
-        // Update other related fields based on status
+        // #4: Set timestamps based on status transitions
+        if (status === 'approved' && !issue.approvedDate) {
+            issue.approvedDate = new Date();
+        }
         if (status === 'resolved') {
             issue.resolvedDate = new Date();
         }
@@ -276,7 +279,17 @@ router.patch('/:id/assign',
             issue.assignedTo = technician._id; // Store the ObjectId reference
             issue.assignedToName = technician.name || technician.email; // Store name for display
             issue.status = 'assigned';
+            issue.assignedDate = new Date(); // #4: Timestamp when technician is assigned
             await issue.save();
+
+            // D1: Send SMS notification to the technician
+            try {
+                const { notifyTechnicianAssignment } = require('../services/smsService');
+                // The service will check if technician.phone exists and handle errors internally
+                await notifyTechnicianAssignment(technician, issue);
+            } catch (smsErr) {
+                console.error('Non-blocking error during SMS notification:', smsErr);
+            }
 
             res.json({
                 message: 'Technician assigned successfully',
@@ -356,8 +369,14 @@ router.get('/assigned-to-me', auth, async (req, res) => {
 });
 
 // PATCH /api/issues/:id
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', auth, async (req, res) => {
     try {
+        // Only technicians, moderators, and administrators can update issues
+        const allowedRoles = ['technician', 'moderator', 'administrator'];
+        if (!allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ message: 'Not authorized to update issues' });
+        }
+
         const { id } = req.params;
         // Only try to match _id if id is a valid ObjectId (24 hex chars)
         const orQuery = [
@@ -375,7 +394,14 @@ router.patch('/:id', async (req, res) => {
 
         // Only update fields that are present in the request body
         if (typeof req.body.progress !== 'undefined') issue.progress = req.body.progress;
-        if (typeof req.body.status !== 'undefined') issue.status = req.body.status;
+        if (typeof req.body.status !== 'undefined') {
+            issue.status = req.body.status;
+            // Set resolvedDate when marking as resolved
+            if (req.body.status === 'resolved') {
+                issue.resolvedDate = new Date();
+            }
+        }
+        if (typeof req.body.priority !== 'undefined') issue.priority = req.body.priority;
         if (typeof req.body.assignedTo !== 'undefined') issue.assignedTo = req.body.assignedTo;
         if (typeof req.body.rejectReason !== 'undefined') issue.rejectReason = req.body.rejectReason;
         // ...add any other updatable fields as needed...

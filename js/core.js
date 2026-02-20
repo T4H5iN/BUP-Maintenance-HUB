@@ -236,6 +236,13 @@ function updateUIForLoggedInUser() {
         document.getElementById('technicianTab').style.display = 'block';
     }
 
+    // #1: Hide "All Campus Issues" section for non-admin/mod users
+    const allIssuesSection = document.querySelector('.all-issues-home');
+    if (allIssuesSection) {
+        const hasFullAccess = currentUser.role === 'administrator' || currentUser.role === 'moderator';
+        allIssuesSection.style.display = hasFullAccess ? '' : 'none';
+    }
+
     // Update filter options based on role
     if (typeof updateFilterOptionsForRole === 'function') {
         updateFilterOptionsForRole();
