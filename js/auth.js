@@ -359,14 +359,23 @@ function saveSettings() {
 // Consolidated logout function
 function logout() {
     try {
+        // Invalidate refresh token server-side
+        const refreshToken = window.TokenManager ? window.TokenManager.getRefreshToken() : null;
+        if (refreshToken) {
+            fetch('/api/users/logout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refreshToken })
+            }).catch(() => { /* Ignore errors on logout */ });
+        }
+
         // Clear user data
         window.currentUser = null;
-        if (localStorage.getItem('bup-current-user')) {
-            localStorage.removeItem('bup-current-user');
+        if (window.TokenManager) {
+            window.TokenManager.clearTokens();
         }
-        if (localStorage.getItem('bup-token')) {
-            localStorage.removeItem('bup-token');
-        }
+        localStorage.removeItem('bup-current-user');
+        localStorage.removeItem('bup-token');
 
         // Show notification if available
         if (typeof showNotification === 'function') {

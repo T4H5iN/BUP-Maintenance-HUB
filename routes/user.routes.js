@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
 const User = require('../models/user.model');
 const OTP = require('../models/otp.model');
 const bcrypt = require('bcryptjs');
@@ -255,7 +256,7 @@ router.post('/resend-otp', async (req, res) => {
 
 // Login endpoint
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, rememberMe } = req.body;
     try {
         const user = await User.findOne({ email });
         if (!user) return res.status(404).json({ message: 'User not found' });
@@ -287,8 +288,29 @@ router.post('/login', async (req, res) => {
         // User authenticated successfully - role is determined from the database
         const token = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: "1h" });
 
+        // Generate refresh token (30 days if rememberMe, 7 days otherwise)
+        const refreshExpiryDays = rememberMe ? 30 : 7;
+        const refreshToken = jwt.sign(
+            { id: user._id, type: 'refresh' },
+            SECRET_KEY,
+            { expiresIn: `${refreshExpiryDays}d` }
+        );
+
+        // Hash and store the refresh token
+        const hashedToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
+
+        // Clean up expired tokens and add new one
+        user.refreshTokens = (user.refreshTokens || []).filter(t => t.expiresAt > new Date());
+        user.refreshTokens.push({
+            token: hashedToken,
+            expiresAt: new Date(Date.now() + refreshExpiryDays * 24 * 60 * 60 * 1000)
+        });
+        await user.save();
+
         res.json({
             token,
+            refreshToken,
+            rememberMe: !!rememberMe,
             user: {
                 id: user._id,
                 role: user.role,
@@ -299,6 +321,103 @@ router.post('/login', async (req, res) => {
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+});
+
+// Refresh token endpoint
+router.post('/refresh-token', async (req, res) => {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+        return res.status(400).json({ message: 'Refresh token is required' });
+    }
+
+    try {
+        // Verify the refresh token JWT
+        const decoded = jwt.verify(refreshToken, SECRET_KEY);
+
+        if (decoded.type !== 'refresh') {
+            return res.status(401).json({ message: 'Invalid token type' });
+        }
+
+        // Find the user
+        const user = await User.findById(decoded.id);
+        if (!user) {
+            return res.status(401).json({ message: 'User not found' });
+        }
+
+        // Hash the incoming token and check against stored tokens
+        const hashedToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
+        const storedTokenIndex = (user.refreshTokens || []).findIndex(
+            t => t.token === hashedToken && t.expiresAt > new Date()
+        );
+
+        if (storedTokenIndex === -1) {
+            return res.status(401).json({ message: 'Invalid or expired refresh token' });
+        }
+
+        // Issue new access token
+        const newAccessToken = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: "1h" });
+
+        // Rotate refresh token: remove old, create new
+        const oldTokenExpiry = user.refreshTokens[storedTokenIndex].expiresAt;
+        user.refreshTokens.splice(storedTokenIndex, 1);
+
+        // Use the old token's original expiry to determine the new token's lifespan
+        const remainingMs = oldTokenExpiry.getTime() - Date.now();
+        const remainingDays = Math.max(1, Math.ceil(remainingMs / (24 * 60 * 60 * 1000)));
+
+        const newRefreshToken = jwt.sign(
+            { id: user._id, type: 'refresh' },
+            SECRET_KEY,
+            { expiresIn: `${remainingDays}d` }
+        );
+
+        const newHashedToken = crypto.createHash('sha256').update(newRefreshToken).digest('hex');
+
+        // Clean up expired tokens and add new one
+        user.refreshTokens = user.refreshTokens.filter(t => t.expiresAt > new Date());
+        user.refreshTokens.push({
+            token: newHashedToken,
+            expiresAt: new Date(Date.now() + remainingDays * 24 * 60 * 60 * 1000)
+        });
+        await user.save();
+
+        res.json({
+            token: newAccessToken,
+            refreshToken: newRefreshToken
+        });
+    } catch (err) {
+        if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+            return res.status(401).json({ message: 'Invalid or expired refresh token' });
+        }
+        console.error('Refresh token error:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Server-side logout (invalidate refresh token)
+router.post('/logout', async (req, res) => {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+        return res.json({ message: 'Logged out successfully' });
+    }
+
+    try {
+        const decoded = jwt.verify(refreshToken, SECRET_KEY);
+        const user = await User.findById(decoded.id);
+
+        if (user) {
+            const hashedToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
+            user.refreshTokens = (user.refreshTokens || []).filter(t => t.token !== hashedToken);
+            await user.save();
+        }
+
+        res.json({ message: 'Logged out successfully' });
+    } catch (err) {
+        // Even if token is invalid/expired, logout should succeed
+        res.json({ message: 'Logged out successfully' });
     }
 });
 

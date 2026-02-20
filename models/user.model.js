@@ -6,7 +6,11 @@ const userSchema = new mongoose.Schema({
     password: String,
     name: String, // Add name field
     studentId: { type: String, index: true }, // Add studentId field to store IDs separately
-    verified: { type: Boolean, default: false } // Add verified field
+    verified: { type: Boolean, default: false }, // Add verified field
+    refreshTokens: [{
+        token: String,
+        expiresAt: Date
+    }]
 }, {
     timestamps: true
 });

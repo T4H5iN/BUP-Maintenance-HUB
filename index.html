@@ -925,6 +925,9 @@
     <!-- Load the script loader first -->
     <script src="js/loader.js"></script>
 
+    <!-- Load token manager (must be before any API-calling scripts) -->
+    <script src="js/tokenManager.js"></script>
+
     <!-- Load the utility functions -->
     <script src="js/utils.js" onload="registerModuleLoaded('utils')"
         onerror="handleScriptError('utils', event)"></script>
@@ -1038,9 +1041,23 @@
         }
 
         function logout() {
+            // Invalidate refresh token server-side
+            const refreshToken = window.TokenManager ? window.TokenManager.getRefreshToken() : null;
+            if (refreshToken) {
+                fetch('/api/users/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken })
+                }).catch(() => { });
+            }
+
             // Clear user data
             currentUser = null;
+            if (window.TokenManager) {
+                window.TokenManager.clearTokens();
+            }
             localStorage.removeItem('bup-current-user');
+            localStorage.removeItem('bup-token');
 
             // Show notification and redirect
             showNotification('Logged out successfully', 'success');

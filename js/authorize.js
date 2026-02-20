@@ -31,6 +31,8 @@ async function handleLogin(e) {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
 
+    const rememberMe = document.getElementById('rememberMe') ? document.getElementById('rememberMe').checked : true;
+
     showLoading();
 
     try {
@@ -38,7 +40,7 @@ async function handleLogin(e) {
         const res = await fetch('/api/users/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ email, password, rememberMe })
         });
         const data = await res.json();
         hideLoading();
@@ -54,7 +56,12 @@ async function handleLogin(e) {
             showNotification(data.message || 'Login failed', 'error');
             return;
         }
-        localStorage.setItem('bup-token', data.token);
+        // Store tokens using TokenManager
+        if (window.TokenManager) {
+            window.TokenManager.setTokens(data.token, data.refreshToken, data.rememberMe);
+        } else {
+            localStorage.setItem('bup-token', data.token);
+        }
         localStorage.setItem('bup-current-user', JSON.stringify(data.user));
         currentUser = data.user;
         showNotification(`Welcome back, ${currentUser.email}!`, 'success');
