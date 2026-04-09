@@ -1,6 +1,5 @@
 ```
-npm init -y
-npm install express dotenv multer nodemailer nodemailer-brevo-transport mongoose bcryptjs cors jsonwebtoken cloudinary @google/generative-ai
+npm install
 node server.js
 
 .env
