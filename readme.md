@@ -13,6 +13,10 @@
 - **Reporting & Analytics**: Generate insights and export reports for operational improvement.
 - **User Roles & Permissions**: Fine-grained access controls for staff, supervisors, and administrators.
 
+## Screenshots
+
+See screenshots of the project [here](https://mdti.pro.bd/#projects)
+
 ## Getting Started
 
 ### Prerequisites
